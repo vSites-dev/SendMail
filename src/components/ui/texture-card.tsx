@@ -11,7 +11,7 @@ const CardStyled = React.forwardRef<
     ref={ref}
     className={cn(
       "rounded-[24px] border border-white/60 dark:border-stone-950/60",
-      "bg-background dark:from-neutral-800 dark:to-neutral-900",
+      "bg-white dark:from-neutral-800 dark:to-neutral-900",
     )}
     {...props}
   >
