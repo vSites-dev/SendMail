@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -80,6 +79,7 @@ model Organization {
   metadata    String?
   members     Member[]
   invitations Invitation[]
+  project     Project?
 
   @@unique([slug])
   @@map("organization")
@@ -109,4 +109,169 @@ model Invitation {
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
   @@map("invitation")
+}
+
+// ================================================================================
+// ================================================================================
+// ================================================================================
+
+model Project {
+  id             String       @id @default(uuid())
+  name           String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @unique
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // relations
+  campaigns Campaign[]
+  contacts  Contact[]
+  tasks     Task[]
+
+  @@map("projects")
+}
+
+model Campaign {
+  id          String         @id @default(uuid())
+  name        String
+  subject     String
+  body        String
+  status      CampaignStatus @default(DRAFT)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  tasks    Task[]
+  emails   Email[]
+  contacts Contact[] // Recipients
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@map("campaigns")
+}
+
+model Contact {
+  id       String        @id @default(uuid())
+  email    String
+  name     String?
+  metadata Json? // For storing custom fields
+  status   ContactStatus @default(SUBSCRIBED)
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  campaigns Campaign[] // Campaigns this contact is part of
+  emails    Email[]
+  tasks     Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, email])
+  @@index([projectId])
+  @@map("contacts")
+}
+
+model Email {
+  id      String      @id @default(uuid())
+  subject String
+  body    String
+  status  EmailStatus @default(QUEUED)
+
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  campaignId String?
+
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contactId String
+
+  clicks Click[]
+
+  sentAt    DateTime?
+  openedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([campaignId])
+  @@map("emails")
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  type        TaskType
+  status      TaskStatus @default(PENDING)
+  scheduledAt DateTime
+  processedAt DateTime?
+  error       String?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  campaignId String?
+
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([scheduledAt, status])
+  @@index([projectId])
+  @@map("tasks")
+}
+
+model Click {
+  id String @id @default(uuid())
+
+  link String
+
+  email   Email  @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  emailId String
+
+  createdAt DateTime @default(now())
+
+  @@index([emailId, createdAt])
+  @@map("clicks")
+}
+
+enum ContactStatus {
+  SUBSCRIBED
+  UNSUBSCRIBED
+  BOUNCED
+  COMPLAINED
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  COMPLETED
+  FAILED
+}
+
+enum EmailStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  BOUNCED
+  OPENED
+  CLICKED
+  COMPLAINED
+  FAILED
+}
+
+enum TaskType {
+  SEND_CAMPAIGN
+  SEND_EMAIL
+}
+
+enum TaskStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }
