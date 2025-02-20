@@ -1,7 +1,6 @@
 "use client";
 
-import { ChevronsUpDown, Plus, Router } from "lucide-react";
-
+import { ChevronsUpDown, Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +22,7 @@ import { activeProjectAtom, activeOrganizationAtom } from "@/store/global";
 import { useHydrateAtoms } from "jotai/utils";
 import { authClient } from "@/lib/auth/client";
 import { api } from "@/trpc/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Project } from "@prisma/client";
 
@@ -49,7 +48,7 @@ export function OrganizationSwitcher({
   );
   const [activeProject, setActiveProject] = useAtom(activeProjectAtom);
 
-  const { data: newChatbot } = api.chatbot.getByOrgId.useQuery({
+  const { data: newProject } = api.project.getById.useQuery({
     organizationId: activeOrganization?.id ?? "",
   });
 
@@ -62,16 +61,16 @@ export function OrganizationSwitcher({
   }
 
   useEffect(() => {
-    if (newChatbot && newChatbot.id !== activeChatbot?.id) {
-      setActiveChatbot(newChatbot);
+    if (newProject && newProject.id !== activeProject?.id) {
+      setActiveProject(newProject);
 
       router.push("/");
 
       window.location.reload();
     }
-  }, [newChatbot]);
+  }, [newProject]);
 
-  if (organizations.length === 0 || !activeChatbot) return null;
+  if (organizations.length === 0 || !activeOrganization) return null;
 
   return (
     <SidebarMenu>
@@ -85,10 +84,7 @@ export function OrganizationSwitcher({
               <div className="flex aspect-square size-8 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground rounded-sm relative">
                 <img
                   className="size-8"
-                  src={
-                    (activeChatbot.links as ChatbotLinks).icon ??
-                    "/brand/icon.png"
-                  }
+                  src={activeOrganization.logo ?? "/brand/icon.jpg"}
                   alt={activeOrganization?.name ?? "Chatbot"}
                 />
               </div>
@@ -96,7 +92,6 @@ export function OrganizationSwitcher({
                 <span className="truncate font-semibold">
                   {activeOrganization?.name}
                 </span>
-                {/* <span className="truncate text-xs">{activeOrganization.}</span> */}
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -119,7 +114,7 @@ export function OrganizationSwitcher({
                 <div className="flex size-6 items-center justify-center rounded-sm border relative">
                   <img
                     className="size-6"
-                    src={organization.logo ?? "/brand/icon.png"}
+                    src={organization.logo ?? "/brand/icon.jpg"}
                     alt={organization.name}
                   />
                 </div>
@@ -131,13 +126,12 @@ export function OrganizationSwitcher({
             <DropdownMenuItem
               disabled
               className="gap-2 p-2"
-            // onClick={() => handleNewChatbot()}
             >
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                 <Plus className="size-4" />
               </div>
               <div className="font-medium line-through text-muted-foreground">
-                Új chatbot
+                Új projekt
               </div>
             </DropdownMenuItem>
           </DropdownMenuContent>

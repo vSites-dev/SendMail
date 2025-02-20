@@ -23,6 +23,8 @@ import {
 import type { Session, User } from "better-auth";
 import { NavUser } from "./nav-user";
 import { type Organization } from "@/lib/auth/auth";
+import { Project } from "@prisma/client";
+import { OrganizationSwitcher } from "./organization-switcher";
 
 const data = {
   navMain: [
@@ -60,17 +62,26 @@ const data = {
 };
 
 export function AppSidebar({
-  ...props
+  session,
+  organizations,
+  activeOrganizationFromServer,
+  activeProjectFromServer,
+  ...sidebarProps
 }: React.ComponentProps<typeof Sidebar> & {
   session: { session: Session; user: User } | null;
   organizations: Organization[];
+  activeOrganizationFromServer: Organization;
+  activeProjectFromServer: Project;
 }) {
-  const { session, organizations } = props;
-
   return (
-    <Sidebar collapsible="icon" {...props}>
-      {/* <SidebarHeader className="border-b">
-      </SidebarHeader> */}
+    <Sidebar collapsible="icon" {...sidebarProps}>
+      <SidebarHeader className="border-b">
+        <OrganizationSwitcher
+          organizations={organizations}
+          activeOrganizationFromServer={activeOrganizationFromServer}
+          activeProjectFromServer={activeProjectFromServer}
+        />
+      </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
       </SidebarContent>
