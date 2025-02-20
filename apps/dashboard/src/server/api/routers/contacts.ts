@@ -93,7 +93,6 @@ export const contactRouter = createTRPCRouter({
         id: z.string(),
         name: z.string().nullable(),
         email: z.string(),
-        metadata: z.any(),
         status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED"]),
       }),
     )
@@ -106,7 +105,6 @@ export const contactRouter = createTRPCRouter({
           data: {
             name: input.name,
             email: input.email,
-            metadata: input.metadata,
             status: input.status,
           },
         });
@@ -130,7 +128,6 @@ export const contactRouter = createTRPCRouter({
       z.object({
         email: z.string().email(),
         name: z.string().optional(),
-        metadata: z.record(z.any()).optional(),
         status: z
           .enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED"])
           .default("SUBSCRIBED"),
@@ -142,7 +139,6 @@ export const contactRouter = createTRPCRouter({
           data: {
             email: input.email,
             name: input.name,
-            metadata: input.metadata,
             status: input.status,
             projectId: ctx.session.activeProjectId,
           },

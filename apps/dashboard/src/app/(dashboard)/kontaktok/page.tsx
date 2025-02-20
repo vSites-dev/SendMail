@@ -30,11 +30,11 @@ export default async function Contacts() {
         </BreadcrumbList>
       </DashboardHeader>
 
-      <main className="max-w-4xl mx-auto h-full py-6 px-4">
+      <main className="max-w-screen-md w-full mx-auto h-full py-6 px-4">
         <div className="flex gap-3 items-center">
           <div
             className={cn(
-              "flex relative p-[5px] items-center justify-center rounded-md bg-neutral-50 text-2xl font-semibold border text-yellow-500",
+              "flex relative p-[5px] items-center justify-center rounded-md bg-neutral-50 text-2xl font-semibold border text-violet-600",
             )}
           >
             <Users2 className="size-5" />

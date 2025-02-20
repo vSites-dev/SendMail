@@ -44,9 +44,8 @@ import {
 } from "@/components/ui/select";
 
 const formSchema = z.object({
-  email: z.string().email(),
-  name: z.string(),
-  metadata: z.any(),
+  email: z.string().email({ message: "Érvénytelen email cím" }),
+  name: z.string().min(2, { message: "Teljes név szükséges" }),
   status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED"]).default("SUBSCRIBED"),
 });
 
@@ -55,6 +54,13 @@ const statusColors = {
   UNSUBSCRIBED: "bg-gray-500",
   BOUNCED: "bg-red-500",
   COMPLAINED: "bg-yellow-500",
+};
+
+const statusLabels = {
+  SUBSCRIBED: "Feliratkozva",
+  UNSUBSCRIBED: "Leiratkozva",
+  BOUNCED: "Visszapattant????",
+  COMPLAINED: "Fellebezzett??",
 };
 
 export default function NewContactForm() {
@@ -70,15 +76,12 @@ export default function NewContactForm() {
     defaultValues: {
       email: "",
       name: "",
-      metadata: {},
       status: "SUBSCRIBED",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
-
-    console.log(values);
 
     const res = await createContact(values);
 
@@ -156,26 +159,12 @@ export default function NewContactForm() {
                         <SelectItem key={key} value={value}>
                           <div className="flex items-center">
                             <div className={`w-2 h-2 rounded-full mr-2 ${statusColors[value as keyof typeof statusColors]}`}></div>
-                            {value}
+                            {statusLabels[value as keyof typeof statusLabels]}
                           </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="metadata"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Metaadatok</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Metaadatok" {...field} />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

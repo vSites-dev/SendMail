@@ -64,15 +64,30 @@ export const columns: ColumnDef<Contact>[] = [
         COMPLAINED: "bg-yellow-500",
       };
 
+      const statusLabels = {
+        SUBSCRIBED: "Feliratkozva",
+        UNSUBSCRIBED: "Leiratkozva",
+        BOUNCED: "Visszapattant????",
+        COMPLAINED: "Fellebezzett??",
+      };
+
       return (
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[row.original.status as keyof typeof statusColors]
             } text-white`}
         >
-          {row.original.status}
+          {statusLabels[row.original.status as keyof typeof statusLabels]}
         </span>
       );
     },
+  },
+  {
+    accessorKey: "updatedAt",
+    header: "Frissítve",
+    enableSorting: true,
+    cell: ({ row }) => {
+      return new Date(row.original.updatedAt).toLocaleDateString();
+    }
   },
   {
     id: "actions",

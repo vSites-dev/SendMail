@@ -31,7 +31,7 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { columns } from "./columns";
-import { Search, Settings2, ArrowUp, ArrowDown } from "lucide-react";
+import { Search, Settings2, ArrowUp, ArrowDown, BarChartBig } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -41,6 +41,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { contactDataTableAtom } from "@/store/global";
 import { useAtom } from "jotai";
+import DotPattern from "@/components/ui/dot-pattern";
 
 export const ContactsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -198,23 +199,47 @@ export const ContactsTable = () => {
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  Nincs találat.
-                </TableCell>
-              </TableRow>
-            )}
+            ) :
+              totalCount !== 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    Nincs találat.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="p-0 relative h-[250px] overflow-hidden">
+                    <DotPattern
+                      width={6}
+                      height={6}
+                      cx={1}
+                      cy={1}
+                      cr={1}
+                      className="opacity-20"
+                    />
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
+                      <BarChartBig className="mb-2 size-8 text-muted-foreground" />
+                      <p className="text-base text-neutral-700 font-semibold">
+                        Nincs megjeleníthető adat
+                      </p>
+                      <p className="text-xs max-w-[250px] mt-2 text-center text-muted-foreground opacity-80">
+                        Ha valami probléma akadt akkor keressen fel minket.
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )
+            }
           </TableBody>
         </Table>
       </div>
 
       <div className="flex w-full justify-between items-center">
         <p className="text-muted-foreground text-sm w-full">
-          {totalCount} gomb
+          {totalCount} kontakt
         </p>
 
         <Pagination className="w-full">
@@ -255,11 +280,12 @@ export const ContactsTable = () => {
             })}
             <PaginationItem>
               <PaginationNext
+                isActive={currentPage === totalPages || totalPages === 0}
                 onClick={() =>
                   setCurrentPage((p) => Math.min(totalPages, p + 1))
                 }
                 className={
-                  currentPage === totalPages
+                  (currentPage === totalPages || totalPages === 0)
                     ? "pointer-events-none opacity-50"
                     : ""
                 }
