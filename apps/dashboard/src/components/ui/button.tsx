@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
@@ -8,14 +8,16 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 overflow-hidden relative",
   {
     variants: {
       variant: {
         default:
-          "bg-gradient-to-b from-violet-700/80 to-violet-800 text-primary-foreground !shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4)] drop-shadow-md border border-gray-200/20 relative overflow-hidden focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/30 !text-white",
+          "bg-gradient-to-b from-violet-700/80 to-violet-800 text-primary-foreground !shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)] drop-shadow-md border border-gray-200/20 relative overflow-hidden focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/30 !text-white",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          "bg-gradient-to-b from-red-600 to-red-800 text-destructive-foreground !shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)] drop-shadow-md border border-red-200/10 relative overflow-hidden focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-destructive/30 !text-white font-semibold",
+        success:
+          "bg-gradient-to-b from-green-600 to-green-800 text-primary-foreground !shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)] drop-shadow-md border border-green-200/10 relative overflow-hidden focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-green-500/30 !text-white",
         outline:
           "border border-input bg-white shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary:

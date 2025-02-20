@@ -3,6 +3,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { organization } from "better-auth/plugins";
 import { sendVerificationEmail } from "@/utils/send-emails";
+import getActiveOrganization from "../get-active-organization";
 
 export const auth = betterAuth({
   plugins: [organization()],
@@ -12,6 +13,7 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
+  trustedOrigins: ["http://localhost:3000"],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
@@ -25,8 +27,6 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url, token }, request) => {
-      console.log("sendVerificationEmail triggered", user, url, token);
-
       await sendVerificationEmail({
         email: user.email,
         name: user.name,
@@ -34,21 +34,21 @@ export const auth = betterAuth({
       });
     },
   },
-  // databaseHooks: {
-  //   session: {
-  //     create: {
-  //       before: async (session) => {
-  //         const organizationId = await getActiveOrganization(session.userId);
-  //         return {
-  //           data: {
-  //             ...session,
-  //             activeOrganizationId: organizationId,
-  //           },
-  //         };
-  //       },
-  //     },
-  //   },
-  // },
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session) => {
+          const organizationId = await getActiveOrganization(session.userId);
+          return {
+            data: {
+              ...session,
+              activeOrganizationId: organizationId,
+            },
+          };
+        },
+      },
+    },
+  },
 });
 
 export type Organization = typeof auth.$Infer.Organization;

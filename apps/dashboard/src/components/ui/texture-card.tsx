@@ -12,7 +12,7 @@ const CardStyled = React.forwardRef<
     className={cn(
       "rounded-[24px] border border-white/60 dark:border-stone-950/60",
       "bg-white dark:from-neutral-800 dark:to-neutral-900",
-    )}
+      className)}
     {...props}
   >
     {/* Nested structure for aesthetic borders */}
@@ -94,7 +94,7 @@ const CardDescription = React.forwardRef<
   <p
     ref={ref}
     className={cn(
-      "!mt-2 text-sm text-muted-foreground dark:text-neutral-400",
+      "!mt-2 text-[15px] text-muted-foreground dark:text-neutral-400",
       className,
     )}
     {...props}

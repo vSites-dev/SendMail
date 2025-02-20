@@ -3,10 +3,10 @@ import { type Metadata } from "next";
 import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-poppins',
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900']
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-poppins",
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 import { TRPCReactProvider } from "@/trpc/react";
@@ -14,8 +14,8 @@ import { Toaster } from "sonner";
 import { AnimatePresence } from "framer-motion";
 
 export const metadata: Metadata = {
-  title: "LeoAI - Vezérlőpult",
-  description: "Leoai Vezérlőpult",
+  title: "SendMail - Vezérlőpult",
+  description: "SendMail Vezérlőpult",
   icons: [{ rel: "icon", url: "/brand/icon.svg" }],
 };
 

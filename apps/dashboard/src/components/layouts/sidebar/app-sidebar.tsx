@@ -10,9 +10,9 @@ import {
   Megaphone,
   PlusSquare,
   Users,
+  Users2,
 } from "lucide-react";
 import { NavMain } from "@/components/layouts/sidebar/nav-main";
-import { OrganizationSwitcher } from "@/components/layouts/sidebar/organization-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +23,8 @@ import {
 import type { Session, User } from "better-auth";
 import { NavUser } from "./nav-user";
 import { type Organization } from "@/lib/auth/auth";
+import { Project } from "@prisma/client";
+import { OrganizationSwitcher } from "./organization-switcher";
 
 const data = {
   navMain: [
@@ -32,72 +34,24 @@ const data = {
       icon: BarChartBigIcon,
     },
     {
-      title: "Közönségek",
-      icon: Users,
-      url: "/kozonsegek/",
-      items: [
-        {
-          title: "Megtekintés",
-          url: "/kozonsegek/",
-          icon: Eye,
-        },
-        {
-          title: "Létrehozás",
-          url: "/kozonsegek/letrehozas/",
-          icon: PlusSquare,
-        }
-      ]
+      title: "Kontaktok",
+      icon: Users2,
+      url: "/kontaktok/",
     },
     {
       title: "Emailek",
       icon: Mail,
       url: "/emailek/",
-      items: [
-        {
-          title: "Megtekintés",
-          url: "/emailek/",
-          icon: Eye,
-        },
-        {
-          title: "Létrehozás",
-          url: "/emailek/letrehozas/",
-          icon: PlusSquare,
-        },
-      ],
     },
     {
       title: "Kampányok",
       icon: Megaphone,
       url: "/kampanyok/",
-      items: [
-        {
-          title: "Megtekintés",
-          url: "/kampanyok/",
-          icon: Eye,
-        },
-        {
-          title: "Létrehozás",
-          url: "/kamnanyok/letrehozas/",
-          icon: PlusSquare,
-        },
-      ],
     },
     {
       title: "Sablonok",
       icon: FolderOpen,
       url: "/sablonok/",
-      items: [
-        {
-          title: "Megtekintés",
-          url: "/sablonok/",
-          icon: Eye,
-        },
-        {
-          title: "Létrehozás",
-          url: "/sablonok/letrehozas/",
-          icon: PlusSquare
-        },
-      ],
     },
     {
       title: "Domainek",
@@ -108,17 +62,25 @@ const data = {
 };
 
 export function AppSidebar({
-  ...props
+  session,
+  organizations,
+  activeOrganizationFromServer,
+  activeProjectFromServer,
+  ...sidebarProps
 }: React.ComponentProps<typeof Sidebar> & {
   session: { session: Session; user: User } | null;
   organizations: Organization[];
+  activeOrganizationFromServer: Organization;
+  activeProjectFromServer: Project;
 }) {
-  const { session, organizations } = props;
-
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" {...sidebarProps}>
       <SidebarHeader className="border-b">
-        <OrganizationSwitcher organizations={organizations} />
+        <OrganizationSwitcher
+          organizations={organizations}
+          activeOrganizationFromServer={activeOrganizationFromServer}
+          activeProjectFromServer={activeProjectFromServer}
+        />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

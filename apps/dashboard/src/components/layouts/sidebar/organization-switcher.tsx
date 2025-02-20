@@ -1,8 +1,6 @@
 "use client";
 
-import * as React from "react";
 import { ChevronsUpDown, Plus } from "lucide-react";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,33 +17,60 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { Organization } from "@/lib/auth/auth";
+import { useAtom } from "jotai";
+import { activeProjectAtom, activeOrganizationAtom } from "@/store/global";
+import { useHydrateAtoms } from "jotai/utils";
 import { authClient } from "@/lib/auth/client";
-import Image from "next/image";
+import { api } from "@/trpc/react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Project } from "@prisma/client";
 
 export function OrganizationSwitcher({
   organizations,
+  activeProjectFromServer,
+  activeOrganizationFromServer,
 }: {
   organizations: Organization[];
+  activeOrganizationFromServer: Organization;
+  activeProjectFromServer: Project;
 }) {
+  const router = useRouter();
+
+  useHydrateAtoms([[activeOrganizationAtom, activeOrganizationFromServer]]);
+
+  useHydrateAtoms([[activeProjectAtom, activeProjectFromServer]]);
+
   const { isMobile } = useSidebar();
-  const [activeOrganization, setActiveOrganization] = React.useState(
-    organizations[0],
+
+  const [activeOrganization, setActiveOrganization] = useAtom(
+    activeOrganizationAtom,
   );
+  const [activeProject, setActiveProject] = useAtom(activeProjectAtom);
 
-  // TODO: handle creating new organization
-  const handleNewChatbot = async () => {
-    await authClient.organization.create({
-      name: "LeoAI",
-      logo: "https://leoai.hu/favicon.svg",
-      slug: "leoai",
+  const { data: newProject } = api.project.getById.useQuery({
+    organizationId: activeOrganization?.id ?? "",
+  });
+
+  async function switchOrganization(organizationId: string) {
+    const newOrg = await authClient.organization.setActive({
+      organizationId: organizationId,
     });
-  };
 
-  if (organizations.length === 0 || !activeOrganization) {
-    return <></>;
+    setActiveOrganization(newOrg?.data as any);
   }
 
-  // TODO: proper default organization logo instead of https://leoai.hu/favicon.svg
+  useEffect(() => {
+    if (newProject && newProject.id !== activeProject?.id) {
+      setActiveProject(newProject);
+
+      router.push("/");
+
+      window.location.reload();
+    }
+  }, [newProject]);
+
+  if (organizations.length === 0 || !activeOrganization) return null;
 
   return (
     <SidebarMenu>
@@ -56,20 +81,17 @@ export function OrganizationSwitcher({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground relative">
-                <Image
-                  fill
-                  src={
-                    activeOrganization.logo ?? "https://leoai.hu/favicon.svg"
-                  }
-                  alt={activeOrganization.name}
+              <div className="flex aspect-square size-8 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground rounded-sm relative">
+                <img
+                  className="size-8"
+                  src={activeOrganization.logo ?? "/brand/icon.jpg"}
+                  alt={activeOrganization?.name ?? "Chatbot"}
                 />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeOrganization?.name.toString()}
+                  {activeOrganization?.name}
                 </span>
-                {/* <span className="truncate text-xs">{activeOrganization.}</span> */}
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -81,18 +103,18 @@ export function OrganizationSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Válassz szervezetet
+              Chatbotok
             </DropdownMenuLabel>
             {organizations.map((organization, index) => (
               <DropdownMenuItem
                 key={organization.slug}
-                onClick={() => setActiveOrganization(organization)}
+                onClick={() => switchOrganization(organization.id)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border relative">
-                  <Image
-                    fill
-                    src={organization.logo ?? "https://leoai.hu/favicon.svg"}
+                  <img
+                    className="size-6"
+                    src={organization.logo ?? "/brand/icon.jpg"}
                     alt={organization.name}
                   />
                 </div>
@@ -102,14 +124,14 @@ export function OrganizationSwitcher({
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem
+              disabled
               className="gap-2 p-2"
-              onClick={() => handleNewChatbot()}
             >
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                 <Plus className="size-4" />
               </div>
-              <div className="font-medium text-muted-foreground">
-                Új szervezet
+              <div className="font-medium line-through text-muted-foreground">
+                Új projekt
               </div>
             </DropdownMenuItem>
           </DropdownMenuContent>

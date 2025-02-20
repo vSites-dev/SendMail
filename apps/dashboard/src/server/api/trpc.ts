@@ -6,11 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
+import { auth } from "@/lib/auth/auth";
+import { headers } from "next/headers";
+import getActiveProject from "@/lib/get-active-organization copy";
 
 /**
  * 1. CONTEXT
@@ -24,9 +27,13 @@ import { db } from "@/server/db";
  *
  * @see https://trpc.io/docs/server/context
  */
+
 export const createTRPCContext = async (opts: { headers: Headers }) => {
+  const session = await auth.api.getSession(opts);
+
   return {
     db,
+    session,
     ...opts,
   };
 };
@@ -104,3 +111,71 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+export const authedProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(async ({ ctx, next }) => {
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const activeOrganization = await auth.api.getFullOrganization({
+      headers: ctx.headers,
+    });
+
+    if (!activeOrganization) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "No active organization",
+      });
+    }
+
+    const activeProject = await getActiveProject(activeOrganization.id);
+
+    if (!activeProject) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "No active project",
+      });
+    }
+
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: {
+          ...ctx.session,
+          user: ctx.session.user,
+          activeOrganization: activeOrganization,
+          activeProjectId: activeProject.id,
+        },
+      },
+    });
+  });
+
+// with organization
+
+export const withOrganization = async ({
+  organizationId,
+}: {
+  organizationId: string | null | undefined;
+}) => {
+  const organizations = await auth.api.listOrganizations({
+    headers: await headers(),
+  });
+
+  if (!organizationId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Nincs kiválasztva egy projekt sem.",
+    });
+  }
+
+  if (!organizations.find((org: any) => org.id === organizationId)) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Nincs jogosultságod ennek a projektnek az adataihoz.",
+    });
+  }
+
+  return;
+};
