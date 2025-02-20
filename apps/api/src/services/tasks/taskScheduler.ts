@@ -54,10 +54,12 @@ export class TaskScheduler {
     }
   }
 
-  private async processTask(task: Task & {
-    campaign?: Campaign | null;
-    contact?: Contact | null;
-  }) {
+  private async processTask(
+    task: Task & {
+      campaign?: Campaign | null;
+      contact?: Contact | null;
+    }
+  ) {
     switch (task.type) {
       case TaskType.SEND_EMAIL:
         if (!task.contact?.email) {
@@ -72,17 +74,17 @@ export class TaskScheduler {
             body: task.campaign?.body || "No content",
             status: "QUEUED",
             contact: {
-              connect: { id: task.contactId! }
+              connect: { id: task.contactId! },
             },
             ...(task.campaignId && {
               campaign: {
-                connect: { id: task.campaignId }
-              }
-            })
+                connect: { id: task.campaignId },
+              },
+            }),
           },
         });
 
-        await this.emailService.sendEmail({
+        const result = await this.emailService.sendEmail({
           from: process.env.DEFAULT_FROM_EMAIL || "noreply@yourdomain.com",
           to: task.contact.email,
           subject: email.subject,
@@ -93,6 +95,7 @@ export class TaskScheduler {
         await prisma.email.update({
           where: { id: email.id },
           data: {
+            messageId: result.messageId,
             status: "SENT",
             sentAt: new Date(),
           },
