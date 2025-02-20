@@ -177,10 +177,12 @@ model Contact {
 }
 
 model Email {
-  id      String      @id @default(uuid())
-  subject String
-  body    String
-  status  EmailStatus @default(QUEUED)
+  id String @id @default(uuid())
+
+  messageId String      @unique() // this is coming from SES
+  subject   String
+  body      String
+  status    EmailStatus @default(QUEUED)
 
   campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   campaignId String?
@@ -274,4 +276,5 @@ enum TaskStatus {
   PROCESSING
   COMPLETED
   FAILED
+  CANCELLED
 }
