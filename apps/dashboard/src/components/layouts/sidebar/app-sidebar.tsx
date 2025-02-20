@@ -10,6 +10,7 @@ import {
   Megaphone,
   PlusSquare,
   Users,
+  Users2,
 } from "lucide-react";
 import { NavMain } from "@/components/layouts/sidebar/nav-main";
 import {
@@ -31,9 +32,9 @@ const data = {
       icon: BarChartBigIcon,
     },
     {
-      title: "Közönségek",
-      icon: Users,
-      url: "/kozonsegek/",
+      title: "Kontaktok",
+      icon: Users2,
+      url: "/kontaktok/",
     },
     {
       title: "Emailek",

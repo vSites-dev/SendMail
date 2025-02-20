@@ -6,24 +6,31 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { HydrateClient } from "@/trpc/server";
+import Link from "next/link";
+import { House } from "lucide-react";
+import NewContactForm from "./form";
 
-export default function Kozonsegek() {
+export default async function UjGomb() {
   return (
     <HydrateClient>
       <DashboardHeader>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbPage>Vezérlőpult</BreadcrumbPage>
+            <Link href="/">
+              <House size={20} strokeWidth={1.6} />
+            </Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Közönségek</BreadcrumbPage>
+            <Link href="/kontaktok">Kontaktok</Link>
           </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbPage>Új kontakt létrehozása</BreadcrumbPage>
         </BreadcrumbList>
       </DashboardHeader>
 
-      <main className="flex flex-col py-8 px-4 md:px-8 relative mx-auto space-y-6 container">
-        <h1 className="text-2xl font-semibold">Közönségek kezelése</h1>
+      <main className="max-w-2xl w-full mx-auto space-y-8 h-full py-2 px-4">
+        <NewContactForm />
       </main>
     </HydrateClient>
   );

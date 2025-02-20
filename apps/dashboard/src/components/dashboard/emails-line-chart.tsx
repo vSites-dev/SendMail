@@ -4,19 +4,11 @@ import * as React from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardSeparator,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { CalendarDays, MessageSquareMore, BarChartBig, Mails } from "lucide-react";
+import { MessageSquareMore, BarChartBig, Mails } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   ChartConfig,
@@ -25,13 +17,10 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import DotPattern from "../ui/dot-pattern";
-import { Button } from "../ui/button";
-import { authClient } from "@/lib/auth/client";
-
-interface EmailsData {
-  date: string;
-  emails: number;
-}
+import { useAtom } from "jotai";
+import { selectedIntervalAtom } from "@/store/global";
+import { api } from "@/trpc/react";
+import { Skeleton } from "../ui/skeleton";
 
 const chartConfig = {
   desktop: {
@@ -40,8 +29,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const generateDummyData = (days: number): EmailsData[] => {
-  const data: EmailsData[] = [];
+const generateDummyData = (days: number): any[] => {
+  const data: any[] = [];
   const endDate = new Date();
 
   for (let i = days; i >= 0; i--) {
@@ -55,6 +44,7 @@ const generateDummyData = (days: number): EmailsData[] => {
   return data;
 };
 
+
 export function EmailsLineChart({
   initialEmailsData,
 }: {
@@ -63,25 +53,28 @@ export function EmailsLineChart({
     emails: number;
   }[];
 }) {
-  const [timeRange, setTimeRange] = React.useState("7d");
-  const [data, setData] = React.useState<EmailsData[]>([]);
+
+  const [chartData, setChartData] = React.useState<any[]>([]);
 
   React.useEffect(() => {
-    setData(initialEmailsData ?? generateDummyData(30));
+    setChartData(initialEmailsData ?? generateDummyData(30));
   }, []);
 
-  const filteredData = React.useMemo(() => {
-    const daysMap: Record<string, number> = {
-      "7d": 7,
-      "30d": 30,
-      "90d": 90,
-      "180d": 180,
-      "365d": 365,
-    };
+  const [selectedInterval] = useAtom(selectedIntervalAtom);
+  // const { data: emailsData, isFetching } =
+  //   api.dashboard.emailsChartData.useQuery(
+  //     {
+  //       timeInterval: selectedInterval,
+  //     },
+  //     {
+  //       refetchOnWindowFocus: false,
+  //       refetchOnReconnect: false,
+  //     },
+  //   );
 
-    const days = daysMap[timeRange] ?? 7;
-    return data.slice(-days);
-  }, [timeRange, data]);
+  // const chartData = React.useMemo(() => {
+  //   return emailsData ?? initialEmailsData ?? [];
+  // }, [emailsData, initialEmailsData]);
 
   return (
     <Card className="w-full">
@@ -93,37 +86,23 @@ export function EmailsLineChart({
             </div>
             <div className="space-y-1">
               <CardTitle className="font-normal text-xl">
-                <b className="font-bold tracking-wide text-neutral-800">Emailek</b> az elmúlt{" "}
-                {timeRange === "365d"
-                  ? "évbe"
-                  : timeRange.replace("d", " napba")}
+                <b className="font-bold tracking-wide text-neutral-800">
+                  Emailek
+                </b>{" "}
+                az elmúlt {selectedInterval} napba
               </CardTitle>
             </div>
           </div>
         </div>
-
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            className="relative z-10 w-[140px] rounded-lg sm:ml-auto"
-            aria-label="Időszak kiválasztása"
-          >
-            <CalendarDays className="size-4" />
-            Intervallum
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem value="7d">7 nap</SelectItem>
-            <SelectItem value="30d">30 nap</SelectItem>
-            <SelectItem value="90d">90 nap</SelectItem>
-            <SelectItem value="180d">180 nap</SelectItem>
-            <SelectItem value="365d">365 nap</SelectItem>
-          </SelectContent>
-        </Select>
       </CardHeader>
-
       <CardSeparator />
-
       <CardContent className="overflow-hidden p-0 z-10">
-        {filteredData.length === 0 ? (
+        {/* TODO: for trpc isFetching */}
+        {false ? (
+          <div className="p-6">
+            <Skeleton className="h-[250px] w-full" />
+          </div>
+        ) : chartData.length === 0 ? (
           <div className="relative h-[250px] overflow-hidden w-full">
             <DotPattern
               width={6}
@@ -133,14 +112,14 @@ export function EmailsLineChart({
               cr={1}
               className="opacity-20"
             />
-
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
               <BarChartBig className="mb-2 size-8 text-muted-foreground" />
               <p className="text-base text-neutral-700 font-semibold">
                 Nincs megjeleníthető adat
               </p>
               <p className="text-xs max-w-[250px] mt-2 text-center text-muted-foreground opacity-80">
-                Ha úgy gondolod, hogy probléma akadt akkor keress fel minket a support@leoai.hu címen.
+                Ha úgy gondolod, hogy probléma akadt akkor keress fel minket a
+                support@leoai.hu címen.
               </p>
             </div>
           </div>
@@ -151,7 +130,7 @@ export function EmailsLineChart({
           >
             <LineChart
               accessibilityLayer
-              data={filteredData}
+              data={chartData}
               margin={{
                 left: 10,
                 right: 10,
@@ -159,7 +138,6 @@ export function EmailsLineChart({
               className="z-10"
             >
               <CartesianGrid vertical={false} horizontal={true} />
-
               <ChartTooltip
                 content={
                   <ChartTooltipContent
@@ -187,7 +165,6 @@ export function EmailsLineChart({
                   />
                 }
               />
-
               <XAxis
                 dataKey="date"
                 tickLine={false}
@@ -195,15 +172,18 @@ export function EmailsLineChart({
                 tickMargin={10}
                 tickFormatter={(value: string) => value}
                 padding={{ left: 0, right: 0 }}
+                letterSpacing={-0.2}
+                fontWeight={500}
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
                 tickMargin={10}
+                letterSpacing={-0.2}
+                fontWeight={500}
                 padding={{ top: 20, bottom: 0 }}
                 tickFormatter={(value) => value.toLocaleString("hu-HU")}
               />
-
               <Line
                 dataKey="emails"
                 type="natural"
@@ -214,8 +194,8 @@ export function EmailsLineChart({
             </LineChart>
           </ChartContainer>
         )}
-
       </CardContent>
     </Card>
   );
 }
+

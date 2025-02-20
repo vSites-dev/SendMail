@@ -1,65 +1,44 @@
 import { api, HydrateClient } from "@/trpc/server";
 import {
-  Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import DashboardHeader from "@/components/layouts/dashboard-header";
-import KpiCard from "@/components/stats/kpi-card";
-import { EmailsLineChart } from "@/components/stats/emails-line-chart";
+import { EmailsLineChart } from "@/components/dashboard/emails-line-chart";
+import IntervalSelect from "@/components/dashboard/interval-select";
+import MainStats from "@/components/dashboard/main-stats";
+import { Home } from "lucide-react";
+import Link from "next/link";
 
-const kpiData = [
-  {
-    title: "Elküldött emailek száma",
-    value: 484,
-    previousValue: 400,
-    type: "sent",
-  },
-  {
-    title: "Megnyitott emailek száma",
-    value: 263,
-    previousValue: 203,
-    type: "opens",
-  },
-  {
-    title: "Kattintások száma",
-    value: 30,
-    previousValue: 0,
-    type: "clicks",
-  }
-]
 
-export default async function Home() {
-  // const hello = await api.post.hello({ text: "from tRPC" });
 
-  // will prefetch the data for events and messages linechart
-  // void api.stats.eventsAndMessages.prefetch({  interval: 7 });
+export default async function Dashboard() {
+  // void api.dashboard.sentEmailCount.prefetch({ timeInterval: 30 });
+  // void api.dashboard.openedEmailCount.prefetch({ timeInterval: 30 });
+  // void api.dashboard.openedLinkCount.prefetch({ timeInterval: 30 });
 
   return (
     <HydrateClient>
       <DashboardHeader>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbPage>Vezérlőpult</BreadcrumbPage>
+            <Link href="/">
+              <Home size={20} strokeWidth={1.6} />
+            </Link>
           </BreadcrumbItem>
         </BreadcrumbList>
       </DashboardHeader>
 
       <main className="flex flex-col py-8 px-4 md:px-8 relative mx-auto space-y-6 container">
-        <div className="z-10 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {kpiData.map((kpi) => (
-            <KpiCard
-              key={kpi.title}
-              title={kpi.title}
-              value={kpi.value}
-              previousValue={kpi.previousValue}
-              type={kpi.type as any}
-            />
-          ))}
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-2xl font-semibold text-neutral-700">
+            Fő statisztikák
+          </h1>
+
+          <IntervalSelect />
         </div>
+
+        <MainStats />
 
         <EmailsLineChart />
       </main>
