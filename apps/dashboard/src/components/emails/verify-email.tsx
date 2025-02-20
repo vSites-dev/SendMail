@@ -23,7 +23,6 @@ const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "";
 
-
 const VerifyEmail = ({ verificationUrl, name }: VerifyEmailProps) => (
   <Html>
     <Head />
@@ -36,18 +35,26 @@ const VerifyEmail = ({ verificationUrl, name }: VerifyEmailProps) => (
               src={`${baseUrl}/brand/icon.svg`}
             width="100"
             height="100"
-            alt="LeoAI Logó"
+            alt="SendMail Logó"
           /> 
           */}
 
-          <Heading className="text-center font-bold text-2xl mt-6">Üdvözöljük a SendMail-nál! 👋</Heading>
+          <Heading className="text-center font-bold text-2xl mt-6">
+            Üdvözöljük a SendMail-nál! 👋
+          </Heading>
           <Section className="my-6">
-            <Text className="text-center text-lg text-gray-800 font-semibold mb-6">Kedves {name}!</Text>
-            <Text className="text-center text-lg text-gray-700">
-              Köszönjük, hogy regisztrált! Kérjük, erősítse meg e-mail címét, hogy
-              elkezdhesse használni SendMail-t, a legjobb e-mail marketing platformot.
+            <Text className="text-center text-lg text-gray-800 font-semibold mb-6">
+              Kedves {name}!
             </Text>
-            <Button className="bg-indigo-500 rounded-md py-2 text-white text-base font-bold no-underline text-center mx-auto w-full mb-4" href={verificationUrl}>
+            <Text className="text-center text-lg text-gray-700">
+              Köszönjük, hogy regisztrált! Kérjük, erősítse meg e-mail címét,
+              hogy elkezdhesse használni SendMail-t, a legjobb e-mail marketing
+              platformot.
+            </Text>
+            <Button
+              className="bg-indigo-500 rounded-md py-2 text-white text-base font-bold no-underline text-center mx-auto w-full mb-4"
+              href={verificationUrl}
+            >
               E-mail cím megerősítése
             </Button>
             <Text className="text-center text-sm text-gray-600">
@@ -60,9 +67,7 @@ const VerifyEmail = ({ verificationUrl, name }: VerifyEmailProps) => (
             <Text>
               © {new Date().getFullYear()} SendMail. Minden jog fenntartva.
             </Text>
-            <Link href="https://leoai.hu/">
-              https://leoai.hu/
-            </Link>
+            <Link href="https://leoai.hu/">https://leoai.hu/</Link>
           </Section>
         </Container>
       </Body>

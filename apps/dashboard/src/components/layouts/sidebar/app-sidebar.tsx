@@ -12,7 +12,6 @@ import {
   Users,
 } from "lucide-react";
 import { NavMain } from "@/components/layouts/sidebar/nav-main";
-import { OrganizationSwitcher } from "@/components/layouts/sidebar/organization-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -35,69 +34,21 @@ const data = {
       title: "Közönségek",
       icon: Users,
       url: "/kozonsegek/",
-      items: [
-        {
-          title: "Megtekintés",
-          url: "/kozonsegek/",
-          icon: Eye,
-        },
-        {
-          title: "Létrehozás",
-          url: "/kozonsegek/letrehozas/",
-          icon: PlusSquare,
-        }
-      ]
     },
     {
       title: "Emailek",
       icon: Mail,
       url: "/emailek/",
-      items: [
-        {
-          title: "Megtekintés",
-          url: "/emailek/",
-          icon: Eye,
-        },
-        {
-          title: "Létrehozás",
-          url: "/emailek/letrehozas/",
-          icon: PlusSquare,
-        },
-      ],
     },
     {
       title: "Kampányok",
       icon: Megaphone,
       url: "/kampanyok/",
-      items: [
-        {
-          title: "Megtekintés",
-          url: "/kampanyok/",
-          icon: Eye,
-        },
-        {
-          title: "Létrehozás",
-          url: "/kamnanyok/letrehozas/",
-          icon: PlusSquare,
-        },
-      ],
     },
     {
       title: "Sablonok",
       icon: FolderOpen,
       url: "/sablonok/",
-      items: [
-        {
-          title: "Megtekintés",
-          url: "/sablonok/",
-          icon: Eye,
-        },
-        {
-          title: "Létrehozás",
-          url: "/sablonok/letrehozas/",
-          icon: PlusSquare
-        },
-      ],
     },
     {
       title: "Domainek",
@@ -117,9 +68,8 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="border-b">
-        <OrganizationSwitcher organizations={organizations} />
-      </SidebarHeader>
+      {/* <SidebarHeader className="border-b">
+      </SidebarHeader> */}
       <SidebarContent>
         <NavMain items={data.navMain} />
       </SidebarContent>
