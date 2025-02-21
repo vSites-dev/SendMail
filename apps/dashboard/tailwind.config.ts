@@ -4,6 +4,13 @@ import * as tailwindAnimate from "tailwindcss-animate";
 export default {
   darkMode: ["class"],
   content: ["./src/**/*.tsx"],
+  safelist: [
+    "bg-green-500",
+    "bg-gray-500",
+    "bg-red-500",
+    "bg-yellow-500",
+    "bg-blue-500",
+  ],
   theme: {
     extend: {
       fontFamily: {

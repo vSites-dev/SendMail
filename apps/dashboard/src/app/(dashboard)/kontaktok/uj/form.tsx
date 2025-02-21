@@ -18,6 +18,7 @@ import {
   Loader2,
   PlusSquare,
   SquareMousePointer,
+  UserPlus2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -42,26 +43,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn, contactStatuses } from "@/lib/utils";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Érvénytelen email cím" }),
   name: z.string().min(2, { message: "Teljes név szükséges" }),
   status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED"]).default("SUBSCRIBED"),
 });
-
-const statusColors = {
-  SUBSCRIBED: "bg-green-500",
-  UNSUBSCRIBED: "bg-gray-500",
-  BOUNCED: "bg-red-500",
-  COMPLAINED: "bg-yellow-500",
-};
-
-const statusLabels = {
-  SUBSCRIBED: "Feliratkozva",
-  UNSUBSCRIBED: "Leiratkozva",
-  BOUNCED: "Visszapattant????",
-  COMPLAINED: "Fellebezzett??",
-};
 
 export default function NewContactForm() {
   const utils = api.useUtils();
@@ -106,7 +94,7 @@ export default function NewContactForm() {
         <Card className="w-[500px] mx-auto my-4">
           <CardHeader>
             <CardTitle className="flex gap-3 items-center">
-              <SquareMousePointer className="size-6" />
+              <UserPlus2 className="size-6" />
               Új kontakt létrehozása
             </CardTitle>
           </CardHeader>
@@ -158,8 +146,8 @@ export default function NewContactForm() {
                       {Object.entries(ContactStatus).map(([key, value]) => (
                         <SelectItem key={key} value={value}>
                           <div className="flex items-center">
-                            <div className={`w-2 h-2 rounded-full mr-2 ${statusColors[value as keyof typeof statusColors]}`}></div>
-                            {statusLabels[value as keyof typeof statusLabels]}
+                            <div className={cn("w-2 h-2 rounded-full mr-2", contactStatuses[value].color)}></div>
+                            {contactStatuses[value].label}
                           </div>
                         </SelectItem>
                       ))}

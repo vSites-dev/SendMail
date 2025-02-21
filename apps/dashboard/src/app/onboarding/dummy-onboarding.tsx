@@ -7,8 +7,8 @@ import { createDummyProject } from "./actions";
 export default function DummyOnboardingButton() {
   async function handleCreate() {
     const res = await authClient.organization.create({
-      name: "Best Organization",
-      slug: "best-organization",
+      name: "Dummy Org",
+      slug: "dummy-org",
       logo: "https://picsum.photos/200",
     });
 

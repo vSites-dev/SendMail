@@ -50,7 +50,7 @@ export const contactRouter = createTRPCRouter({
 
       return {
         items,
-        totalCount: totalCount[0]?.count,
+        totalCount,
       };
     }),
 
@@ -83,6 +83,33 @@ export const contactRouter = createTRPCRouter({
         return {
           success: false,
           error: "Hiba történt a kontakt törlése során.",
+        };
+      }
+    }),
+
+  updateStatus: authedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.db.contact.update({
+          where: { id: input.id },
+          data: { status: input.status },
+        });
+
+        return {
+          success: true,
+          error: null,
+        };
+      } catch (e) {
+        console.error("Error updating contact status", e);
+        return {
+          success: false,
+          error: "Hiba történt a kontakt státuszának frissítése során.",
         };
       }
     }),

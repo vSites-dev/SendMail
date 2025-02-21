@@ -58,7 +58,6 @@ const ActionsPanel = () => {
             <ActionCard
               icon={MessageCircleMore}
               title="Beszélgetések"
-              // TODO: implement get parameter for unseen conversations
               href="/beszelgetesek"
               gradient="bg-gradient-to-br from-blue-500/80 to-blue-700/80"
             />

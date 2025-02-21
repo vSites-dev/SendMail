@@ -15,7 +15,7 @@ export default function IntervalSelect() {
       onValueChange={(e) => setSelectedInterval(parseInt(e) as any)}
     >
       <SelectTrigger
-        className="relative z-10 w-[156px] gap-2 rounded-lg sm:ml-auto"
+        className="relative z-10 w-[186px] gap-2 rounded-lg sm:ml-auto"
         aria-label="Időszak kiválasztása"
       >
         <CalendarDays className="size-4" /> Elmúlt {selectedInterval} nap
