@@ -7,7 +7,10 @@ const domainService = new DomainService();
 
 // Schema for domain verification request
 const verifyDomainSchema = z.object({
-  domain: z.string().min(1).regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/),
+  domain: z
+    .string()
+    .min(1)
+    .regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/),
   projectId: z.string().uuid(),
 });
 
@@ -15,9 +18,12 @@ const verifyDomainSchema = z.object({
 router.post("/verify", async (req, res) => {
   try {
     const { domain, projectId } = verifyDomainSchema.parse(req.body);
-    
-    const verificationResult = await domainService.verifyDomain(domain, projectId);
-    
+
+    const verificationResult = await domainService.verifyDomain(
+      domain,
+      projectId
+    );
+
     res.json({
       success: true,
       data: verificationResult,
@@ -35,9 +41,9 @@ router.post("/verify", async (req, res) => {
 router.get("/status/:id", async (req, res) => {
   try {
     const id = z.string().uuid().parse(req.params.id);
-    
+
     const status = await domainService.checkDomainStatus(id);
-    
+
     res.json({
       success: true,
       data: status,

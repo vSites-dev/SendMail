@@ -1,1 +1,4 @@
 this project is a simple email marketing platform.
+
+the prisma schema should be only modified at the root: prisma/schema.prisma
+use pnpm
