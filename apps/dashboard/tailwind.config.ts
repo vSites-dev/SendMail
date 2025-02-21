@@ -14,7 +14,40 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-poppins)"],
+        sans: [
+          "var(--font-sans)",
+          "ui-sans-serif",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI Variable Display",
+          "Segoe UI",
+          "Helvetica",
+          "Apple Color Emoji",
+          "Arial",
+          "sans-serif",
+          "Segoe UI Emoji",
+          "Segoe UI Symbol",
+          "Noto Color Emoji",
+        ],
+        heading: [
+          "var(--font-heading)",
+          "ui-sans-serif",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI Variable Display",
+          "Segoe UI",
+          "Helvetica",
+          "Apple Color Emoji",
+          "Arial",
+          "sans-serif",
+          "Segoe UI Emoji",
+          "Segoe UI Symbol",
+          "Noto Color Emoji",
+        ],
+        mono: [
+          "var(--font-mono)",
+          ...require("tailwindcss/defaultTheme").fontFamily.mono,
+        ],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -26,15 +59,15 @@ export default {
         foreground: "hsl(var(--foreground))",
         card: {
           DEFAULT: "hsl(var(--card))",
-          foreground: "#262626",
+          foreground: "hsl(var(--card-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
-          foreground: "#262626",
+          foreground: "hsl(var(--popover-foreground))",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
-          foreground: "#262626",
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -42,7 +75,7 @@ export default {
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
-          foreground: "#52525B",
+          foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
           DEFAULT: "hsl(var(--accent))",
@@ -72,8 +105,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        brand: {
+          DEFAULT: "hsl(var(--brand))",
+          foreground: "hsl(var(--brand-foreground))",
+        },
+        highlight: {
+          DEFAULT: "hsl(var(--highlight))",
+          foreground: "hsl(var(--highlight-foreground))",
+        },
       },
     },
   },
-  plugins: [tailwindAnimate],
+  plugins: [tailwindAnimate, require("tailwind-scrollbar-hide")],
 } satisfies Config;
