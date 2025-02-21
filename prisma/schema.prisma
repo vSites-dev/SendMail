@@ -127,6 +127,7 @@ model Project {
   campaigns Campaign[]
   contacts  Contact[]
   tasks     Task[]
+  domains   Domain[]
 
   @@map("projects")
 }
@@ -240,6 +241,20 @@ model Click {
   @@map("clicks")
 }
 
+model Domain {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  status      DomainStatus @default(PENDING)
+  dkimTokens  String[]
+  projectId   String
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([projectId])
+  @@map("domains")
+}
+
 enum ContactStatus {
   SUBSCRIBED
   UNSUBSCRIBED
@@ -264,6 +279,15 @@ enum EmailStatus {
   CLICKED
   COMPLAINED
   FAILED
+}
+
+enum DomainStatus {
+  PENDING
+  VERIFIED
+  FAILED
+  DKIM_PENDING
+  DKIM_VERIFIED
+  DKIM_FAILED
 }
 
 enum TaskType {

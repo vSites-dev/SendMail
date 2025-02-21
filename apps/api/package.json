@@ -18,13 +18,15 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-ses": "^3.750.0",
+    "@aws-sdk/client-sesv2": "^3.753.0",
     "@aws-sdk/client-sts": "^3.750.0",
     "@prisma/client": "^6.3.1",
     "@types/node-cron": "^3.0.11",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
