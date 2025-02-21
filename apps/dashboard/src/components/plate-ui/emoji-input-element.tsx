@@ -56,7 +56,7 @@ export const EmojiInputElement = withRef<typeof PlateElement>(
 
           <InlineComboboxContent>
             {!isPending && (
-              <InlineComboboxEmpty>No results</InlineComboboxEmpty>
+              <InlineComboboxEmpty>Nincs találat</InlineComboboxEmpty>
             )}
 
             <InlineComboboxGroup>

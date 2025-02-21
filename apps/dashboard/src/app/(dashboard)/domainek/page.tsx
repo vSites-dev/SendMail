@@ -6,13 +6,16 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { api, HydrateClient } from "@/trpc/server";
-import { Globe, Home, Mails, PlusSquare, Users2 } from "lucide-react";
+import { DomainsTable } from "./data-table";
+import { Globe, Home, PlusSquare, Users2 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 
-export default async function EmailsPage() {
+export default async function DomainsPage() {
+  void api.domain.getForTable({ limit: 10, offset: 0 });
+
   return (
     <HydrateClient>
       <DashboardHeader>
@@ -41,19 +44,21 @@ export default async function EmailsPage() {
         </div>
 
         <p className="text-muted-foreground mb-6 mt-4 max-w-[600px]">
-          A projekthez csatolt domainek közül választhatja ki emailek kiküldésénél, hogy <b>milyen címről legyen ki küldve</b>. Hozzáadás után megerősítés szükséges az Ön részéről.
+          A projekthez csatolt domainek közül választhatja ki emailek
+          kiküldésénél, hogy <b>milyen címről legyen ki küldve</b>. Hozzáadás
+          után megerősítés szükséges az Ön részéről.
         </p>
 
         <Link href="/domainek/uj">
           <Button>
             <PlusSquare className="size-5" />
-            Új domain hozzáadás
+            Új domain létrehozása
           </Button>
         </Link>
 
         <Separator className="my-6" />
 
-        <div className="h-6"></div>
+        <DomainsTable />
       </main>
     </HydrateClient>
   );

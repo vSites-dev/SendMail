@@ -11,7 +11,7 @@ import { domainRouter } from "./routers/domains";
 export const appRouter = createTRPCRouter({
   contact: contactRouter,
   project: projectRouter,
-  domains: domainRouter,
+  domain: domainRouter,
 });
 
 // export type definition of API

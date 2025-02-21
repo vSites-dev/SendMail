@@ -4,7 +4,7 @@ import React from "react";
 
 import { withRef } from "@udecode/cn";
 import { type PlateEditor, ParagraphPlugin } from "@udecode/plate/react";
-import { AIChatPlugin } from "@udecode/plate-ai/react";
+import { AIChatPlugin, AIPlugin } from "@udecode/plate-ai/react";
 import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
 import { CodeBlockPlugin } from "@udecode/plate-code-block/react";
 import { DatePlugin } from "@udecode/plate-date/react";
@@ -184,7 +184,7 @@ export const SlashInputElement = withRef<typeof PlateElement>(
           <InlineComboboxInput />
 
           <InlineComboboxContent>
-            <InlineComboboxEmpty>No results</InlineComboboxEmpty>
+            <InlineComboboxEmpty>Nincs találat</InlineComboboxEmpty>
 
             {groups.map(({ group, items }) => (
               <InlineComboboxGroup key={group}>

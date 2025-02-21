@@ -48,11 +48,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { contactDataTableAtom } from "@/store/global";
+import { contactDataTableAtom, domainDataTableAtom } from "@/store/global";
 import { useAtom } from "jotai";
 import DotPattern from "@/components/ui/dot-pattern";
 
-export const ContactsTable = () => {
+export const DomainsTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -65,9 +65,9 @@ export const ContactsTable = () => {
     { id: "updatedAt", desc: true },
   ]);
 
-  const [contacts, setContacts] = useAtom(contactDataTableAtom);
+  const [domains, setDomains] = useAtom(domainDataTableAtom);
 
-  const { data, isLoading } = api.contact.getForTable.useQuery({
+  const { data, isLoading } = api.domain.getForTable.useQuery({
     limit: pageSize,
     offset: (currentPage - 1) * pageSize,
   });
@@ -84,11 +84,11 @@ export const ContactsTable = () => {
   }, [data, totalPages, pageSize]);
 
   useEffect(() => {
-    if (data?.items) setContacts(data.items);
+    if (data?.items) setDomains(data.items);
   }, [data]);
 
   const table = useReactTable({
-    data: contacts,
+    data: domains,
     columns,
     state: {
       globalFilter,
@@ -110,7 +110,7 @@ export const ContactsTable = () => {
         <div className="relative w-full">
           <Input
             className="bg-white max-w-sm peer ps-9"
-            placeholder="Keresés a kontaktok között..."
+            placeholder="Keresés a domainek között..."
             type="text"
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
@@ -254,7 +254,7 @@ export const ContactsTable = () => {
 
       <div className="flex w-full justify-between items-center">
         <p className="text-muted-foreground text-sm w-full">
-          {totalCount} kontakt
+          {totalCount} domain
         </p>
 
         <Pagination className="w-full">

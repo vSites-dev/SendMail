@@ -16,6 +16,7 @@ import {
   Loader2,
   RefreshCcw,
   SquareMousePointer,
+  User2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -44,7 +45,9 @@ import { cn, contactStatuses } from "@/lib/utils";
 const formSchema = z.object({
   email: z.string().email({ message: "Érvénytelen email cím" }),
   name: z.string().min(2, { message: "Teljes név szükséges" }),
-  status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED"]).default("SUBSCRIBED"),
+  status: z
+    .enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED"])
+    .default("SUBSCRIBED"),
 });
 
 export default function EditContactForm({ contact }: { contact: Contact }) {
@@ -94,7 +97,7 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
         <Card className="w-[500px] mx-auto my-4">
           <CardHeader>
             <CardTitle className="flex gap-3 items-center">
-              <SquareMousePointer className="size-6" />
+              <User2 className="size-6" />
               Kontakt szerkesztése
             </CardTitle>
           </CardHeader>
@@ -136,7 +139,10 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Státusz</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Válasszon státuszt" />
@@ -146,7 +152,12 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
                       {Object.entries(ContactStatus).map(([key, value]) => (
                         <SelectItem key={key} value={value}>
                           <div className="flex items-center">
-                            <div className={cn("w-2 h-2 rounded-full mr-2", contactStatuses[value].color)}></div>
+                            <div
+                              className={cn(
+                                "w-2 h-2 rounded-full mr-2",
+                                contactStatuses[value].color,
+                              )}
+                            ></div>
                             {contactStatuses[value].label}
                           </div>
                         </SelectItem>
