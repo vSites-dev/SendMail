@@ -246,6 +246,11 @@ model Domain {
   name        String       @unique
   status      DomainStatus @default(PENDING)
   dkimTokens  String[]
+  spfRecord   String?
+  dmarcRecord String?
+  mailFromSubdomain String?
+  mailFromMxRecord String?
+  verificationToken String?
   projectId   String
   project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdAt   DateTime     @default(now())
@@ -283,11 +288,10 @@ enum EmailStatus {
 
 enum DomainStatus {
   PENDING
-  VERIFIED
-  FAILED
   DKIM_PENDING
   DKIM_VERIFIED
-  DKIM_FAILED
+  FAILED
+  VERIFIED
 }
 
 enum TaskType {
