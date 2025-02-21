@@ -3,8 +3,6 @@
 import { selectedIntervalAtom } from "@/store/global";
 import { useAtom } from "jotai";
 import KpiCard from "./kpi-card";
-import { api } from "@/trpc/react";
-import { useEffect, useMemo } from "react";
 
 const kpiData = [
   {

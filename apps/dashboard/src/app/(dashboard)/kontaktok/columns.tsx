@@ -7,6 +7,8 @@ import {
   Eye,
   Trash2,
   Loader2,
+  ChevronRight,
+  ChevronsUpDown,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -31,8 +33,9 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
-import { Contact } from "@prisma/client";
+import { Contact, ContactStatus } from "@prisma/client";
 import { contactDataTableAtom } from "@/store/global";
+import { cn, contactStatuses } from "@/lib/utils";
 
 export const columns: ColumnDef<Contact>[] = [
   {
@@ -57,27 +60,59 @@ export const columns: ColumnDef<Contact>[] = [
     header: "Státusz",
     enableSorting: true,
     cell: ({ row }) => {
-      const statusColors = {
-        SUBSCRIBED: "bg-green-500",
-        UNSUBSCRIBED: "bg-gray-500",
-        BOUNCED: "bg-red-500",
-        COMPLAINED: "bg-yellow-500",
-      };
+      const utils = api.useUtils();
 
-      const statusLabels = {
-        SUBSCRIBED: "Feliratkozva",
-        UNSUBSCRIBED: "Leiratkozva",
-        BOUNCED: "Visszapattant????",
-        COMPLAINED: "Fellebezzett??",
-      };
+      const { mutate: updateStatus, isPending } = api.contact.updateStatus.useMutation({
+        onMutate: () => {
+          const loadingToast = toast.loading('Státusz frissítése...');
+          return { loadingToast };
+        },
+        onSuccess: () => {
+          utils.contact.getForTable.invalidate();
+
+          toast.success('Státusz sikeresen frissítve');
+        },
+        onError: (error) => {
+          toast.error('Hiba történt a státusz frissítése során');
+          console.error('Error updating status:', error);
+        },
+        onSettled: (_, __, ___, context) => {
+          toast.dismiss(context?.loadingToast);
+        },
+      });
 
       return (
-        <span
-          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[row.original.status as keyof typeof statusColors]
-            } text-white`}
-        >
-          {statusLabels[row.original.status as keyof typeof statusLabels]}
-        </span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-max justify-start text-left font-normal p-0 hover:bg-transparent hover:underline",
+                isPending && "opacity-50 cursor-not-allowed"
+              )}
+              disabled={isPending}
+            >
+              <div className="flex items-center">
+                <div className={cn("w-2 h-2 rounded-full mr-2", contactStatuses[row.original.status].color)}></div>
+                {contactStatuses[row.original.status].label}
+              </div>
+
+              <ChevronsUpDown className="h-4 w-4 text-muted-foreground opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {Object.entries(contactStatuses).map(([key, value]) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => updateStatus({ id: row.original.id, status: key as ContactStatus })}
+                className="flex items-center"
+              >
+                <div className={cn("w-2 h-2 rounded-full mr-2", value.color)}></div>
+                {value.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   },

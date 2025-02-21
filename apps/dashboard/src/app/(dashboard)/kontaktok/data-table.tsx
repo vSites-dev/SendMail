@@ -31,7 +31,7 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { columns } from "./columns";
-import { Search, Settings2, ArrowUp, ArrowDown, BarChartBig } from "lucide-react";
+import { Search, Settings2, ArrowUp, ArrowDown, BarChartBig, ChevronsUpDown, ChevronUp, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -58,7 +58,7 @@ export const ContactsTable = () => {
 
   const [contacts, setContacts] = useAtom(contactDataTableAtom);
 
-  const { data, isFetching } = api.contact.getForTable.useQuery({
+  const { data, isLoading } = api.contact.getForTable.useQuery({
     limit: pageSize,
     offset: (currentPage - 1) * pageSize,
   });
@@ -162,10 +162,14 @@ export const ContactsTable = () => {
                         )}
 
                         {header.column.getIsSorted() === "asc" && (
-                          <ArrowUp className="size-4 ml-1" />
+                          <ChevronUp className="size-4 ml-1" />
                         )}
                         {header.column.getIsSorted() === "desc" && (
-                          <ArrowDown className="size-4 ml-1" />
+                          <ChevronDown className="size-4 ml-1" />
+                        )}
+
+                        {header.column.getCanSort() && !header.column.getIsSorted() && (
+                          <ChevronsUpDown className="size-4 ml-1 opacity-50" />
                         )}
                       </div>
                     )}
@@ -176,7 +180,7 @@ export const ContactsTable = () => {
           </TableHeader>
 
           <TableBody className="bg-white">
-            {isFetching ? (
+            {isLoading ? (
               [...Array(10)].map((_, idx) => (
                 <TableRow key={idx}>
                   {columns.map((_, colIdx) => (
@@ -286,7 +290,7 @@ export const ContactsTable = () => {
                 }
                 className={
                   (currentPage === totalPages || totalPages === 0)
-                    ? "pointer-events-none opacity-50"
+                    ? "pointer-events-none opacity-50 !bg-transparent border-none"
                     : ""
                 }
               />
