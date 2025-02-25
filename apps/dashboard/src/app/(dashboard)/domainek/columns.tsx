@@ -63,7 +63,7 @@ export const columns: ColumnDef<Domain>[] = [
           <div
             className={cn(
               "w-2 h-2 rounded-full mr-2",
-              domainStatuses[row.original.status].color,
+              domainStatuses[row.original.status].bgColor,
             )}
           ></div>
           {domainStatuses[row.original.status].label}
@@ -83,7 +83,7 @@ export const columns: ColumnDef<Domain>[] = [
     id: "actions",
 
     cell: ({ row }) => {
-      const contact = row.original!;
+      const domain = row.original!;
 
       const utils = api.useUtils();
 
@@ -97,16 +97,16 @@ export const columns: ColumnDef<Domain>[] = [
       const { mutateAsync, isPending } = api.domain.delete.useMutation();
 
       async function handleDelete() {
-        const res = await mutateAsync({ id: contact.id });
+        const res = await mutateAsync({ id: domain.id });
 
         if (res.success) {
           utils.domain.getForTable.invalidate();
           utils.domain.getAll.invalidate();
 
-          setDomains((prev) => prev.filter((d) => d.id !== contact.id));
+          setDomains((prev) => prev.filter((d) => d.id !== domain.id));
 
-          toast.success("A kontakt sikeresen törölve!");
-        } else toast.error("Hiba történt a kontakt törlése közben!");
+          toast.success("A domain sikeresen törölve!");
+        } else toast.error("Hiba történt a domain törlése közben!");
 
         setDeleteDialog(false);
         setMenu(false);
@@ -121,6 +121,12 @@ export const columns: ColumnDef<Domain>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href={`/domainek/${domain.id}`}>
+                <Eye className="mr-2 h-4 w-4" />
+                Megtekintés
+              </Link>
+            </DropdownMenuItem>
             <AlertDialog open={deleteDialog} onOpenChange={setDeleteDialog}>
               <AlertDialogTrigger asChild>
                 <DropdownMenuItem

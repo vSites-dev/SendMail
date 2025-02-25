@@ -3,6 +3,7 @@ import {
   createTRPCRouter,
   withOrganization,
 } from "@/server/api/trpc";
+import { DomainStatus } from "@prisma/client";
 
 import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
@@ -68,6 +69,8 @@ export const domainRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
+        // TODO: check if domain is attached to any active scheduled campaign/email
+
         await ctx.db.domain.delete({
           where: {
             id: input.id,
@@ -105,7 +108,7 @@ export const domainRouter = createTRPCRouter({
       try {
         await ctx.db.domain.update({
           where: { id: input.id },
-          data: { status: input.status },
+          data: { status: input.status as DomainStatus },
         });
 
         return {
@@ -145,7 +148,7 @@ export const domainRouter = createTRPCRouter({
           },
           data: {
             name: input.name,
-            status: input.status,
+            status: input.status as DomainStatus,
             dkimTokens: input.dkimTokens,
           },
         });
