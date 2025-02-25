@@ -46,13 +46,13 @@ export default async function DomainsPage() {
         <p className="text-muted-foreground mb-6 mt-4 max-w-[600px]">
           A projekthez csatolt domainek közül választhatja ki emailek
           kiküldésénél, hogy <b>milyen címről legyen ki küldve</b>. Hozzáadás
-          után megerősítés szükséges az Ön részéről.
+          után megerésítés szükséges az Ön részéről.
         </p>
 
         <Link href="/domainek/uj">
           <Button>
             <PlusSquare className="size-5" />
-            Új domain létrehozása
+            Új domain hozzáadása
           </Button>
         </Link>
 

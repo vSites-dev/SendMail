@@ -126,11 +126,20 @@ const CardFooter = React.forwardRef<
 ));
 CardFooter.displayName = "CardFooter";
 
-const CardSeparator = () => {
-  return (
-    <div className="border border-b-neutral-300/50 border-l-transparent border-r-transparent border-t-neutral-50 dark:border-b-neutral-700/50 dark:border-t-neutral-950" />
-  );
-};
+const CardSeparator = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "border border-b-neutral-300/50 border-l-transparent border-r-transparent border-t-neutral-50 dark:border-b-neutral-700/50 dark:border-t-neutral-950",
+      className
+    )}
+    {...props}
+  />
+));
+CardSeparator.displayName = "CardSeparator";
 
 export {
   Card,

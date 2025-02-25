@@ -66,11 +66,11 @@ export default function CreateDomainForm() {
       utils.domain.getForTable.invalidate();
       utils.domain.getById.invalidate({ id: res.id });
 
-      toast.success("Új domain létrehozva!");
+      toast.success("Új domain hozzáadva sikeresen!");
       router.push(`/domainek`);
     } else {
       console.error(res);
-      toast.error("Hiba történt a domain létrehozása során!");
+      toast.error("Hiba történt a domain hozzáadása során!");
     }
 
     setLoading(false);
@@ -83,7 +83,7 @@ export default function CreateDomainForm() {
           <CardHeader>
             <CardTitle className="flex gap-3 items-center">
               <Globe className="size-6" />
-              Új domain létrehozása
+              Új domain hozzáadása
             </CardTitle>
           </CardHeader>
 
