@@ -11,7 +11,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
-import { Home } from "lucide-react";
+import { FolderPlus, Home } from "lucide-react";
+import { TemplateCreator } from "@/components/editor/template-creator";
+import { cn } from "@/lib/utils";
 
 export default function Page() {
   return (
@@ -25,13 +27,34 @@ export default function Page() {
               </Link>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbPage>Sablonok</BreadcrumbPage>
+            <BreadcrumbItem>
+              <Link href="/sablonok">Sablonok</Link>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbPage>Új sablon</BreadcrumbPage>
           </BreadcrumbList>
         </DashboardHeader>
 
-        <SettingsProvider>
-          <PlateEditor />
-        </SettingsProvider>
+        <main className="max-w-screen-md w-full mx-auto h-full py-6 px-4">
+          <div className="flex gap-3 items-center">
+            <div
+              className={cn(
+                "flex relative p-[5px] items-center justify-center rounded-md bg-neutral-50 text-2xl font-semibold border text-violet-600",
+              )}
+            >
+              <FolderPlus className="size-5" />
+            </div>
+
+            <h1 className="text-3xl font-semibold text-neutral-700">
+              Új sablon
+            </h1>
+          </div>
+
+          <SettingsProvider>
+            <TemplateCreator />
+          </SettingsProvider>
+        </main>
+        {/* <PlateEditor /> */}
       </div>
     </HydrateClient>
   );

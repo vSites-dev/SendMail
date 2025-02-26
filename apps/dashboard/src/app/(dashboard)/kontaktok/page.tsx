@@ -40,12 +40,14 @@ export default async function Contacts() {
             <Users2 className="size-5" />
           </div>
 
-          <h1 className="text-3xl font-semibold text-neutral-800">Kontaktok</h1>
+          <h1 className="text-3xl font-semibold text-neutral-700">Kontaktok</h1>
         </div>
 
         <p className="text-muted-foreground mb-6 mt-4 max-w-[600px]">
-          A kontaktok egy-egy személyt jelentenek a projektek email listáján. Ezek az elérhetőségek később{" "}
-          <b>egyedi emailekhez, kampányokhoz vagy automatizált üzenetekhez</b> rendelhetők hozzá.
+          A kontaktok egy-egy személyt jelentenek a projektek email listáján.
+          Ezek az elérhetőségek később{" "}
+          <b>egyedi emailekhez, kampányokhoz vagy automatizált üzenetekhez</b>{" "}
+          rendelhetők hozzá.
         </p>
 
         <Link href="/kontaktok/uj">

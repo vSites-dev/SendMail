@@ -11,8 +11,11 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import SablonokTable from "./table";
 
 export default async function TemplatesPage() {
+  const templates = await api.template.getAll();
+
   return (
     <HydrateClient>
       <DashboardHeader>
@@ -37,11 +40,14 @@ export default async function TemplatesPage() {
             <FolderOpen className="size-5" />
           </div>
 
-          <h1 className="text-3xl font-semibold text-neutral-800">Sablonok</h1>
+          <h1 className="text-3xl font-semibold text-neutral-700">Sablonok</h1>
         </div>
 
         <p className="text-muted-foreground mb-6 mt-4 max-w-[600px]">
-          A sablonokat használhatja később fel kontaktok értesítésére. Ezeket a sablonokat lehet hozzárendelni <b>manuális küldéshez, kampányokhoz vagy automatizált eseményekhez</b>.
+          A sablonokat használhatja később fel kontaktok értesítésére. Ezeket a
+          sablonokat lehet hozzárendelni{" "}
+          <b>manuális küldéshez, kampányokhoz vagy automatizált eseményekhez</b>
+          .
         </p>
 
         <Link href="/sablonok/uj">
@@ -53,7 +59,7 @@ export default async function TemplatesPage() {
 
         <Separator className="my-6" />
 
-        <div className="h-6"></div>
+        <SablonokTable templates={templates} />
       </main>
     </HydrateClient>
   );

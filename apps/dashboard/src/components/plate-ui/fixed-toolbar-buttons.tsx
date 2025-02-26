@@ -82,14 +82,6 @@ export function FixedToolbarButtons() {
           </ToolbarGroup>
 
           <ToolbarGroup>
-            <ExportToolbarButton>
-              <ArrowUpToLineIcon />
-            </ExportToolbarButton>
-
-            <ImportToolbarButton />
-          </ToolbarGroup>
-
-          <ToolbarGroup>
             <InsertDropdownMenu />
             {!isTudasbazis && <TurnIntoDropdownMenu />}
             {!isTudasbazis && <FontSizeToolbarButton />}

@@ -14,48 +14,32 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { Separator } from "../ui/separator";
+import { Input } from "../ui/input";
 
-export function ArticleEditor({
-  articleId,
-  content,
-}: {
-  articleId: string;
-  content?: string;
-}) {
+export function TemplateCreator() {
   const utils = api.useUtils();
   const router = useRouter();
   const editor = useCreateEditor();
 
+  const [name, setName] = React.useState("");
   const [isLoading, setLoading] = React.useState(false);
 
-  const { mutateAsync: deleteArticle } =
-    api.article.deleteArticleById.useMutation();
-
-  useEffect(() => {
-    if (content) editor.tf.setValue(editor.api.markdown.deserialize(content));
-  }, [content]);
+  const { mutateAsync: createTemplate } = api.template.create.useMutation();
 
   async function handleSave() {
     setLoading(true);
 
     const markdown = editor.api.markdown.serialize();
 
-    const res = await fetch("https://api.leoai.hu/workflows/retrain-document", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        articleId,
-        newContent: markdown,
-      }),
+    const res = await createTemplate({
+      name: name,
+      body: markdown,
     });
 
-    if (res.status === 200) {
-      utils.document.getById.invalidate({ id: articleId });
-      utils.document.getDocuments.invalidate();
+    if (res.success) {
+      utils.template.getAll.invalidate();
 
-      toast.success("A dokumentum sikeresen frissítve!");
+      toast.success("A sablon sikeresen hozzáadva!");
     } else {
       toast.error("Hiba történt a mentés során!");
     }
@@ -63,37 +47,22 @@ export function ArticleEditor({
     setLoading(false);
   }
 
-  const handleDelete = async () => {
-    setLoading(true);
-
-    await deleteArticle({ id: articleId });
-    utils.article.getArticles.invalidate();
-    router.push("/bejegyzesek");
-
-    setLoading(false);
-  };
-
   return (
     <>
       <div className="my-3" />
 
-      <Button
-        onClick={() => handleDelete()}
-        variant={"destructive"}
-        type="button"
-        disabled={isLoading}
-      >
-        {isLoading && <Loader2 className="size-4 animate-spin" />}
-        {!isLoading && <Trash2 className="size-4" />}
-        Törlés
-      </Button>
-
       <Separator className="my-3" />
 
       <p className="text-muted-foreground -mb-4">
-        Az alábbi szerkesztő segítségével módosíthatod az adott bejegyzés
-        tartalmát.
+        Az alábbi szerkesztő segítségével hozhatod létre a sablonodat.
       </p>
+
+      <Input
+        className="my-4"
+        placeholder="Sablon neve"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
 
       <div
         className="min-h-[400px] h-[calc(100vh-380px)] overflow-y-scroll mt-6 w-full border bg-white rounded-md"
@@ -124,7 +93,7 @@ export function ArticleEditor({
           ) : (
             <Save className="size-4" />
           )}
-          Mentés
+          Létrehozás
         </Button>
       </div>
     </>

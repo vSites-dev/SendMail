@@ -40,7 +40,7 @@ export default async function DomainsPage() {
             <Globe className="size-5" />
           </div>
 
-          <h1 className="text-3xl font-semibold text-neutral-800">Domainek</h1>
+          <h1 className="text-3xl font-semibold text-neutral-700">Domainek</h1>
         </div>
 
         <p className="text-muted-foreground mb-6 mt-4 max-w-[600px]">

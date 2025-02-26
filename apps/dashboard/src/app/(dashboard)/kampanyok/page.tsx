@@ -6,7 +6,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { api, HydrateClient } from "@/trpc/server";
-import { FolderOpen, Home, Mails, PlusSquare, SendHorizonal, Users2 } from "lucide-react";
+import {
+  FolderOpen,
+  Home,
+  Mails,
+  PlusSquare,
+  SendHorizonal,
+  Users2,
+} from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -37,11 +44,14 @@ export default async function CampaignsPage() {
             <SendHorizonal className="size-5" />
           </div>
 
-          <h1 className="text-3xl font-semibold text-neutral-800">Kampányok</h1>
+          <h1 className="text-3xl font-semibold text-neutral-700">Kampányok</h1>
         </div>
 
         <p className="text-muted-foreground mb-6 mt-4 max-w-[600px]">
-          A kampányokat használhatja később fel kontaktok értesítésére. Ezeket a kampányokat lehet hozzárendelni <b>manuális küldéshez, kampányokhoz vagy automatizált eseményekhez</b>.
+          A kampányokat használhatja később fel kontaktok értesítésére. Ezeket a
+          kampányokat lehet hozzárendelni{" "}
+          <b>manuális küldéshez, kampányokhoz vagy automatizált eseményekhez</b>
+          .
         </p>
 
         <Link href="/kampanyok/uj">

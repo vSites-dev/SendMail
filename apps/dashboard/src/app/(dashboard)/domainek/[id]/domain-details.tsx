@@ -1,9 +1,14 @@
-"use client"
+"use client";
 
 import { Globe, Copy, CheckCircle, ArrowUpRightFromSquare } from "lucide-react";
 import { useState } from "react";
 import { Domain } from "@prisma/client";
-import { Card, CardHeader, CardContent, CardSeparator } from "@/components/ui/texture-card";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardSeparator,
+} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { cn, domainStatuses } from "@/lib/utils";
 
@@ -18,34 +23,44 @@ export function DomainDetails({ domain }: { domain: Domain }) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center space-x-4 rounded-lg">
         <div
           className={cn(
             "flex relative p-[5px] items-center justify-center rounded-md bg-neutral-50 text-2xl font-semibold border",
             domainStatuses[domain.status].color,
-            domainStatuses[domain.status].borderColor
+            domainStatuses[domain.status].borderColor,
           )}
         >
           <Globe className="size-6" />
         </div>
 
-        <h1 className={cn("text-3xl font-semibold text-neutral-800")}>{domain.name}</h1>
+        <h1 className={cn("text-3xl font-semibold text-neutral-700")}>
+          {domain.name}
+        </h1>
       </div>
 
-      {/* DNS Records */}
       <Card>
-        <div className="overflow-hidden rounded-t-[12px] bg-stone-100 dark:bg-neutral-800 p-4">
+        <div className="overflow-hidden rounded-t-[15.5px] bg-stone-100 dark:bg-neutral-800 p-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs uppercase font-bold text-muted-foreground">LÉTREHOZVA</p>
+              <p className="text-xs uppercase font-bold text-muted-foreground">
+                LÉTREHOZVA
+              </p>
               <p>{new Date(domain.createdAt).toLocaleDateString("hu-HU")}</p>
             </div>
             <div>
-              <p className="text-xs uppercase font-bold text-muted-foreground">STÁTUSZ</p>
+              <p className="text-xs uppercase font-bold text-muted-foreground">
+                STÁTUSZ
+              </p>
               <div className="flex items-center gap-2">
-                <div className={cn("size-2 rounded-[2px]", domainStatuses[domain.status].bgColor)} />
-                {domainStatuses[domain.status].label}</div>
+                <div
+                  className={cn(
+                    "size-2 rounded-[2px]",
+                    domainStatuses[domain.status].bgColor,
+                  )}
+                />
+                {domainStatuses[domain.status].label}
+              </div>
             </div>
           </div>
         </div>
@@ -53,14 +68,18 @@ export function DomainDetails({ domain }: { domain: Domain }) {
         <CardSeparator />
 
         <CardContent className="my-4">
-          <h2 className="text-lg font-semibold mb-2">DNS Bejegyzések</h2>
+          <h2 className="text-lg font-semibold mb-2 text-neutral-700">
+            DNS Bejegyzések
+          </h2>
 
           <div className="rounded-md border">
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
                   <th className="p-3 text-left text-sm font-medium">Típus</th>
-                  <th className="p-3 text-left text-sm font-medium">Host / Név</th>
+                  <th className="p-3 text-left text-sm font-medium">
+                    Host / Név
+                  </th>
                   <th className="p-3 text-left text-sm font-medium">Érték</th>
                   <th className="p-3 text-left text-sm font-medium">TTL</th>
                 </tr>
@@ -93,7 +112,9 @@ export function DomainDetails({ domain }: { domain: Domain }) {
                     <td className="group relative p-3">
                       <span className="mr-8 break-all">{domain.spfRecord}</span>
                       <button
-                        onClick={() => handleCopy(domain.spfRecord ?? "", "spf")}
+                        onClick={() =>
+                          handleCopy(domain.spfRecord ?? "", "spf")
+                        }
                         className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100"
                       >
                         {copiedField === "spf" ? (
@@ -111,9 +132,13 @@ export function DomainDetails({ domain }: { domain: Domain }) {
                     <td className="p-3">TXT</td>
                     <td className="p-3">_dmarc</td>
                     <td className="group relative p-3">
-                      <span className="mr-8 break-all">{domain.dmarcRecord}</span>
+                      <span className="mr-8 break-all">
+                        {domain.dmarcRecord}
+                      </span>
                       <button
-                        onClick={() => handleCopy(domain.dmarcRecord ?? "", "dmarc")}
+                        onClick={() =>
+                          handleCopy(domain.dmarcRecord ?? "", "dmarc")
+                        }
                         className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100"
                       >
                         {copiedField === "dmarc" ? (
@@ -129,20 +154,18 @@ export function DomainDetails({ domain }: { domain: Domain }) {
               </tbody>
             </table>
           </div>
-
-
-
         </CardContent>
 
         <CardSeparator />
 
         <CardContent className="my-4">
-          <h2 className="text-lg font-semibold mb-2">Beállítások</h2>
+          <h2 className="text-lg font-semibold mb-2 text-neutral-700">
+            Beállítások
+          </h2>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-
                 <div
                   className={cn(
                     "flex relative p-[4px] items-center justify-center rounded-sm bg-neutral-50 text-2xl font-semibold border text-neutral-600",
@@ -150,17 +173,19 @@ export function DomainDetails({ domain }: { domain: Domain }) {
                 >
                   <ArrowUpRightFromSquare className="size-[14px]" />
                 </div>
-                <p className="font-medium underline">Linkek nyomon követése</p>
+                <p className="font-medium">Linkek nyomon követése</p>
               </div>
 
-              <p className="text-sm text-muted-foreground">
-                Az emailben lévő hivatkozásokat módosítjuk a kattintások nyomon követéséhez. A felhasználó észrevétlenül átirányításra kerül az eredeti linkre.
+              <p className="text-sm text-muted-foreground mt-1 ml-1">
+                Az emailben lévő hivatkozásokat módosítjuk a kattintások nyomon
+                követéséhez. A felhasználó észrevétlenül átirányításra kerül az
+                eredeti linkre.
               </p>
             </div>
             <Switch />
           </div>
         </CardContent>
       </Card>
-    </div >
+    </div>
   );
 }
