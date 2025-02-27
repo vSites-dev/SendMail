@@ -54,7 +54,6 @@ export default function Page() {
             <TemplateCreator />
           </SettingsProvider>
         </main>
-        {/* <PlateEditor /> */}
       </div>
     </HydrateClient>
   );

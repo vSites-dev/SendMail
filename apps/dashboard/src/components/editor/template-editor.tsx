@@ -9,30 +9,39 @@ import { Plate } from "@udecode/plate/react";
 import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { Button } from "../ui/button";
-import { ArrowLeft, Loader2, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
-import { Separator } from "../ui/separator";
-import { Input } from "../ui/input";
+import { Template } from "@prisma/client";
 import { Card, CardContent } from "../ui/card";
+import { Input } from "../ui/input";
+import { Separator } from "../ui/separator";
 
-export function TemplateCreator() {
+export function TemplateEditor({ template }: { template?: Template }) {
   const utils = api.useUtils();
   const router = useRouter();
   const editor = useCreateEditor();
 
-  const [name, setName] = React.useState("");
   const [isLoading, setLoading] = React.useState(false);
+  const [name, setName] = React.useState("");
 
-  const { mutateAsync: createTemplate } = api.template.create.useMutation();
+  useEffect(() => {
+    if (template) {
+      editor.tf.setValue(editor.api.markdown.deserialize(template?.body));
+      setName(template?.name);
+    }
+  }, [template]);
+
+  const { mutateAsync: updateTemplate } = api.template.update.useMutation();
 
   async function handleSave() {
     setLoading(true);
 
     const markdown = editor.api.markdown.serialize();
 
-    const res = await createTemplate({
+    const res = await updateTemplate({
+      id: template!.id,
       name: name,
       body: markdown,
     });
@@ -40,7 +49,7 @@ export function TemplateCreator() {
     if (res.success) {
       utils.template.getAll.invalidate();
 
-      toast.success("A sablon sikeresen létrehozva!");
+      toast.success("A sablon sikeresen frissítve!");
       router.push("/sablonok");
     } else {
       toast.error("Hiba történt a mentés során!");
@@ -102,7 +111,7 @@ export function TemplateCreator() {
           ) : (
             <Save className="size-4" />
           )}
-          Létrehozás
+          Mentés
         </Button>
       </div>
     </>

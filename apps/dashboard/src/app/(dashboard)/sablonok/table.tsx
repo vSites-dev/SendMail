@@ -1,4 +1,5 @@
 import { Template } from "@prisma/client";
+import Link from "next/link";
 
 export default function SablonokTable({
   templates,
@@ -18,7 +19,14 @@ export default function SablonokTable({
         <tbody>
           {templates.map((template) => (
             <tr key={template.id}>
-              <td className="border-b p-3">{template.name}</td>
+              <td className="border-b p-3">
+                <Link
+                  href={`/sablonok/${template.id}`}
+                  className="hover:underline"
+                >
+                  {template.name}
+                </Link>
+              </td>
               <td className="border-b p-3">
                 {template.updatedAt.toLocaleTimeString()}
               </td>
