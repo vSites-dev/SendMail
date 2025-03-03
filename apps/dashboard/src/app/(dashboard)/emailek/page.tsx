@@ -54,7 +54,7 @@ export default async function EmailsPage() {
             </Button>
           </Link>
 
-          <Link href="/kampanyok/uj">
+          <Link href="/kampanyok">
             <Button variant={"success"}>
               <PlusSquare className="size-5" />
               Új kampány létrehozása

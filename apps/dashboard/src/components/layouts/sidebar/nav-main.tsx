@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 
 export function NavMain({
   items,
@@ -32,14 +31,14 @@ export function NavMain({
     items?: {
       title: string;
       url: string;
-      icon?: LucideIcon;
     }[];
   }[];
 }) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <SidebarGroup>
+      <SidebarGroupLabel>Vezérlőpult</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           // Check if item has children
@@ -49,12 +48,16 @@ export function NavMain({
             // Render simple link button for items without children
             return (
               <SidebarMenuItem key={item.title}>
-                <Link href={item.url}>
-                  <SidebarMenuButton isActive={pathname === item.url} tooltip={item.title}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === item.url}
+                  tooltip={item.title}
+                >
+                  <Link href={item.url}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             );
           }
@@ -79,10 +82,8 @@ export function NavMain({
                   <SidebarMenuSub>
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton isActive={pathname === subItem.url} asChild>
+                        <SidebarMenuSubButton asChild>
                           <Link href={subItem.url}>
-                            {subItem.icon && <subItem.icon />}
-
                             <span>{subItem.title}</span>
                           </Link>
                         </SidebarMenuSubButton>

@@ -1,16 +1,16 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 export const TemplateCard = ({
   title,
   description,
   Icon,
 }: {
-  title: string
-  description: string
-  Icon?: React.ElementType
+  title: string;
+  description: string;
+  Icon?: React.ElementType;
 }) => (
   <div className="relative">
-    <a
+    <div
       className={cn(
         "relative z-10 mt-0 block h-full w-full overflow-hidden hover:cursor-pointer",
         "transition-all duration-[180ms] ease-in-out",
@@ -25,6 +25,6 @@ export const TemplateCard = ({
         </div>
         <p className="mt-2 text-gray-600 sm:text-sm">{description}</p>
       </div>
-    </a>
+    </div>
   </div>
-)
+);

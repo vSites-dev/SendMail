@@ -19,8 +19,8 @@ export default function SablonokTable({
     //     </thead>
     //     <tbody>
     //       {templates.map((template) => (
-    //         <tr key={template.id}>
-    //           <td className="border-b p-3">
+    //         <tr key={template.id} className="border-b hover:bg-muted/60">
+    //           <td className="p-3">
     //             <Link
     //               href={`/sablonok/${template.id}`}
     //               className="hover:underline"
@@ -28,10 +28,10 @@ export default function SablonokTable({
     //               {template.name}
     //             </Link>
     //           </td>
-    //           <td className="border-b p-3">
+    //           <td className="p-3">
     //             {template.updatedAt.toLocaleTimeString()}
     //           </td>
-    //           <td className="border-b p-3">
+    //           <td className="p-3">
     //             {template.createdAt.toLocaleTimeString()}
     //           </td>
     //         </tr>
@@ -41,10 +41,7 @@ export default function SablonokTable({
     // </div>
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
       {templates.map((template) => (
-        <Link
-          key={template.id}
-          href={`/sablonok/${template.id}`}
-        >
+        <Link key={template.id} href={`/sablonok/${template.id}`}>
           <TemplateCard
             title={template.name}
             description={template.createdAt.toLocaleTimeString()}

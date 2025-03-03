@@ -18,6 +18,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import CreateCampaignButton from "@/components/campaigns/create-campaign";
 
 export default async function CampaignsPage() {
   return (
@@ -54,12 +55,7 @@ export default async function CampaignsPage() {
           .
         </p>
 
-        <Link href="/kampanyok/uj">
-          <Button>
-            <PlusSquare className="size-5" />
-            Új kampány létrehozása
-          </Button>
-        </Link>
+        <CreateCampaignButton />
 
         <Separator className="my-6" />
 
