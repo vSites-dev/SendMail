@@ -48,7 +48,9 @@ import { cn, contactStatuses } from "@/lib/utils";
 const formSchema = z.object({
   email: z.string().email({ message: "Érvénytelen email cím" }),
   name: z.string().min(2, { message: "Teljes név szükséges" }),
-  status: z.enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED"]).default("SUBSCRIBED"),
+  status: z
+    .enum(["SUBSCRIBED", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED"])
+    .default("SUBSCRIBED"),
 });
 
 export default function NewContactForm() {
@@ -136,7 +138,10 @@ export default function NewContactForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Státusz</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Válasszon státuszt" />
@@ -146,7 +151,12 @@ export default function NewContactForm() {
                       {Object.entries(ContactStatus).map(([key, value]) => (
                         <SelectItem key={key} value={value}>
                           <div className="flex items-center">
-                            <div className={cn("w-2 h-2 rounded-full mr-2", contactStatuses[value].color)}></div>
+                            <div
+                              className={cn(
+                                "w-2 h-2 rounded-full mr-2",
+                                contactStatuses[value].bgColor,
+                              )}
+                            ></div>
                             {contactStatuses[value].label}
                           </div>
                         </SelectItem>

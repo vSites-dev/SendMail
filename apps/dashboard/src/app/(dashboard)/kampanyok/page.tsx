@@ -5,7 +5,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { api, HydrateClient } from "@/trpc/server";
 import {
   FolderOpen,
   Home,
@@ -19,8 +18,12 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import CreateCampaignButton from "@/components/campaigns/create-campaign";
+import { api, HydrateClient } from "@/trpc/server";
 
 export default async function CampaignsPage() {
+  const contacts = await api.contact.getAll();
+  const templates = await api.template.getAll();
+
   return (
     <HydrateClient>
       <DashboardHeader>
@@ -55,7 +58,7 @@ export default async function CampaignsPage() {
           .
         </p>
 
-        <CreateCampaignButton />
+        <CreateCampaignButton contacts={contacts} templates={templates} />
 
         <Separator className="my-6" />
 

@@ -19,6 +19,7 @@ import { CampaignContacts } from "@/components/campaigns/contacts";
 import { CampaignSettings } from "@/components/campaigns/settings";
 import { CampaignOverview } from "@/components/campaigns/overview";
 import { CampaignFlow } from "@/components/campaigns/flow";
+import { Contact, Template } from "@prisma/client";
 
 export type Step = {
   id: number;
@@ -31,9 +32,13 @@ export type Step = {
 export function CampaignModal({
   isOpen,
   onClose,
+  contacts,
+  templates,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  contacts: Contact[];
+  templates: Template[];
 }) {
   const [isMounted, setIsMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -181,7 +186,7 @@ export function CampaignModal({
         <CampaignSteps steps={steps} />
 
         <div className="flex-1 overflow-auto p-6">
-          {currentStep === 1 && <CampaignContacts />}
+          {currentStep === 1 && <CampaignContacts contacts={contacts} />}
           {currentStep === 2 && <CampaignFlow />}
           {currentStep === 3 && <CampaignSettings />}
           {currentStep === 4 && <CampaignOverview />}

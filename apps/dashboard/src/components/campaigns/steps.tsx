@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 export function CampaignSteps({ steps }: { steps: Step[] }) {
   return (
     <div className="border-b">
-      <div className="mx-auto flex max-w-3xl items-center justify-center gap-4 px-4 py-4">
+      <div className="mx-auto flex max-w-3xl items-center justify-center px-4 py-4">
         {steps.map((step, index) => (
           <div key={step.id} className="flex items-center">
             {/* Step Badge */}
@@ -36,11 +36,10 @@ export function CampaignSteps({ steps }: { steps: Step[] }) {
               <span className="text-sm font-medium">{step.title}</span>
             </div>
 
-            {/* Connector between steps */}
             {index < steps.length - 1 && (
               <div
                 className={`
-                mx-1 h-0.5 w-4
+                h-0.5 w-12
                 ${step.isCompleted ? "bg-indigo-600" : "bg-gray-200"}
               `}
               />

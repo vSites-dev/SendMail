@@ -44,7 +44,10 @@ export const columns: ColumnDef<Contact>[] = [
     enableSorting: true,
     cell: ({ row }) => {
       return (
-        <Link className="hover:underline" href={`/kontaktok/${row.original?.id}`}>
+        <Link
+          className="hover:underline"
+          href={`/kontaktok/${row.original?.id}`}
+        >
           {row.original?.email}
         </Link>
       );
@@ -62,24 +65,25 @@ export const columns: ColumnDef<Contact>[] = [
     cell: ({ row }) => {
       const utils = api.useUtils();
 
-      const { mutate: updateStatus, isPending } = api.contact.updateStatus.useMutation({
-        onMutate: () => {
-          const loadingToast = toast.loading('Státusz frissítése...');
-          return { loadingToast };
-        },
-        onSuccess: () => {
-          utils.contact.getForTable.invalidate();
+      const { mutate: updateStatus, isPending } =
+        api.contact.updateStatus.useMutation({
+          onMutate: () => {
+            const loadingToast = toast.loading("Státusz frissítése...");
+            return { loadingToast };
+          },
+          onSuccess: () => {
+            utils.contact.getForTable.invalidate();
 
-          toast.success('Státusz sikeresen frissítve');
-        },
-        onError: (error) => {
-          toast.error('Hiba történt a státusz frissítése során');
-          console.error('Error updating status:', error);
-        },
-        onSettled: (_, __, ___, context) => {
-          toast.dismiss(context?.loadingToast);
-        },
-      });
+            toast.success("Státusz sikeresen frissítve");
+          },
+          onError: (error) => {
+            toast.error("Hiba történt a státusz frissítése során");
+            console.error("Error updating status:", error);
+          },
+          onSettled: (_, __, ___, context) => {
+            toast.dismiss(context?.loadingToast);
+          },
+        });
 
       return (
         <DropdownMenu>
@@ -88,12 +92,17 @@ export const columns: ColumnDef<Contact>[] = [
               variant="ghost"
               className={cn(
                 "w-max justify-start text-left font-normal p-0 hover:bg-transparent hover:underline",
-                isPending && "opacity-50 cursor-not-allowed"
+                isPending && "opacity-50 cursor-not-allowed",
               )}
               disabled={isPending}
             >
               <div className="flex items-center">
-                <div className={cn("w-2 h-2 rounded-full mr-2", contactStatuses[row.original.status].color)}></div>
+                <div
+                  className={cn(
+                    "w-2 h-2 rounded-full mr-2",
+                    contactStatuses[row.original.status].bgColor,
+                  )}
+                ></div>
                 {contactStatuses[row.original.status].label}
               </div>
 
@@ -104,10 +113,17 @@ export const columns: ColumnDef<Contact>[] = [
             {Object.entries(contactStatuses).map(([key, value]) => (
               <DropdownMenuItem
                 key={key}
-                onClick={() => updateStatus({ id: row.original.id, status: key as ContactStatus })}
+                onClick={() =>
+                  updateStatus({
+                    id: row.original.id,
+                    status: key as ContactStatus,
+                  })
+                }
                 className="flex items-center"
               >
-                <div className={cn("w-2 h-2 rounded-full mr-2", value.color)}></div>
+                <div
+                  className={cn("w-2 h-2 rounded-full mr-2", value.bgColor)}
+                ></div>
                 {value.label}
               </DropdownMenuItem>
             ))}
@@ -122,7 +138,7 @@ export const columns: ColumnDef<Contact>[] = [
     enableSorting: true,
     cell: ({ row }) => {
       return new Date(row.original.updatedAt).toLocaleDateString();
-    }
+    },
   },
   {
     id: "actions",
