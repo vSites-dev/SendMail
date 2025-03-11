@@ -7,6 +7,81 @@ import { DomainStatus } from "@prisma/client";
 
 import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
+import type { PrismaClient } from "@prisma/client";
+
+// Extract the domain verification logic into a reusable helper function
+async function verifyDomainHelper(
+  db: PrismaClient,
+  domainName: string,
+  projectId: string,
+) {
+  try {
+    // First, check if the domain already exists in our database
+    const existingDomain = await db.domain.findFirst({
+      where: {
+        name: domainName,
+        projectId: projectId,
+      },
+    });
+
+    if (existingDomain) {
+      // If domain exists, return it directly
+      return {
+        success: true,
+        id: existingDomain.id,
+      };
+    }
+
+    // Call the backend API to verify domain using fetch
+    const response = await fetch(`${process.env.API_URL}/api/domains/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        domain: domainName,
+        projectId: projectId,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      const domainData = data.data;
+
+      // Create domain in database with verification data
+      const domain = await db.domain.create({
+        data: {
+          name: domainName,
+          status: "PENDING",
+          dkimTokens: domainData.dkimAttributes?.Tokens || [],
+          verificationToken: domainData.verificationToken,
+          spfRecord: domainData.spfRecord,
+          dmarcRecord: domainData.dmarcRecord,
+          mailFromSubdomain: domainData.mailFromDomain,
+          mailFromMxRecord: domainData.mailFromMxRecord,
+          projectId: projectId,
+        },
+      });
+
+      return {
+        success: true,
+        id: domain.id,
+      };
+    } else {
+      throw new Error(data.error || "Domain verification failed");
+    }
+  } catch (error) {
+    console.error("Error verifying domain:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Hiba történt a domain ellenőrzése során.",
+    };
+  }
+}
 
 export const domainRouter = createTRPCRouter({
   getAll: authedProcedure.query(async ({ ctx }) => {
@@ -31,6 +106,8 @@ export const domainRouter = createTRPCRouter({
         organizationId: ctx.session.session.activeOrganizationId,
       });
 
+      console.log("get for table", ctx.session.activeProjectId);
+
       const [items, totalCount] = await Promise.all([
         ctx.db.domain.findMany({
           where: {
@@ -49,6 +126,8 @@ export const domainRouter = createTRPCRouter({
         }),
       ]);
 
+      console.log("items", items);
+
       return {
         items,
         totalCount,
@@ -63,6 +142,107 @@ export const domainRouter = createTRPCRouter({
           id: input.id,
         },
       });
+    }),
+
+  getDnsRecords: authedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      try {
+        const domain = await ctx.db.domain.findUnique({
+          where: {
+            id: input.id,
+          },
+        });
+
+        if (!domain) {
+          throw new Error("Domain not found");
+        }
+
+        // Call the backend API to get DNS records using fetch
+        const response = await fetch(
+          `${process.env.API_URL}/api/domains/dns-records/${input.id}`,
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error fetching DNS records: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.data;
+      } catch (error) {
+        console.error("Error fetching DNS records:", error);
+        throw new Error("Failed to fetch DNS records");
+      }
+    }),
+
+  verifyDomain: authedProcedure
+    .input(z.object({ name: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Use the helper function for domain verification
+      return await verifyDomainHelper(
+        ctx.db,
+        input.name,
+        ctx.session.activeProjectId,
+      );
+    }),
+
+  checkVerificationStatus: authedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const domain = await ctx.db.domain.findUnique({
+          where: {
+            id: input.id,
+          },
+        });
+
+        if (!domain) {
+          throw new Error("Domain not found");
+        }
+
+        // Call the backend API to check verification status using fetch
+        const response = await fetch(
+          `${process.env.API_URL}/api/domains/status/${input.id}`,
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Error checking domain status: ${response.statusText}`,
+          );
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          const statusData = data.data;
+
+          // Update domain status in database
+          await ctx.db.domain.update({
+            where: {
+              id: input.id,
+            },
+            data: {
+              status: statusData.status as DomainStatus,
+            },
+          });
+
+          return {
+            success: true,
+            status: statusData,
+          };
+        } else {
+          throw new Error(data.error || "Failed to check domain status");
+        }
+      } catch (error) {
+        console.error("Error checking domain verification status:", error);
+        return {
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Hiba történt a domain státuszának ellenőrzése során.",
+        };
+      }
     }),
 
   delete: authedProcedure
@@ -176,19 +356,12 @@ export const domainRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const newDomain = await ctx.db.domain.create({
-          data: {
-            name: input.name,
-            dkimTokens: input.dkimTokens,
-            projectId: ctx.session.activeProjectId,
-          },
-          select: { id: true },
-        });
-
-        return {
-          success: true,
-          id: newDomain.id,
-        };
+        // Use the helper function for domain verification
+        return await verifyDomainHelper(
+          ctx.db,
+          input.name,
+          ctx.session.activeProjectId,
+        );
       } catch (error) {
         console.error("Error creating domain:", error);
         return {
@@ -199,8 +372,6 @@ export const domainRouter = createTRPCRouter({
     }),
 });
 
-type DomainRouter = typeof domainRouter;
+export type DomainRouterOutputs = inferRouterOutputs<typeof domainRouter>;
 
-type DomainRouterOutputs = inferRouterOutputs<DomainRouter>;
-
-export type Domain = DomainRouterOutputs["getAll"][number];
+export type Domain = DomainRouterOutputs["getById"];

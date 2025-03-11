@@ -1,4 +1,7 @@
-this project is a simple email marketing platform.
-
-the prisma schema should be only modified at the root: prisma/schema.prisma
+1.this project is a simple email marketing platform.
+2. the prisma schema should be only modified at the root: prisma/schema.prisma
 use pnpm
+3. dont try to run the commands, i will run them myself
+4. always use pnpm over npm
+5. dont try to run server, its already running and watching for changes
+

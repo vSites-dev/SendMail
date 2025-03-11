@@ -38,7 +38,12 @@ import {
 } from "@/components/ui/form";
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Teljes domain szükséges" }),
+  name: z
+    .string()
+    .min(2, { message: "Teljes domain szükséges" })
+    .regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/, {
+      message: "Érvénytelen domain formátum (pl: pelda.hu)",
+    }),
 });
 
 export default function CreateDomainForm() {
@@ -47,7 +52,7 @@ export default function CreateDomainForm() {
 
   const [isLoading, setLoading] = useState(false);
 
-  const { mutateAsync: createDomain } = api.domain.create.useMutation();
+  const { mutateAsync: verifyDomain } = api.domain.verifyDomain.useMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,21 +64,26 @@ export default function CreateDomainForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
 
-    const res = await createDomain(values);
+    try {
+      const res = await verifyDomain(values);
 
-    if (res && res.id) {
-      utils.domain.getAll.invalidate();
-      utils.domain.getForTable.invalidate();
-      utils.domain.getById.invalidate({ id: res.id });
+      if (res && res.success && res.id) {
+        utils.domain.getAll.invalidate();
+        utils.domain.getForTable.invalidate();
+        utils.domain.getById.invalidate({ id: res.id });
 
-      toast.success("Új domain hozzáadva sikeresen!");
-      router.push(`/domainek`);
-    } else {
-      console.error(res);
+        toast.success("Domain ellenőrzése elindítva!");
+        router.push(`/domainek/${res.id}`);
+      } else {
+        console.error(res);
+        toast.error(res.error || "Hiba történt a domain hozzáadása során!");
+      }
+    } catch (error) {
+      console.error(error);
       toast.error("Hiba történt a domain hozzáadása során!");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
@@ -85,6 +95,9 @@ export default function CreateDomainForm() {
               <Globe className="size-6" />
               Új domain hozzáadása
             </CardTitle>
+            <CardDescription>
+              A domain hozzáadása után DNS beállításokat kell majd elvégezned a domain ellenőrzéséhez.
+            </CardDescription>
           </CardHeader>
 
           <CardSeparator />
@@ -99,6 +112,9 @@ export default function CreateDomainForm() {
                   <FormControl>
                     <Input placeholder="pelda.hu" {...field} />
                   </FormControl>
+                  <FormDescription>
+                    Add meg a teljes domain nevet, amit használni szeretnél (pl: pelda.hu)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
