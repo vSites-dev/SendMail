@@ -22,6 +22,7 @@ import { CampaignFlow } from "@/components/campaigns/flow";
 import { Contact, Template } from "@prisma/client";
 import { useAtom } from "jotai";
 import { selectedCampaignContactsAtom } from "@/store/global";
+import { cn } from "@/lib/utils";
 
 export type Step = {
   id: number;
@@ -157,6 +158,14 @@ export function CampaignModal({
 
   if (!isMounted || !isOpen) return null;
 
+  function isButtonDisabled() {
+    if (currentStep === 1) {
+      return selectedContacts.length === 0;
+    }
+
+    return false;
+  }
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
@@ -213,7 +222,7 @@ export function CampaignModal({
               <Users className="h-4 w-4" />
               {selectedContacts.length} kontaktnak</div>
           </div>
-          <Button onClick={handleNext}>
+          <Button onClick={handleNext} disabled={isButtonDisabled()}>
             {currentStep === steps.length ? "Befejezés" : "Következő"}
             <ChevronRight className="h-4 w-4" />
           </Button>

@@ -270,6 +270,6 @@ export function CampaignContacts({ contacts }: { contacts: Contact[] }) {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 }
