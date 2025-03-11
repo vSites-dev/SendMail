@@ -13,3 +13,7 @@ export const selectedIntervalAtom = atom<7 | 30 | 90 | 180 | 365>(30);
 
 export const contactDataTableAtom = atom<Contact[]>([]);
 export const domainDataTableAtom = atom<Domain[]>([]);
+
+// Campaign creation atoms
+export const selectedCampaignContactsAtom = atom<string[]>([]);
+export const campaignContactsDataTableAtom = atom<Contact[]>([]);

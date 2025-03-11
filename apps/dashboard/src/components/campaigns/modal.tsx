@@ -20,6 +20,8 @@ import { CampaignSettings } from "@/components/campaigns/settings";
 import { CampaignOverview } from "@/components/campaigns/overview";
 import { CampaignFlow } from "@/components/campaigns/flow";
 import { Contact, Template } from "@prisma/client";
+import { useAtom } from "jotai";
+import { selectedCampaignContactsAtom } from "@/store/global";
 
 export type Step = {
   id: number;
@@ -44,6 +46,10 @@ export function CampaignModal({
   const [currentStep, setCurrentStep] = useState(1);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  const [selectedContacts, setSelectedContacts] = useAtom(
+    selectedCampaignContactsAtom
+  );
 
   const steps: Step[] = [
     {
@@ -201,8 +207,11 @@ export function CampaignModal({
             <ChevronLeft className="h-4 w-4" />
             Előző
           </Button>
-          <div className="text-sm text-muted-foreground">
-            A kampány X kontaktnak lesz elküldve
+
+          <div className="text-xs text-muted-foreground flex items-center gap-2">
+            A kampány el lesz küldve <div className="bg-violet-50 border-violet-500 border text-violet-500 font-semibold tracking-wide rounded-full px-2 py-1 flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              {selectedContacts.length} kontaktnak</div>
           </div>
           <Button onClick={handleNext}>
             {currentStep === steps.length ? "Befejezés" : "Következő"}

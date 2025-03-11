@@ -6,12 +6,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import {
-  FolderOpen,
   Home,
-  Mails,
-  PlusSquare,
   SendHorizonal,
-  Users2,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -21,7 +17,7 @@ import CreateCampaignButton from "@/components/campaigns/create-campaign";
 import { api, HydrateClient } from "@/trpc/server";
 
 export default async function CampaignsPage() {
-  const contacts = await api.contact.getAll();
+  const contacts = await api.contact.getAllAvailable();
   const templates = await api.template.getAll();
 
   return (

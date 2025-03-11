@@ -16,6 +16,15 @@ export const contactRouter = createTRPCRouter({
     });
   }),
 
+  getAllAvailable: authedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.contact.findMany({
+      where: {
+        projectId: ctx.session.activeProjectId,
+        status: "SUBSCRIBED",
+      },
+    });
+  }),
+
   getForTable: authedProcedure
     .input(
       z.object({
