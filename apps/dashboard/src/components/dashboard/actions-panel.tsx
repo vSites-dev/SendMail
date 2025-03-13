@@ -35,7 +35,7 @@ const ActionCard = ({ icon: Icon, title, href, gradient }) => (
 
 const ActionsPanel = () => {
   return (
-    <Card className="w-full p-6 relative bg-gradient-to-br from-indigo-50 to-purple-50">
+    <Card className="w-full p-6 relative bg-gradient-to-br from-violet-50 to-purple-50">
       <DotPattern
         width={6}
         height={6}
@@ -84,7 +84,7 @@ const ActionsPanel = () => {
               icon={ScrollText}
               title="Bejegyzések"
               href="/bejegyzesek"
-              gradient="bg-gradient-to-br from-indigo-500/80 to-purple-700/80"
+              gradient="bg-gradient-to-br from-violet-500/80 to-purple-700/80"
             />
           </motion.div>
         </div>

@@ -1,88 +1,80 @@
 "use client";
 
-import { useState } from "react";
-import { Mail, Linkedin, Plus, MoreVertical } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import { useState, useEffect } from "react";
+import { Mail, Plus, MoreVertical, Power, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Template } from "@prisma/client";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { useAtom } from "jotai";
+import { atom } from "jotai";
+import { toast } from "sonner";
+import { BlockModal, EmailBlock } from "./email-modal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
-type EmailTemplate = {
-  id: number;
-  type: "email" | "other";
-  title: string;
-  day: number;
-  enabled: boolean;
-  subject?: string;
-  content?: string;
-  connectionMessage?: string;
-};
+// Create a new atom for storing email blocks in the global store
+export const emailBlocksAtom = atom<EmailBlock[]>([]);
 
-export function CampaignFlow() {
-  const [templates, setTemplates] = useState<EmailTemplate[]>([
-    {
-      id: 1,
-      type: "email",
-      title: "Email",
-      day: 1,
-      enabled: true,
-      subject: "Reaching out",
-      content: "yup",
-    },
-    {
-      id: 2,
-      type: "email",
-      title: "Follow-up Email",
-      day: 4,
-      enabled: true,
-      subject: "Reaching out",
-      content: "yup12",
-    },
-    {
-      id: 3,
-      type: "email",
-      title: "Connect - Automatic",
-      day: 10,
-      enabled: true,
-      connectionMessage: "yup321,",
-    },
-  ]);
+export function CampaignFlow({ templates }: { templates: Template[] }) {
+  // Use the global atom for storing email blocks
+  const [emailBlocks, setEmailBlocks] = useAtom(emailBlocksAtom);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBlock, setEditingBlock] = useState<EmailBlock | undefined>(undefined);
 
-  const handleToggle = (id: number) => {
-    setTemplates(
-      templates.map((template) =>
-        template.id === id
-          ? { ...template, enabled: !template.enabled }
-          : template,
-      ),
-    );
+  useEffect(() => {
+    // Initialize with sample data if needed
+    if (emailBlocks.length === 0 && templates.length > 0) {
+      // Optional: Initialize with empty blocks or leave empty
+    }
+  }, [emailBlocks.length, templates.length]);
+
+  const handleAddEmail = () => {
+    if (templates.length === 0) {
+      toast.error("Először hozz létre egy sablont!");
+      return;
+    }
+
+    setEditingBlock(undefined);
+    setIsModalOpen(true);
   };
 
-  const addTemplate = () => {
-    const newId = Math.max(...templates.map((t) => t.id), 0) + 1;
-    setTemplates([
-      ...templates,
-      {
-        id: newId,
-        type: "email",
-        title: "Új Email",
-        day:
-          templates.length > 0 ? templates[templates.length - 1]!.day + 3 : 1,
-        enabled: true,
-      },
-    ]);
+  const handleEditEmail = (block: EmailBlock) => {
+    setEditingBlock(block);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteEmail = (blockId: string) => {
+    setEmailBlocks(emailBlocks.filter((block) => block.id !== blockId));
+    toast.success("Email törölve");
+  };
+
+  const handleSaveEmail = (data: EmailBlock) => {
+    // If we're editing an existing block, replace it
+    if (editingBlock) {
+      setEmailBlocks(
+        emailBlocks.map((block) => (block.id === data.id ? data : block))
+      );
+      toast.success("Email frissítve");
+    } else {
+      // Otherwise add a new block
+      setEmailBlocks([...emailBlocks, data]);
+      toast.success("Email hozzáadva");
+    }
+  };
+
+  const formatSchedule = (block: EmailBlock) => {
+    if (!block.scheduledDate) return "Nincs időzítve";
+
+    const dateString = format(block.scheduledDate, "yyyy. MMMM d.");
+    return `${dateString}, ${block.scheduledTime || "00:00:00"}`;
   };
 
   return (
     <div className="flex flex-col items-center">
-      <div className="mb-8 flex flex-col items-center">
-        <div className="rounded-full bg-primary/10 p-3">
-          <div className="rounded-full bg-primary/20 p-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <Plus className="h-4 w-4" />
-            </div>
-          </div>
-        </div>
-        <div className="mt-2 text-sm font-medium">Kampány kezdete</div>
+      <div className="bg-white text-sm border rounded-md px-3 py-2 flex items-center gap-3">
+        <Power className="size-4 text-indigo-600" strokeWidth={3} />
+        Kampány kezdete
       </div>
 
       <div className="relative flex flex-col items-center">
@@ -90,66 +82,71 @@ export function CampaignFlow() {
           <div className="w-0.5 bg-border" />
         </div>
 
-        {templates.map((template, index) => (
+        {emailBlocks.map((block) => (
           <div
-            key={template.id}
+            key={block.id}
             className="relative z-10 mb-8 w-full max-w-2xl"
           >
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center border-b p-4">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  {template.type === "email" ? (
-                    <Mail className="h-4 w-4" />
-                  ) : (
-                    <Mail className="h-4 w-4" />
-                  )}
+                  <Mail className="h-4 w-4" />
                 </div>
                 <div className="ml-3 flex-1">
                   <div className="font-medium">
-                    {template.id}. {template.title}
+                    {block.subject}
                   </div>
-                  {template.type === "email" && (
-                    <div className="text-xs text-muted-foreground">
-                      Threaded Follow-up
-                    </div>
-                  )}
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {formatSchedule(block)}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm text-muted-foreground">
-                      Nap {template.day}
-                    </span>
-                  </div>
-                  <Switch
-                    checked={template.enabled}
-                    onCheckedChange={() => handleToggle(template.id)}
-                  />
-                  <Button variant="ghost" size="icon">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditEmail(block)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Szerkesztés</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteEmail(block.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Törlés</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
               <div className="p-4">
-                {template.type === "email" ? (
-                  <>
-                    <div className="mb-2 flex items-center">
-                      <div className="text-sm font-medium">Tárgy:</div>
-                      <div className="ml-2 text-sm">{template.subject}</div>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {template.content}
-                    </div>
-                  </>
-                ) : template.type === "other" ? (
-                  <>
-                    <div className="mb-2 text-sm font-medium">
-                      Kapcsolódási üzenet:
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {template.connectionMessage}
-                    </div>
-                  </>
-                ) : null}
+                <div className="mb-2">
+                  <div className="text-sm font-medium">Tárgy:</div>
+                  <div className="text-sm">{block.subject}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Sablon:</div>
+                  <div className="text-sm text-muted-foreground">
+                    {block.template.name}
+                  </div>
+                </div>
               </div>
             </Card>
           </div>
@@ -158,12 +155,22 @@ export function CampaignFlow() {
         <Button
           variant="outline"
           className="relative z-10 mt-4 flex items-center gap-2"
-          onClick={addTemplate}
+          onClick={handleAddEmail}
         >
           <Plus className="h-4 w-4" />
-          Email hozzáadása
+          Új email hozzáadása
         </Button>
       </div>
+
+      {isModalOpen && (
+        <BlockModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          templates={templates}
+          onSave={handleSaveEmail}
+          initialData={editingBlock}
+        />
+      )}
     </div>
   );
 }

@@ -202,7 +202,7 @@ export function CampaignModal({
 
         <div className="flex-1 overflow-auto p-6">
           {currentStep === 1 && <CampaignContacts contacts={contacts} />}
-          {currentStep === 2 && <CampaignFlow />}
+          {currentStep === 2 && <CampaignFlow templates={templates} />}
           {currentStep === 3 && <CampaignSettings />}
           {currentStep === 4 && <CampaignOverview />}
         </div>

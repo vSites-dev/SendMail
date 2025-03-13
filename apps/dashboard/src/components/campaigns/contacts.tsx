@@ -91,7 +91,7 @@ export function CampaignContacts({ contacts }: { contacts: Contact[] }) {
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-muted-foreground">
+        <h2 className="text-xl font-semibold text-neutral-700">
           Kontaktok kiválasztása
         </h2>
       </div>

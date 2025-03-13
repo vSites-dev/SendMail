@@ -52,7 +52,7 @@ const VerifyEmail = ({ verificationUrl, name }: VerifyEmailProps) => (
               platformot.
             </Text>
             <Button
-              className="bg-indigo-500 rounded-md py-2 text-white text-base font-bold no-underline text-center mx-auto w-full mb-4"
+              className="bg-violet-500 rounded-md py-2 text-white text-base font-bold no-underline text-center mx-auto w-full mb-4"
               href={verificationUrl}
             >
               E-mail cím megerősítése

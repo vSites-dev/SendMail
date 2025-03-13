@@ -12,12 +12,11 @@ export function CampaignSteps({ steps }: { steps: Step[] }) {
             <div
               className={`
                 flex items-center gap-2 rounded-full px-4 py-1.5
-                ${
-                  step.isCompleted
-                    ? "bg-indigo-600 text-white"
-                    : step.isActive
-                      ? "border border-indigo-600 bg-indigo-50 text-indigo-600"
-                      : "border border-gray-200 bg-gray-50 text-gray-500"
+                ${step.isCompleted
+                  ? "bg-violet-600 text-white"
+                  : step.isActive
+                    ? "border border-violet-600 bg-violet-50 text-violet-600"
+                    : "border border-gray-200 bg-gray-50 text-gray-500"
                 }
               `}
             >
@@ -27,7 +26,7 @@ export function CampaignSteps({ steps }: { steps: Step[] }) {
                 <div
                   className={cn(
                     "flex h-5 w-5 items-center justify-center",
-                    step.isActive ? "text-indigo-600" : "text-gray-500",
+                    step.isActive ? "text-violet-600" : "text-gray-500",
                   )}
                 >
                   {step.Icon}
@@ -40,7 +39,7 @@ export function CampaignSteps({ steps }: { steps: Step[] }) {
               <div
                 className={`
                 h-0.5 w-12
-                ${step.isCompleted ? "bg-indigo-600" : "bg-gray-200"}
+                ${step.isCompleted ? "bg-violet-600" : "bg-gray-200"}
               `}
               />
             )}
