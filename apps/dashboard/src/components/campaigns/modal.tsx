@@ -3,10 +3,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
   Blocks,
+  Check,
   ChevronLeft,
   ChevronRight,
   Cog,
   Eye,
+  Loader2,
   Users,
   X,
 } from "lucide-react";
@@ -18,11 +20,14 @@ import { CampaignSteps } from "@/components/campaigns/steps";
 import { CampaignContacts } from "@/components/campaigns/contacts";
 import { CampaignSettings } from "@/components/campaigns/settings";
 import { CampaignOverview } from "@/components/campaigns/overview";
-import { CampaignFlow } from "@/components/campaigns/flow";
+import { CampaignFlow, emailBlocksAtom } from "@/components/campaigns/flow";
 import { Contact, Template } from "@prisma/client";
 import { useAtom } from "jotai";
 import { selectedCampaignContactsAtom } from "@/store/global";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { api } from "@/trpc/react";
+
 
 export type Step = {
   id: number;
@@ -51,6 +56,7 @@ export function CampaignModal({
   const [selectedContacts, setSelectedContacts] = useAtom(
     selectedCampaignContactsAtom
   );
+  const [emailBlocks, setEmailBlocks] = useAtom(emailBlocksAtom);
 
   const steps: Step[] = [
     {
@@ -148,8 +154,52 @@ export function CampaignModal({
     }
   }, [isOpen]);
 
-  const handleNext = () => {
-    if (currentStep < steps.length) setCurrentStep(currentStep + 1);
+  const { mutateAsync: createCampaign, isPending } = api.campaign.createWithTask.useMutation();
+
+  const handleNext = async () => {
+    if (currentStep < steps.length) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      try {
+        console.log("Campaign submitted for processing!");
+
+        const campaignName = `Campaign ${new Date().toLocaleDateString()}`;
+        const firstEmailBlock = emailBlocks[0];
+
+        if (!firstEmailBlock) {
+          toast.error('You need at least one email in your campaign');
+          return;
+        }
+
+        const res = await createCampaign({
+          name: campaignName,
+          subject: firstEmailBlock.subject,
+          body: firstEmailBlock.template.body,
+          contactIds: selectedContacts,
+          emailBlocks: emailBlocks.map(block => ({
+            subject: block.subject,
+            templateId: block.template.id,
+            scheduledDate: block.scheduledDate,
+            scheduledTime: block.scheduledTime
+          }))
+        });
+
+        if (res.success) {
+          toast.success("A kampány sikeresen létrehozva!");
+        } else {
+          toast.error(res.error);
+
+          setCurrentStep(1);
+          setSelectedContacts([]);
+          setEmailBlocks([]);
+        }
+
+        onClose();
+      } catch (error) {
+        console.error('Error creating campaign:', error);
+        toast.error('Failed to create campaign. Please try again.');
+      }
+    }
   };
 
   const handlePrevious = () => {
@@ -161,6 +211,11 @@ export function CampaignModal({
   function isButtonDisabled() {
     if (currentStep === 1) {
       return selectedContacts.length === 0;
+    }
+
+    if (currentStep === 2) {
+      return emailBlocks.length === 0;
+
     }
 
     return false;
@@ -222,9 +277,15 @@ export function CampaignModal({
               <Users className="h-4 w-4" />
               {selectedContacts.length} kontaktnak</div>
           </div>
-          <Button onClick={handleNext} disabled={isButtonDisabled()}>
+          <Button onClick={handleNext} disabled={isButtonDisabled() || isPending}>
             {currentStep === steps.length ? "Befejezés" : "Következő"}
-            <ChevronRight className="h-4 w-4" />
+            {isPending ? <Loader2 className="h-4 w-4" />
+              : (
+                <>
+                  {currentStep === steps.length && <Check className="h-4 w-4" />}
+                  {currentStep < steps.length && <ChevronRight className="h-4 w-4" />}
+                </>
+              )}
           </Button>
         </div>
       </Card>

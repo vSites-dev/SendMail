@@ -24,7 +24,7 @@ export const Placeholder = (props: PlaceholderProps) => {
         ...nodeProps,
         className: cn(
           enabled &&
-            "before:absolute before:cursor-text before:opacity-30 before:content-[attr(placeholder)]",
+          "before:absolute before:cursor-text before:opacity-30 before:content-[attr(placeholder)]",
         ),
         placeholder,
       },
@@ -49,6 +49,6 @@ export const withPlaceholders = (components: any) =>
     {
       key: HEADING_KEYS.h1,
       hideOnBlur: false,
-      placeholder: "Untitled",
+      placeholder: "Címsor...",
     },
   ]);

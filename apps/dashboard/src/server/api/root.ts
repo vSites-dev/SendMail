@@ -3,6 +3,7 @@ import { contactRouter } from "./routers/contacts";
 import { projectRouter } from "./routers/projects";
 import { domainRouter } from "./routers/domains";
 import { templateRouter } from "./routers/templates";
+import { campaignRouter } from "./routers/campaigns";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   project: projectRouter,
   domain: domainRouter,
   template: templateRouter,
+  campaign: campaignRouter,
 });
 
 // export type definition of API

@@ -156,8 +156,8 @@ export function BlockModal({
                   >
                     <TemplateCard
                       title={template.name}
-                      description={`Email sablon`}
-                      Icon={Mail}
+                      description={template.updatedAt.toLocaleString()}
+                      selected={selectedTemplate?.id === template.id}
                     />
                   </Label>
                 </div>
@@ -183,7 +183,7 @@ export function BlockModal({
                     {date ? (
                       format(date, "PPP")
                     ) : (
-                      <span>Pick a date</span>
+                      <span>Válassz ki egy időpontot</span>
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
@@ -194,7 +194,7 @@ export function BlockModal({
                 <div className="border-t p-3">
                   <div className="flex items-center gap-3">
                     <Label className="text-xs">
-                      Enter time
+                      Időpont:
                     </Label>
                     <div className="relative grow">
                       <Input
