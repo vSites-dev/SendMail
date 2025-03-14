@@ -155,7 +155,7 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
                             <div
                               className={cn(
                                 "w-2 h-2 rounded-full mr-2",
-                                contactStatuses[value].color,
+                                contactStatuses[value].bgColor,
                               )}
                             ></div>
                             {contactStatuses[value].label}

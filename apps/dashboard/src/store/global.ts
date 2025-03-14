@@ -1,7 +1,7 @@
 "use client";
 
 import type { Organization } from "@/lib/auth/auth";
-import { Contact, Domain, Project } from "@prisma/client";
+import { Contact, Domain, Email, Project } from "@prisma/client";
 import { atom, createStore } from "jotai";
 
 export const globalStore = createStore();
@@ -13,6 +13,7 @@ export const selectedIntervalAtom = atom<7 | 30 | 90 | 180 | 365>(30);
 
 export const contactDataTableAtom = atom<Contact[]>([]);
 export const domainDataTableAtom = atom<Domain[]>([]);
+export const emailDataTableAtom = atom<Email[]>([]);
 
 // Campaign creation atoms
 export const selectedCampaignContactsAtom = atom<string[]>([]);
