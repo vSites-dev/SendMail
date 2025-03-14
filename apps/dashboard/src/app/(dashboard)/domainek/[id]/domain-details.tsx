@@ -53,10 +53,44 @@ export function DomainDetails({ domain }: { domain: Domain }) {
 
   useEffect(() => {
     if (records) {
-      setDnsRecords(records);
+      // Transform domain data into DNS records format
+      const dnsRecordsList: DnsRecord[] = [
+        {
+          type: 'TXT',
+          name: domain.name,
+          value: records.verificationToken || '',
+          purpose: 'Domain verification'
+        },
+        {
+          type: 'SPF',
+          name: domain.name,
+          value: records.spfRecord || '',
+          purpose: 'Email authentication'
+        },
+        {
+          type: 'DMARC',
+          name: `_dmarc.${domain.name}`,
+          value: records.dmarcRecord || '',
+          purpose: 'Email authentication policy'
+        },
+        {
+          type: 'MX',
+          name: records.mailFromSubdomain || '',
+          value: records.mailFromMxRecord || '',
+          purpose: 'Mail server configuration'
+        },
+        ...records.dkimTokens.map((token, index) => ({
+          type: 'DKIM',
+          name: `${index}._domainkey.${domain.name}`,
+          value: token,
+          purpose: 'Email signing key'
+        }))
+      ];
+      
+      setDnsRecords(dnsRecordsList);
       setIsLoadingRecords(false);
     }
-  }, [records]);
+  }, [records, domain.name]);
 
   useEffect(() => {
     if (dnsRecordsError) {

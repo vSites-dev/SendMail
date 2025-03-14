@@ -9,7 +9,6 @@
 /coverage
 
 # database
-prisma
 /prisma/db.sqlite
 /prisma/db.sqlite-journal
 db.sqlite

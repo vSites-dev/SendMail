@@ -7,7 +7,7 @@ import { DomainStatus } from "@prisma/client";
 
 import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient, Domain } from "@prisma/client";
 
 // Extract the domain verification logic into a reusable helper function
 async function verifyDomainHelper(
@@ -148,6 +148,7 @@ export const domainRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
+
         const domain = await ctx.db.domain.findUnique({
           where: {
             id: input.id,
@@ -158,17 +159,7 @@ export const domainRouter = createTRPCRouter({
           throw new Error("Domain not found");
         }
 
-        // Call the backend API to get DNS records using fetch
-        const response = await fetch(
-          `${process.env.API_URL}/api/domains/dns-records/${input.id}`,
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error fetching DNS records: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data.data;
+        return domain;
       } catch (error) {
         console.error("Error fetching DNS records:", error);
         throw new Error("Failed to fetch DNS records");
@@ -373,5 +364,3 @@ export const domainRouter = createTRPCRouter({
 });
 
 export type DomainRouterOutputs = inferRouterOutputs<typeof domainRouter>;
-
-export type Domain = DomainRouterOutputs["getById"];
