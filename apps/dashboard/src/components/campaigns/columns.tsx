@@ -20,12 +20,10 @@ export const columns: ColumnDef<Contact>[] = [
             (table.getIsSomePageRowsSelected() && "indeterminate")
           }
           onCheckedChange={(value) => {
-            // Get IDs of all contacts on the current page
             const pageRowIds = table.getRowModel().rows.map(
               (row) => row.original.id
             );
 
-            // If checking the box, add all page row IDs that aren't already selected
             if (value) {
               const newSelectedIds = [
                 ...selectedContacts,
@@ -33,14 +31,12 @@ export const columns: ColumnDef<Contact>[] = [
               ];
               setSelectedContacts(newSelectedIds);
             } else {
-              // If unchecking, remove all page row IDs from selection
               const newSelectedIds = selectedContacts.filter(
                 (id) => !pageRowIds.includes(id)
               );
               setSelectedContacts(newSelectedIds);
             }
 
-            // Update the table selection state
             table.toggleAllPageRowsSelected(!!value);
           }}
           aria-label="Összes kiválasztása"

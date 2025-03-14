@@ -6,11 +6,12 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { api, HydrateClient } from "@/trpc/server";
-import { Home, Mails, PlusSquare, Users2 } from "lucide-react";
+import { Home, Mails, PlusSquare } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { EmailsTable } from "./data-table";
 
 export default async function EmailsPage() {
   return (
@@ -27,7 +28,7 @@ export default async function EmailsPage() {
         </BreadcrumbList>
       </DashboardHeader>
 
-      <main className="max-w-screen-md w-full mx-auto h-full py-6 px-4">
+      <main className="max-w-screen-xl w-full mx-auto h-full py-6 px-4">
         <div className="flex gap-3 items-center">
           <div
             className={cn(
@@ -64,7 +65,7 @@ export default async function EmailsPage() {
 
         <Separator className="my-6" />
 
-        <div className="h-6"></div>
+        <EmailsTable />
       </main>
     </HydrateClient>
   );

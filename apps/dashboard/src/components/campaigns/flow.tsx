@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, Plus, MoreVertical, Power, Edit, Trash2 } from "lucide-react";
+import { Mail, Plus, MoreVertical, Power, Edit, Trash2, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Template } from "@prisma/client";
@@ -72,32 +72,34 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="bg-white text-sm border rounded-md px-3 py-2 flex items-center gap-3">
-        <Power className="size-4 text-indigo-600" strokeWidth={3} />
-        Kampány kezdete
-      </div>
-
       <div className="relative flex flex-col items-center">
         <div className="absolute inset-0 flex justify-center">
           <div className="w-0.5 bg-border" />
         </div>
 
+        <div className="bg-white text-sm border rounded-md px-3 py-2 flex items-center gap-3 relative z-10 mb-8">
+          <Wand2 className="size-4 text-violet-600" strokeWidth={3} />
+          Kampány kezdete
+        </div>
+
         {emailBlocks.map((block) => (
           <div
             key={block.id}
-            className="relative z-10 mb-8 w-full max-w-2xl"
+            className="relative z-10 mb-8 w-full"
           >
             <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
-              <div className="flex items-center border-b p-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Mail className="h-4 w-4" />
-                </div>
-                <div className="ml-3 flex-1">
-                  <div className="font-medium">
-                    {block.subject}
+              <div className="flex items-center border-b p-4 gap-6">
+                <div className="flex items-center">
+                  <div className="flex h-8 w-8 items-center justify-center bg-white border rounded-md text-primary">
+                    <Mail className="h-4 w-4" />
                   </div>
-                  <div className="text-xs text-muted-foreground mt-0.5">
-                    {formatSchedule(block)}
+                  <div className="ml-3 flex-1">
+                    <div className="font-medium">
+                      {block.subject}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {formatSchedule(block)}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
