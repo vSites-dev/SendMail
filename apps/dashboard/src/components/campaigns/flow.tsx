@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Mail, Plus, MoreVertical, Power, Edit, Trash2, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,6 +20,19 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBlock, setEditingBlock] = useState<EmailBlock | undefined>(undefined);
 
+  useEffect(() => {
+    if (emailBlocks.length === 0) {
+      setEmailBlocks([
+        {
+          id: `email-${Date.now()}`,
+          template: templates[0]!,
+          subject: "Példa tárgy",
+          scheduledDate: new Date()
+        }
+      ])
+    }
+  }, [emailBlocks])
+
   const handleAddEmail = () => {
     if (templates.length === 0) {
       toast.error("Először hozz létre egy sablont!");
@@ -37,7 +50,7 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
 
   const handleDeleteEmail = (blockId: string) => {
     setEmailBlocks(emailBlocks.filter((block) => block.id !== blockId));
-    toast.success("Email törölve");
+    toast.success(`Email blokk törölve`);
   };
 
   const handleSaveEmail = (data: EmailBlock) => {
@@ -45,10 +58,10 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
       setEmailBlocks(
         emailBlocks.map((block) => (block.id === data.id ? data : block))
       );
-      toast.success("Email frissítve");
+      toast.success("Email blokk frissítve");
     } else {
       setEmailBlocks([...emailBlocks, data]);
-      toast.success("Email hozzáadva");
+      toast.success("Email blokk létrehozva");
     }
   };
 
@@ -61,7 +74,7 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative flex flex-col items-center">
+      <div className="relative flex flex-col items-center w-full">
         <div className="absolute inset-0 flex justify-center">
           <div className="w-[1px] bg-border" />
         </div>
@@ -74,19 +87,19 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
         {emailBlocks.map((block) => (
           <div
             key={block.id}
-            className="relative z-10 mb-8 w-full"
+            className="relative z-10 mb-8 w-max"
           >
-            <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
-              <div className="flex items-center border-b p-4 gap-6">
+            <Card className="overflow-hidden rounded-sm">
+              <div className="flex items-center border-b p-4 gap-14">
                 <div className="flex items-center">
-                  <div className="flex h-8 w-8 items-center justify-center text-violet-600 border rounded-md text-primary">
+                  <div className="flex h-8 w-8 items-center justify-center text-violet-600 border rounded-full text-primary">
                     <Mail className="h-4 w-4" />
                   </div>
                   <div className="ml-3 flex-1">
                     <div className="font-medium">
                       {block.subject}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
+                    <div className="text-xs text-muted-foreground">
                       {formatSchedule(block)}
                     </div>
                   </div>
@@ -99,6 +112,7 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEditEmail(block)}
+                          className="hover:text-violet-600"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -116,8 +130,9 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDeleteEmail(block.id)}
+                          className="hover:text-destructive"
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -128,15 +143,26 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
                 </div>
               </div>
               <div className="p-4">
-                <div className="mb-2">
-                  <div className="text-sm font-medium">Tárgy:</div>
-                  <div className="text-sm">{block.subject}</div>
+                <div className="text-sm mb-1">
+                  <span className="text-muted-foreground mr-2">Tárgy:</span>
+                  <span className="text-sm font-medium">{block.subject}</span>
                 </div>
-                <div>
-                  <div className="text-sm font-medium">Sablon:</div>
-                  <div className="text-sm text-muted-foreground">
-                    {block.template.name}
-                  </div>
+                <div className="mb-2 pb-2 text-sm border-b">
+                  <span className="text-muted-foreground mr-2">Sablon:</span>
+                  <span className="text-sm font-medium">{block.template.name}</span>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {block.template.body
+                    .replace(/<[^>]*>|[#*_`]/g, '')
+                    .split('<br>')
+                    .map((line, index) => (
+                      <React.Fragment key={index}>
+                        {line}
+                        {index < block.template.body.split('<br>').length - 1 && <br />}
+                      </React.Fragment>
+                    ))
+                    .slice(0, 3)}
+                  {block.template.body.split('<br>').length > 3 && <div>...</div>}
                 </div>
               </div>
             </Card>
@@ -145,7 +171,7 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
 
         <Button
           variant="outline"
-          className="relative z-10 mt-4 flex items-center gap-2 text-muted-foreground"
+          className="relative z-10 mt-4 flex items-center gap-2"
           onClick={handleAddEmail}
         >
           <Plus className="h-4 w-4" />
