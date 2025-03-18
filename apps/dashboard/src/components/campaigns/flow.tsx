@@ -13,21 +13,12 @@ import { toast } from "sonner";
 import { BlockModal, EmailBlock } from "./email-modal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
-// Create a new atom for storing email blocks in the global store
 export const emailBlocksAtom = atom<EmailBlock[]>([]);
 
 export function CampaignFlow({ templates }: { templates: Template[] }) {
-  // Use the global atom for storing email blocks
   const [emailBlocks, setEmailBlocks] = useAtom(emailBlocksAtom);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBlock, setEditingBlock] = useState<EmailBlock | undefined>(undefined);
-
-  useEffect(() => {
-    // Initialize with sample data if needed
-    if (emailBlocks.length === 0 && templates.length > 0) {
-      // Optional: Initialize with empty blocks or leave empty
-    }
-  }, [emailBlocks.length, templates.length]);
 
   const handleAddEmail = () => {
     if (templates.length === 0) {
@@ -50,14 +41,12 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
   };
 
   const handleSaveEmail = (data: EmailBlock) => {
-    // If we're editing an existing block, replace it
     if (editingBlock) {
       setEmailBlocks(
         emailBlocks.map((block) => (block.id === data.id ? data : block))
       );
       toast.success("Email frissítve");
     } else {
-      // Otherwise add a new block
       setEmailBlocks([...emailBlocks, data]);
       toast.success("Email hozzáadva");
     }
@@ -67,18 +56,18 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
     if (!block.scheduledDate) return "Nincs időzítve";
 
     const dateString = format(block.scheduledDate, "yyyy. MMMM d.");
-    return `${dateString}, ${block.scheduledTime || "00:00:00"}`;
+    return `${dateString}, ${block.scheduledDate.toTimeString().slice(0, 5)}`;
   };
 
   return (
     <div className="flex flex-col items-center">
       <div className="relative flex flex-col items-center">
         <div className="absolute inset-0 flex justify-center">
-          <div className="w-0.5 bg-border" />
+          <div className="w-[1px] bg-border" />
         </div>
 
-        <div className="bg-white text-sm border rounded-md px-3 py-2 flex items-center gap-3 relative z-10 mb-8">
-          <Wand2 className="size-4 text-violet-600" strokeWidth={3} />
+        <div className="bg-white text-sm border font-medium rounded-md px-3 py-2 flex items-center gap-3 relative z-10 mb-8">
+          <Wand2 className="size-5 text-violet-600" />
           Kampány kezdete
         </div>
 
@@ -90,7 +79,7 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
             <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center border-b p-4 gap-6">
                 <div className="flex items-center">
-                  <div className="flex h-8 w-8 items-center justify-center bg-white border rounded-md text-primary">
+                  <div className="flex h-8 w-8 items-center justify-center text-violet-600 border rounded-md text-primary">
                     <Mail className="h-4 w-4" />
                   </div>
                   <div className="ml-3 flex-1">
@@ -156,7 +145,7 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
 
         <Button
           variant="outline"
-          className="relative z-10 mt-4 flex items-center gap-2"
+          className="relative z-10 mt-4 flex items-center gap-2 text-muted-foreground"
           onClick={handleAddEmail}
         >
           <Plus className="h-4 w-4" />

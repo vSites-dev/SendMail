@@ -206,9 +206,9 @@ export function CampaignContacts({ contacts }: { contacts: Contact[] }) {
                   <TableRow>
                     <TableCell
                       colSpan={columns.length}
-                      className="h-24 text-center"
+                      className="h-24 text-center text-muted-foreground"
                     >
-                      Nincsenek találatok
+                      Nincsen találat...
                     </TableCell>
                   </TableRow>
                 )}

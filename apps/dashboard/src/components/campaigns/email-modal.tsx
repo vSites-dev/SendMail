@@ -11,7 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import DotPattern from "../ui/dot-pattern";
@@ -40,29 +44,25 @@ export function BlockModal({
   const [isMounted, setIsMounted] = useState(false);
   const [subject, setSubject] = useState(initialData?.subject || "");
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
-    initialData?.template || null
+    initialData?.template || null,
   );
   const [date, setDate] = useState<Date | undefined>(
-    initialData?.scheduledDate || undefined
+    initialData?.scheduledDate || undefined,
   );
-  const [time, setTime] = useState(initialData?.scheduledTime || "12:00:00");
 
-  // Generate a unique ID for new email blocks
   const [id] = useState(initialData?.id || `email-${Date.now()}`);
 
   useEffect(() => {
     setIsMounted(true);
 
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
+    const handleKeys = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
     };
 
-    window.addEventListener("keydown", handleEsc);
+    window.addEventListener("keydown", handleKeys);
 
     return () => {
-      window.removeEventListener("keydown", handleEsc);
+      window.removeEventListener("keydown", handleKeys);
     };
   }, [onClose]);
 
@@ -74,7 +74,6 @@ export function BlockModal({
       template: selectedTemplate,
       subject,
       scheduledDate: date,
-      scheduledTime: time,
     });
 
     onClose();
@@ -104,18 +103,13 @@ export function BlockModal({
               {initialData ? "Email szerkesztése" : "Új email hozzáadása"}
             </h2>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-          >
+          <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
             <span className="sr-only">Bezárás</span>
           </Button>
         </div>
 
         <div className="flex-1 overflow-auto p-6 space-y-6">
-          {/* Email Subject */}
           <div className="space-y-2">
             <Label htmlFor="subject" className="text-base font-medium">
               Email tárgya
@@ -129,11 +123,8 @@ export function BlockModal({
             />
           </div>
 
-          {/* Template Selection */}
           <div className="space-y-4">
-            <Label className="text-base font-medium">
-              Válasszon sablont
-            </Label>
+            <Label className="text-base font-medium">Válasszon sablont</Label>
 
             <RadioGroup
               value={selectedTemplate?.id}
@@ -152,7 +143,10 @@ export function BlockModal({
                   />
                   <Label
                     htmlFor={`template-${template.id}`}
-                    className="peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-primary peer-data-[state=checked]:ring-offset-2 rounded-lg block cursor-pointer"
+                    className={cn(
+                      "block cursor-pointer rounded-lg",
+                      "peer-focus:ring-[2px] peer-focus:ring-offset-2 peer-focus:ring-black/50",
+                    )}
                   >
                     <TemplateCard
                       title={template.name}
@@ -165,11 +159,8 @@ export function BlockModal({
             </RadioGroup>
           </div>
 
-          {/* Schedule Date/Time */}
           <div className="space-y-2">
-            <Label className="text-base font-medium">
-              Időzítés
-            </Label>
+            <Label className="text-base font-medium">Időzítés</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <div>
@@ -177,11 +168,11 @@ export function BlockModal({
                     variant="outline"
                     className={cn(
                       "w-[240px] pl-3 text-left font-normal",
-                      !date && "text-muted-foreground"
+                      !date && "text-muted-foreground",
                     )}
                   >
                     {date ? (
-                      format(date, "PPP")
+                      date.toLocaleString()
                     ) : (
                       <span>Válassz ki egy időpontot</span>
                     )}
@@ -189,19 +180,36 @@ export function BlockModal({
                   </Button>
                 </div>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 rounded-md border" align="start">
-                <Calendar mode="single" className="p-2" selected={date} onSelect={setDate} />
+              <PopoverContent
+                className="w-auto p-0 rounded-md border"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  className="p-2"
+                  selected={date}
+                  onSelect={setDate}
+                />
                 <div className="border-t p-3">
                   <div className="flex items-center gap-3">
-                    <Label className="text-xs">
-                      Időpont:
-                    </Label>
+                    <Label className="text-xs">Időpont:</Label>
                     <div className="relative grow">
                       <Input
                         type="time"
                         step="1"
-                        value={time}
-                        onChange={(e) => setTime(e.target.value)}
+                        value={date && `${date?.getHours()}:${date?.getMinutes()}:${date?.getSeconds()}`}
+                        onChange={(e) =>
+                          date ?
+                            setDate(
+                              new Date(
+                                date.setHours(
+                                  Number(e.target.value.split(":")[0] ?? 12),
+                                  Number(e.target.value.split(":")[1] ?? 0),
+                                  Number(e.target.value.split(":")[2] ?? 0),
+                                ),
+                              ),
+                            ) : setDate(new Date())
+                        }
                         className="peer appearance-none ps-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                       />
                       <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
@@ -216,21 +224,15 @@ export function BlockModal({
         </div>
 
         <div className="flex items-center justify-end border-t p-4 gap-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-          >
+          <Button variant="outline" onClick={onClose}>
             Mégsem
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={!isValid}
-          >
+          <Button onClick={handleSave} disabled={!isValid}>
             {initialData ? "Mentés" : "Hozzáadás"}
           </Button>
         </div>
       </Card>
     </div>,
-    document.body
+    document.body,
   );
 }

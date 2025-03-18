@@ -27,6 +27,7 @@ import { selectedCampaignContactsAtom } from "@/store/global";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
+import { Badge } from "../ui/badge";
 
 
 export type Step = {
@@ -167,7 +168,7 @@ export function CampaignModal({
         const firstEmailBlock = emailBlocks[0];
 
         if (!firstEmailBlock) {
-          toast.error('You need at least one email in your campaign');
+          toast.error('Legalább egy email blokkra van szükgség a kampány létrehozásához');
           return;
         }
 
@@ -215,7 +216,6 @@ export function CampaignModal({
 
     if (currentStep === 2) {
       return emailBlocks.length === 0;
-
     }
 
     return false;
@@ -237,15 +237,17 @@ export function CampaignModal({
         aria-labelledby="modal-title"
       >
         <div className="flex items-center border-b p-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-4"
-            onClick={onClose}
-          >
-            <X className="h-5 w-5" />
-            <span className="sr-only">Bezárás</span>
-          </Button>
+          <div className="flex items-center gap-2 absolute left-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+            >
+              <X className="h-5 w-5" />
+              <span className="sr-only">Bezárás</span>
+            </Button>
+            <Badge className="text-muted-foreground" variant="outline">ESC</Badge>
+          </div>
           <div className="mx-auto flex items-center">
             <h2 id="modal-title" className="text-xl font-semibold">
               Kampány létrehozása

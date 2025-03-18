@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import {
   Home,
+  Megaphone,
   SendHorizonal,
 } from "lucide-react";
 import Link from "next/link";
@@ -41,7 +42,7 @@ export default async function CampaignsPage() {
               "flex relative p-[5px] items-center justify-center rounded-md bg-neutral-50 text-2xl font-semibold border text-violet-600",
             )}
           >
-            <SendHorizonal className="size-5" />
+            <Megaphone className="size-5" />
           </div>
 
           <h1 className="text-3xl font-semibold text-neutral-700">Kampányok</h1>
