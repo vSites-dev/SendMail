@@ -18,15 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import DotPattern from "../ui/dot-pattern";
-
-export type EmailBlock = {
-  id: string;
-  template: Template;
-  subject: string;
-  scheduledDate?: Date;
-  scheduledTime?: string;
-};
+import { EmailBlock } from "@/types";
 
 export function BlockModal({
   isOpen,

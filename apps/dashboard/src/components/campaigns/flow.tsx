@@ -6,17 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Template } from "@prisma/client";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { useAtom } from "jotai";
-import { atom } from "jotai";
 import { toast } from "sonner";
-import { BlockModal, EmailBlock } from "./email-modal";
+import { BlockModal } from "./email-modal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
-
-export const emailBlocksAtom = atom<EmailBlock[]>([]);
+import { useAtom } from "jotai";
+import { campaignEmailBlocksAtom } from "@/store/global";
+import { EmailBlock } from "@/types";
 
 export function CampaignFlow({ templates }: { templates: Template[] }) {
-  const [emailBlocks, setEmailBlocks] = useAtom(emailBlocksAtom);
+  const [emailBlocks, setEmailBlocks] = useAtom(campaignEmailBlocksAtom);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBlock, setEditingBlock] = useState<EmailBlock | undefined>(undefined);
 

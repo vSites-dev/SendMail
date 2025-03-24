@@ -20,11 +20,10 @@ import { CampaignSteps } from "@/components/campaigns/steps";
 import { CampaignContacts } from "@/components/campaigns/contacts";
 import { CampaignSettings } from "@/components/campaigns/settings";
 import { CampaignOverview } from "@/components/campaigns/overview";
-import { CampaignFlow, emailBlocksAtom } from "@/components/campaigns/flow";
+import { CampaignFlow } from "@/components/campaigns/flow";
 import { Contact, Template } from "@prisma/client";
 import { useAtom } from "jotai";
-import { selectedCampaignContactsAtom } from "@/store/global";
-import { cn } from "@/lib/utils";
+import { campaignEmailBlocksAtom, campaignSettingsAtom, selectedCampaignContactsAtom } from "@/store/global";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { Badge } from "../ui/badge";
@@ -57,7 +56,8 @@ export function CampaignModal({
   const [selectedContacts, setSelectedContacts] = useAtom(
     selectedCampaignContactsAtom
   );
-  const [emailBlocks, setEmailBlocks] = useAtom(emailBlocksAtom);
+  const [emailBlocks, setEmailBlocks] = useAtom(campaignEmailBlocksAtom);
+  const [settings] = useAtom(campaignSettingsAtom);
 
   const steps: Step[] = [
     {
@@ -216,6 +216,11 @@ export function CampaignModal({
 
     if (currentStep === 2) {
       return emailBlocks.length === 0;
+    }
+
+    if (currentStep === 3) {
+      // Check if settings exist and name is at least 3 characters long
+      return !settings || !settings.name || settings.name.length < 3;
     }
 
     return false;
