@@ -134,13 +134,11 @@ model Project {
 }
 
 model Campaign {
-  id          String         @id @default(uuid())
-  name        String
-  subject     String
-  body        String
-  status      CampaignStatus @default(DRAFT)
-  scheduledAt DateTime?
-  sentAt      DateTime?
+  id     String         @id @default(uuid())
+  name   String
+  status CampaignStatus @default(DRAFT)
+
+  trackLinks Boolean @default(false)
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -243,30 +241,30 @@ model Click {
 }
 
 model Domain {
-  id          String       @id @default(uuid())
-  name        String       @unique
-  status      DomainStatus @default(PENDING)
-  dkimTokens  String[]
-  spfRecord   String?
-  dmarcRecord String?
+  id                String       @id @default(uuid())
+  name              String       @unique
+  status            DomainStatus @default(PENDING)
+  dkimTokens        String[]
+  spfRecord         String?
+  dmarcRecord       String?
   mailFromSubdomain String?
-  mailFromMxRecord String?
+  mailFromMxRecord  String?
   verificationToken String?
-  projectId   String
-  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  projectId         String
+  project           Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   @@index([projectId])
   @@map("domains")
 }
 
 model Template {
-  id   String @id @default(uuid())
-  name String
-  body String
+  id        String   @id @default(uuid())
+  name      String
+  body      String
   projectId String
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -284,9 +282,7 @@ enum ContactStatus {
 enum CampaignStatus {
   DRAFT
   SCHEDULED
-  SENDING
   COMPLETED
-  FAILED
 }
 
 enum EmailStatus {
