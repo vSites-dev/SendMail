@@ -92,9 +92,6 @@ export const campaignRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-        subject: z.string(),
-        body: z.string(),
-        scheduledAt: z.date().optional(),
         contactIds: z.array(z.string()).optional(),
       }),
     )
@@ -103,9 +100,7 @@ export const campaignRouter = createTRPCRouter({
         const newCampaign = await ctx.db.campaign.create({
           data: {
             name: input.name,
-            subject: input.subject,
-            body: input.body,
-            scheduledAt: input.scheduledAt,
+            status: CampaignStatus.SCHEDULED,
             projectId: ctx.session.activeProjectId,
             contacts: input.contactIds
               ? {
@@ -128,21 +123,18 @@ export const campaignRouter = createTRPCRouter({
         };
       }
     }),
-    
+
   createWithTask: authedProcedure
     .input(
       z.object({
         name: z.string(),
-        subject: z.string(),
-        body: z.string(),
         contactIds: z.array(z.string()),
         emailBlocks: z.array(
           z.object({
-            subject: z.string(),
             templateId: z.string(),
             scheduledDate: z.date().optional(),
             scheduledTime: z.string().optional(),
-          })
+          }),
         ),
       }),
     )
@@ -152,8 +144,6 @@ export const campaignRouter = createTRPCRouter({
         const campaign = await ctx.db.campaign.create({
           data: {
             name: input.name,
-            subject: input.subject,
-            body: input.body,
             status: CampaignStatus.SCHEDULED,
             projectId: ctx.session.activeProjectId,
             // Connect contacts to the campaign
@@ -167,17 +157,17 @@ export const campaignRouter = createTRPCRouter({
         // Using the first email block's scheduled date/time or current time if not provided
         const firstBlock = input.emailBlocks[0];
         let scheduledAt = new Date();
-        
+
         if (firstBlock?.scheduledDate) {
           scheduledAt = new Date(firstBlock.scheduledDate);
-          
+
           // If time is provided, parse and set it
           if (firstBlock.scheduledTime) {
-            const timeParts = firstBlock.scheduledTime.split(':').map(Number);
+            const timeParts = firstBlock.scheduledTime.split(":").map(Number);
             const hours = timeParts[0] || 0;
             const minutes = timeParts[1] || 0;
             const seconds = timeParts[2] || 0;
-            
+
             scheduledAt.setHours(hours, minutes, seconds);
           }
         }
@@ -192,10 +182,10 @@ export const campaignRouter = createTRPCRouter({
           },
         });
 
-        return { 
+        return {
           success: true,
           campaign,
-          task
+          task,
         };
       } catch (error) {
         console.error("Error creating campaign with task:", error);

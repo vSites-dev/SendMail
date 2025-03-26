@@ -68,6 +68,10 @@ export const EmailsTable = () => {
   const { data, isLoading } = api.email.getForTable.useQuery({
     limit: pageSize,
     offset: (currentPage - 1) * pageSize,
+  }, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
   useEffect(() => {

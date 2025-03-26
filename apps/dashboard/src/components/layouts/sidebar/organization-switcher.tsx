@@ -50,6 +50,10 @@ export function OrganizationSwitcher({
 
   const { data: newProject } = api.project.getById.useQuery({
     organizationId: activeOrganization?.id ?? "",
+  }, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
   async function switchOrganization(organizationId: string) {
@@ -85,7 +89,7 @@ export function OrganizationSwitcher({
                 <img
                   className="size-8"
                   src={activeOrganization.logo ?? "/brand/icon.jpg"}
-                  alt={activeOrganization?.name ?? "Chatbot"}
+                  alt={activeOrganization?.name ?? "Porjekt#" + activeOrganization.id}
                 />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -103,7 +107,7 @@ export function OrganizationSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Chatbotok
+              Projektek
             </DropdownMenuLabel>
             {organizations.map((organization, index) => (
               <DropdownMenuItem

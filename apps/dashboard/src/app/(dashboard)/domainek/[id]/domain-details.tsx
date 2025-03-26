@@ -49,7 +49,11 @@ export function DomainDetails({ domain }: { domain: Domain }) {
   const utils = api.useUtils();
 
   const { data: records, isLoading: isLoadingDnsRecords, error: dnsRecordsError } =
-    api.domain.getDnsRecords.useQuery({ id: domain.id });
+    api.domain.getDnsRecords.useQuery({ id: domain.id }, {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+    });
 
   useEffect(() => {
     if (records) {
@@ -86,7 +90,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
           purpose: 'Email signing key'
         }))
       ];
-      
+
       setDnsRecords(dnsRecordsList);
       setIsLoadingRecords(false);
     }

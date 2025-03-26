@@ -70,6 +70,10 @@ export const ContactsTable = () => {
   const { data, isLoading } = api.contact.getForTable.useQuery({
     limit: pageSize,
     offset: (currentPage - 1) * pageSize,
+  }, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
   useEffect(() => {

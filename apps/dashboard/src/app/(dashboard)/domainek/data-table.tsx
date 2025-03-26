@@ -69,7 +69,11 @@ export const DomainsTable = () => {
 
   const { data, isLoading } = api.domain.getForTable.useQuery({
     limit: pageSize,
-    offset: (currentPage - 1) * pageSize,
+    offset: (currentPage - 1) * pageSize
+  }, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
   useEffect(() => {

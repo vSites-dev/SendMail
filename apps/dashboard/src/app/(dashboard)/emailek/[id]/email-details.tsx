@@ -34,7 +34,11 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
 
   const utils = api.useUtils();
 
-  const { data: statistics } = api.email.getStatistics.useQuery({});
+  const { data: statistics } = api.email.getStatistics.useQuery({}, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+  });
 
   const formatDate = (date: Date | null) => {
     if (!date) return "N/A";
