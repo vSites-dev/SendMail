@@ -2,13 +2,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
   MoreHorizontal,
-  Pencil,
-  Trash,
   Eye,
   Trash2,
-  Loader2,
-  ChevronRight,
-  ChevronsUpDown,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -19,7 +14,6 @@ import {
 import Link from "next/link";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -150,14 +144,10 @@ export const columns: ColumnDef<Domain>[] = [
                   <AlertDialogCancel>Mégsem</AlertDialogCancel>
                   <Button
                     variant={"destructive"}
-                    disabled={isPending}
                     onClick={handleDelete}
+                    isLoading={isPending}
                   >
-                    {isPending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="size-4" />
-                    )}
+                    {!isPending && <Trash2 className="size-4" />}
                     Törlés
                   </Button>
                 </AlertDialogFooter>

@@ -13,7 +13,6 @@ import {
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Loader2,
   RefreshCcw,
   SquareMousePointer,
   User2,
@@ -181,12 +180,8 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
               Vissza
             </Button>
 
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <RefreshCcw className="size-4" />
-              )}
+            <Button type="submit" isLoading={isLoading}>
+              {!isLoading && <RefreshCcw className="size-4" />}
               Frissítés
             </Button>
           </CardFooter>

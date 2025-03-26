@@ -9,7 +9,7 @@ import { Plate } from "@udecode/plate/react";
 import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { Button } from "../ui/button";
-import { ArrowLeft, Loader2, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
@@ -96,12 +96,8 @@ export function TemplateCreator() {
           Vissza
         </Button>
 
-        <Button onClick={handleSave} disabled={isLoading}>
-          {isLoading ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Save className="size-4" />
-          )}
+        <Button onClick={handleSave} isLoading={isLoading}>
+          {!isLoading && <Save className="size-4" />}
           Létrehozás
         </Button>
       </div>

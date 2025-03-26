@@ -5,6 +5,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
   VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  isLoading?: boolean;
 }
 
 const AnimatedButton = motion.create(
@@ -62,14 +64,15 @@ const AnimatedButton = motion.create(
 );
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (props, ref) => {
+  ({ isLoading, children, ...props }, ref) => {
     return (
       <AnimatedButton
         ref={ref}
+        disabled={isLoading || props.disabled}
         {...(props as any)}
-        whileHover="hover"
-        whileFocus="tap"
-        whileTap="tap"
+        whileHover={!isLoading ? "hover" : undefined}
+        whileFocus={!isLoading ? "tap" : undefined}
+        whileTap={!isLoading ? "tap" : undefined}
       >
         <motion.div
           className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent"
@@ -87,7 +90,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             },
           }}
         />
-        {props.children}
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {children}
+          </>
+        ) : (
+          children
+        )}
       </AnimatedButton>
     );
   },

@@ -4,7 +4,6 @@ import {
   MoreHorizontal,
   Eye,
   Trash2,
-  Loader2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -244,14 +243,10 @@ export const columns: ColumnDef<Email>[] = [
                   <AlertDialogCancel>Mégsem</AlertDialogCancel>
                   <Button
                     variant={"destructive"}
-                    disabled={isPending}
                     onClick={handleDelete}
+                    isLoading={isPending}
                   >
-                    {isPending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="size-4" />
-                    )}
+                    {!isPending && <Trash2 className="size-4" />}
                     Törlés
                   </Button>
                 </AlertDialogFooter>

@@ -28,7 +28,6 @@ import {
   EyeOff,
   Fingerprint,
   KeyRound,
-  Loader2,
   User,
 } from "lucide-react";
 import { useState } from "react";
@@ -281,13 +280,9 @@ export function SignUpForm() {
                   <CardSeparator />
 
                   <CardFooter className="flex-col space-y-2 pt-4">
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="w-full" isLoading={isLoading}>
                       Regisztráció
-                      {isLoading ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Fingerprint className="mr-2 h-4 w-4" />
-                      )}
+                      {!isLoading && <Fingerprint className="mr-2 h-4 w-4" />}
                     </Button>
                   </CardFooter>
                 </form>

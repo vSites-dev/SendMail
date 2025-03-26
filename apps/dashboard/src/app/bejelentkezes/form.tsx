@@ -23,7 +23,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { AtSign, Eye, EyeOff, KeyRound, Loader2, LogIn } from "lucide-react";
+import { AtSign, Eye, EyeOff, KeyRound, LogIn } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -145,13 +145,11 @@ export function SignInForm() {
 										<Button
 											variant="outline"
 											type="button"
-											disabled={isGoogleLoading || isLoading}
 											className="w-full text-neutral-800"
 											onClick={handleGoogleSignIn}
+											isLoading={isGoogleLoading || isLoading}
 										>
-											{isGoogleLoading ? (
-												<Loader2 className="h-4 w-4 animate-spin" />
-											) : (
+											{!(isGoogleLoading || isLoading) && (
 												<div className="h-4 w-4">
 													<Image
 														src="/google.svg"
@@ -273,14 +271,10 @@ export function SignInForm() {
 										<Button
 											type="submit"
 											className="w-full"
-											disabled={isLoading}
+											isLoading={isLoading}
 										>
 											Bejelentkezés
-											{isLoading ? (
-												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-											) : (
-												<LogIn className="mr-2 h-4 w-4" />
-											)}
+											{!isLoading && <LogIn className="mr-2 h-4 w-4" />}
 										</Button>
 
 									</CardFooter>

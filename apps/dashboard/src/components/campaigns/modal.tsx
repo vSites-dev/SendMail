@@ -174,8 +174,6 @@ export function CampaignModal({
 
         const res = await createCampaign({
           name: campaignName,
-          subject: firstEmailBlock.subject,
-          body: firstEmailBlock.template.body,
           contactIds: selectedContacts,
           emailBlocks: emailBlocks.map(block => ({
             subject: block.subject,
@@ -284,15 +282,14 @@ export function CampaignModal({
               <Users className="h-4 w-4" />
               {selectedContacts.length} kontaktnak</div>
           </div>
-          <Button onClick={handleNext} disabled={isButtonDisabled() || isPending}>
+          <Button onClick={handleNext} disabled={isButtonDisabled()} isLoading={isPending}>
             {currentStep === steps.length ? "Befejezés" : "Következő"}
-            {isPending ? <Loader2 className="h-4 w-4" />
-              : (
-                <>
-                  {currentStep === steps.length && <Check className="h-4 w-4" />}
-                  {currentStep < steps.length && <ChevronRight className="h-4 w-4" />}
-                </>
-              )}
+            {!isPending && (
+              <>
+                {currentStep === steps.length && <Check className="h-4 w-4" />}
+                {currentStep < steps.length && <ChevronRight className="h-4 w-4" />}
+              </>
+            )}
           </Button>
         </div>
       </Card>

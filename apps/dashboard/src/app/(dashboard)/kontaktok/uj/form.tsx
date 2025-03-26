@@ -15,7 +15,6 @@ import {
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Loader2,
   PlusSquare,
   SquareMousePointer,
   UserPlus2,
@@ -180,12 +179,8 @@ export default function NewContactForm() {
               Vissza
             </Button>
 
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <PlusSquare className="size-4" />
-              )}
+            <Button type="submit" isLoading={isLoading}>
+              {!isLoading && <PlusSquare className="size-4" />}
               Létrehozás
             </Button>
           </CardFooter>
