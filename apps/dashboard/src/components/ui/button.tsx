@@ -15,13 +15,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-b from-violet-700/80 to-violet-800 text-primary-foreground !shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)] drop-shadow-md border border-gray-200/20 relative overflow-hidden focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/30 !text-white",
+          "bg-gradient-to-b from-violet-700/80 to-violet-800 text-primary-foreground !shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)] drop-shadow-md border border-neutral-950/25 relative overflow-hidden focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/30 !text-white",
         destructive:
           "bg-gradient-to-b from-red-600 to-red-800 text-destructive-foreground !shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)] drop-shadow-md border border-red-200/10 relative overflow-hidden focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-destructive/30 !text-white font-semibold",
         success:
           "bg-gradient-to-b from-green-600 to-green-800 text-primary-foreground !shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35)] drop-shadow-md border border-green-200/10 relative overflow-hidden focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-green-500/30 !text-white",
         outline:
-          "border border-input bg-white shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border border-neutral-950/25 bg-white shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",

@@ -22,7 +22,7 @@ export default async function DashboardLayout({
   ]);
 
   if (organizations.length === 0) {
-    return redirect("/onboarding");
+    return redirect("/uj-projekt");
   } else if (!activeOrganization) {
     await auth.api.setActiveOrganization({
       body: {

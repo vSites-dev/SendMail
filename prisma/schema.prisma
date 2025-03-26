@@ -138,8 +138,6 @@ model Campaign {
   name   String
   status CampaignStatus @default(DRAFT)
 
-  trackLinks Boolean @default(false)
-
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
