@@ -129,6 +129,7 @@ model Project {
   tasks     Task[]
   domains   Domain[]
   templates Template[]
+  apiKeys   ApiKey[]
 
   @@map("projects")
 }
@@ -241,19 +242,20 @@ model Click {
 }
 
 model Domain {
-  id                String       @id @default(uuid())
-  name              String       @unique
-  status            DomainStatus @default(PENDING)
-  dkimTokens        String[]
-  spfRecord         String?
-  dmarcRecord       String?
-  mailFromSubdomain String?
-  mailFromMxRecord  String?
-  verificationToken String?
-  projectId         String
-  project           Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  id                 String       @id @default(uuid())
+  name               String       @unique
+  status             DomainStatus @default(PENDING)
+  verificationStatus String?
+  dkimTokens         String[]
+  spfRecord          String?
+  dmarcRecord        String?
+  mailFromSubdomain  String?
+  mailFromMxRecord   String?
+  verificationToken  String?
+  projectId          String
+  project            Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 
   @@index([projectId])
   @@map("domains")
@@ -270,6 +272,21 @@ model Template {
 
   @@unique([projectId, name])
   @@map("templates")
+}
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  name        String    // A friendly name for the API key
+  key         String    @unique // The actual API key (hashed)
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([projectId])
+  @@map("api_keys")
 }
 
 enum ContactStatus {

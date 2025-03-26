@@ -5,6 +5,8 @@ import prisma from "./lib/prisma";
 import emailRoutes from "./routes/emailRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import domainRoutes from "./routes/domainRoutes";
+import apiKeyRoutes from "./routes/apiKeyRoutes";
+import publicApiRoutes from "./routes/publicApiRoutes";
 import { TaskScheduler } from "./services/tasks/taskScheduler";
 
 const app = express();
@@ -17,6 +19,10 @@ app.use(express.json());
 app.use('/email', emailRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/domains", domainRoutes);
+app.use("/api/keys", apiKeyRoutes);
+
+// Public API routes (protected by API key authentication)
+app.use("/v1", publicApiRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
