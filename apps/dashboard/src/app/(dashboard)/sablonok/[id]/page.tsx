@@ -48,7 +48,7 @@ export default async function Template({
             <FolderCog className="size-5" />
           </div>
 
-          <h1 className="text-3xl font-semibold text-neutral-700">Új sablon</h1>
+          <h1 className="text-2xl title">Új sablon</h1>
         </div>
 
         {!template ? (

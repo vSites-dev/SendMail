@@ -134,6 +134,21 @@ export default {
           foreground: "hsl(var(--highlight-foreground))",
         },
       },
+      keyframes: {
+        revealBottom: {
+          from: {
+            opacity: "0",
+            transform: "translateY(12px)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateY(0px)",
+          },
+        },
+      },
+      animation: {
+        revealBottom: "revealBottom ease-in-out",
+      },
     },
   },
   plugins: [tailwindAnimate, require("tailwind-scrollbar-hide")],

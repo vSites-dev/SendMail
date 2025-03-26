@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button"
 import useScroll from "@/lib/use-scroll"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import React from "react"
 
@@ -69,17 +70,16 @@ const Layout = ({
           scrolled ? "h-12" : "h-20",
         )}
       >
-        <div
-          className="hidden flex-nowrap items-center gap-0.5 md:flex"
-          aria-hidden="true"
-        >
-          <span className="mt-0.5 text-lg font-semibold text-gray-900 dark:text-gray-50">
-            Insights
-          </span>
-        </div>
+        <Image
+          src="/brand/logo.svg"
+          alt="logo"
+          width={120}
+          height={46}
+          quality={100}
+        />
         <StepProgress steps={steps} />
-        <Button variant="ghost" className="ml-auto w-fit" asChild>
-          <a href="/reports">Skip to dashboard</a>
+        <Button variant="ghost" className="ml-auto w-fit hidden md:block">
+          Segítség
         </Button>
       </header>
       <main id="main-content" className="mx-auto mb-20 mt-28 max-w-lg">

@@ -41,7 +41,7 @@ export default async function Dashboard() {
               <ChartColumnBig className="size-5" />
             </div>
 
-            <h1 className="text-3xl font-semibold text-neutral-700">Fő statisztikák</h1>
+            <h1 className="text-2xl title">Fő statisztikák</h1>
           </div>
 
           <IntervalSelect />

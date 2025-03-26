@@ -45,7 +45,7 @@ export default async function CampaignsPage() {
             <Megaphone className="size-5" />
           </div>
 
-          <h1 className="text-3xl font-semibold text-neutral-700">Kampányok</h1>
+          <h1 className="text-2xl title">Kampányok</h1>
         </div>
 
         <p className="text-muted-foreground mb-6 mt-4 max-w-[600px]">

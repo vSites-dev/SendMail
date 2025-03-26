@@ -10,7 +10,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "relative rounded-2xl border bg-card text-card-foreground",
+      "relative rounded-2xl border-[1.5px] bg-card text-card-foreground",
       "dark:bg-zinc-900",
       "bg-white",
       className,
@@ -89,7 +89,7 @@ const CardSeparator = React.forwardRef<
       "relative h-[1px] w-full",
       // Light mode - darker top border, lighter bottom border
       "before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-black/[0.08]",
-      "after:absolute after:inset-x-0 after:top-[1px] after:h-[1.5px] after:bg-black/[0.02]",
+      "after:absolute after:inset-x-0 after:top-[1px] after:h-[1.5px] after:bg-black/[0.03]",
       // Dark mode - subtle gradient effect
       "dark:before:bg-background/[0.08]",
       "dark:after:bg-black/40",

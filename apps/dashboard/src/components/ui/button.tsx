@@ -64,7 +64,33 @@ const AnimatedButton = motion.create(
 );
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ isLoading, children, ...props }, ref) => {
+  ({ isLoading, children, asChild, ...props }, ref) => {
+    // If using asChild with isLoading, we need to handle it differently
+    // to avoid the React.Children.only error
+    if (asChild && isLoading) {
+      // When both asChild and isLoading are true, we need to modify how we render
+      // We'll use the AnimatedButton without the asChild prop and handle the slot differently
+      return (
+        <AnimatedButton
+          ref={ref}
+          disabled={isLoading || props.disabled}
+          {...(props as any)}
+          asChild={false} // Force this to false to avoid the Slot component
+          whileHover={undefined}
+          whileFocus={undefined}
+          whileTap={undefined}
+        >
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent"
+            initial={{ opacity: 0, height: "0%" }}
+          />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {children}
+        </AnimatedButton>
+      );
+    }
+
+    // Normal rendering when not both asChild and isLoading
     return (
       <AnimatedButton
         ref={ref}

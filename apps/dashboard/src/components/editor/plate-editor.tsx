@@ -29,7 +29,7 @@ export function PlateEditor() {
               <Mail className="size-5" />
             </div>
 
-            <h1 className="text-3xl font-semibold text-neutral-700">
+            <h1 className="text-2xl title">
               Email sablon készítés
             </h1>
           </div>

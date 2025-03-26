@@ -45,7 +45,7 @@ export default function Page() {
               <FolderPlus className="size-5" />
             </div>
 
-            <h1 className="text-3xl font-semibold text-neutral-700">
+            <h1 className="text-2xl title">
               Új sablon
             </h1>
           </div>

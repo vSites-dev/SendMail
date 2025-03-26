@@ -38,7 +38,7 @@ export default async function EmailsPage() {
             <Mails className="size-5" />
           </div>
 
-          <h1 className="text-3xl font-semibold text-neutral-700">Emailek</h1>
+          <h1 className="text-2xl title">Emailek</h1>
         </div>
 
         <p className="text-muted-foreground mb-6 mt-4 max-w-[600px]">

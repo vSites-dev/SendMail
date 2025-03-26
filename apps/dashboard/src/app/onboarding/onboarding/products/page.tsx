@@ -145,7 +145,7 @@ export default function Products() {
         style={{ animationDuration: "500ms" }}
         className="motion-safe:animate-revealBottom"
       >
-        <h1 className="text-2xl font-semibold text-gray-900 sm:text-xl dark:text-gray-50">
+        <h1 className="title text-2xl font-semibold sm:text-xl dark:text-gray-50">
           Which products are you interested in?
         </h1>
         <p className="mt-6 text-gray-700 sm:text-sm dark:text-gray-300">

@@ -64,7 +64,7 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
             <Mail className="size-6" />
           </div>
 
-          <h1 className={cn("text-3xl font-semibold text-neutral-700")}>
+          <h1 className={cn("text-2xl title")}>
             {email.subject}
           </h1>
         </div>

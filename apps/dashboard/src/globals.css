@@ -163,3 +163,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.title {
+  @apply font-semibold tracking-tight bg-gradient-to-br from-neutral-800 from-30% to-neutral-600/90 bg-clip-text text-transparent;
+}

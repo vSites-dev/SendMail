@@ -159,7 +159,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
             <Globe className="size-6" />
           </div>
 
-          <h1 className={cn("text-3xl font-semibold text-neutral-700")}>
+          <h1 className={cn("text-2xl title")}>
             {domain.name}
           </h1>
         </div>
