@@ -33,7 +33,7 @@ async function verifyDomainHelper(
     }
 
     // Call the backend API to verify domain using fetch
-    const response = await fetch(`${process.env.API_URL}/api/domains/verify`, {
+    const response = await fetch(`${process.env.API_URL}/domains/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -193,7 +193,7 @@ export const domainRouter = createTRPCRouter({
 
         // Call the backend API to check verification status using fetch
         const response = await fetch(
-          `${process.env.API_URL}/api/domains/status/${input.id}`,
+          `${process.env.API_URL}/domains/status/${input.id}`,
         );
 
         if (!response.ok) {
