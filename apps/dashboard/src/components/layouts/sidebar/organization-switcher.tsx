@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, Plus, Rocket } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,7 @@ import { api } from "@/trpc/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Project } from "@prisma/client";
+import Link from "next/link";
 
 export function OrganizationSwitcher({
   organizations,
@@ -128,15 +129,17 @@ export function OrganizationSwitcher({
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              disabled
               className="gap-2 p-2"
+              asChild
             >
-              <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                <Plus className="size-4" />
-              </div>
-              <div className="font-medium line-through text-muted-foreground">
-                Új projekt
-              </div>
+              <Link href="/uj-projekt/1">
+                <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                  <Rocket className="size-4 text-indigo-600" />
+                </div>
+                <span>
+                  Új projekt
+                </span>
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

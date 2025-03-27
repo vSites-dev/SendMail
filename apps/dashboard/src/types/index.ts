@@ -8,7 +8,13 @@ export type EmailBlock = {
   scheduledTime?: string;
 };
 
-export type CampaignSettings = {
-  name: string;
-  trackLinks: boolean;
+export enum MemberRole {
+  OWNER = "OWNER",
+  ADMIN = "ADMIN",
+  MARKETING = "MARKETING",
+}
+
+export type MemberInvite = {
+  email: string;
+  role: MemberRole;
 };

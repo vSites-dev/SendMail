@@ -1,8 +1,11 @@
 "use client"
+
 import { Button } from "@/components/ui/button"
+import { Organization } from "@/lib/auth/auth"
 import useScroll from "@/lib/use-scroll"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React from "react"
 
@@ -12,9 +15,8 @@ interface Step {
 }
 
 const steps: Step[] = [
-  { name: "Product selection", href: "/onboarding/product" },
-  { name: "Employees", href: "/onboarding/employees" },
-  { name: "Infrastructure", href: "/onboarding/infrastructure" },
+  { name: "Első lépés", href: "/uj-projekt/1" },
+  { name: "Második lépés", href: "/uj-projekt/2" },
 ]
 
 interface StepProgressProps {
@@ -28,7 +30,7 @@ const StepProgress = ({ steps }: StepProgressProps) => {
   )
 
   return (
-    <div aria-label="Onboarding progress">
+    <div aria-label="Onboarding folyamat">
       <ol className="mx-auto flex w-24 flex-nowrap gap-1 md:w-fit">
         {steps.map((step, index) => (
           <li
@@ -36,7 +38,7 @@ const StepProgress = ({ steps }: StepProgressProps) => {
             className={cn(
               "h-1 w-12 rounded-full",
               index <= currentStepIndex
-                ? "bg-blue-500"
+                ? "bg-violet-500"
                 : "bg-gray-300 dark:bg-gray-700",
             )}
           >
@@ -55,10 +57,12 @@ const StepProgress = ({ steps }: StepProgressProps) => {
   )
 }
 
-const Layout = ({
+const Wrapper = ({
   children,
+  organizations,
 }: Readonly<{
   children: React.ReactNode
+  organizations: Organization[]
 }>) => {
   const scrolled = useScroll(15)
 
@@ -78,8 +82,8 @@ const Layout = ({
           quality={100}
         />
         <StepProgress steps={steps} />
-        <Button variant="ghost" className="ml-auto w-fit hidden md:block">
-          Segítség
+        <Button asChild variant={"link"}>
+          <Link href={"/"} >Vissza vezérlőpultra</Link>
         </Button>
       </header>
       <main id="main-content" className="mx-auto mb-20 mt-28 max-w-lg">
@@ -89,4 +93,4 @@ const Layout = ({
   )
 }
 
-export default Layout
+export default Wrapper
