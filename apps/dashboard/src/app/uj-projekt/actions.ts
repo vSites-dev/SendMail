@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@/lib/auth/auth";
 import { db } from "@/server/db";
 
 export async function createDummyProject(orgId: string) {
