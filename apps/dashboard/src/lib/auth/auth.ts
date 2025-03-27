@@ -2,11 +2,27 @@ import { db } from "@/server/db";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { organization } from "better-auth/plugins";
-import { sendVerificationEmail } from "@/utils/send-emails";
+import {
+  sendProjectInvitationEmail,
+  sendVerificationEmail,
+} from "@/utils/send-emails";
 import getActiveOrganization from "../get-active-organization";
 
 export const auth = betterAuth({
-  plugins: [organization()],
+  plugins: [
+    organization({
+      async sendInvitationEmail(data) {
+        const inviteLink = `http://localhost:3000/projekt-meghivas/${data.id}`;
+        await sendProjectInvitationEmail({
+          email: data.email,
+          invitedByUsername: data.inviter.user.name,
+          invitedByEmail: data.inviter.user.email,
+          teamName: data.organization.name,
+          inviteLink,
+        });
+      },
+    }),
+  ],
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,

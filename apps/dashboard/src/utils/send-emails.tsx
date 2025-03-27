@@ -1,14 +1,11 @@
 import VerifyEmail from "@/components/emails/verify-email";
+import ProjectInvitation from "@/components/emails/project-invitation";
 import { Resend } from "resend";
+import { VerifyEmailProps, ProjectInvitationEmailProps } from "@/types";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-interface sendVerificationEmailProps {
-  email: string;
-  name: string;
-  verificationUrl: string;
-}
-async function sendVerificationEmail({ email, name, verificationUrl }: sendVerificationEmailProps) {
+async function sendVerificationEmail({ email, name, verificationUrl }: VerifyEmailProps) {
   try {
     const res = await resend.emails.send({
       from: "SendMail <sendmail@vsites.dev>",
@@ -26,4 +23,28 @@ async function sendVerificationEmail({ email, name, verificationUrl }: sendVerif
   }
 }
 
-export { sendVerificationEmail };
+async function sendProjectInvitationEmail({
+  email,
+  invitedByUsername,
+  invitedByEmail,
+  teamName,
+  inviteLink,
+}: ProjectInvitationEmailProps) {
+  try {
+    const res = await resend.emails.send({
+      from: "SendMail <sendmail@vsites.dev>",
+      to: email,
+      subject: "SendMail - Projekt meghívó",
+      react: <ProjectInvitation email={email} invitedByUsername={invitedByUsername} invitedByEmail={invitedByEmail} teamName={teamName} inviteLink={inviteLink} />,
+    });
+
+    return res
+  }
+  catch (error) {
+    console.log(error);
+
+    return error;
+  }
+}
+
+export { sendVerificationEmail, sendProjectInvitationEmail };

@@ -1,3 +1,4 @@
+import { VerifyEmailProps } from "@/types";
 import {
   Body,
   Button,
@@ -14,11 +15,6 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface VerifyEmailProps {
-  verificationUrl: string;
-  name: string;
-}
-
 const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "";
@@ -30,15 +26,6 @@ const VerifyEmail = ({ verificationUrl, name }: VerifyEmailProps) => (
     <Tailwind>
       <Body className="bg-background">
         <Container className="mx-auto px-[20px] py-[40px] max-w-[560px]">
-          {/* 
-          <Img
-              src={`${baseUrl}/brand/icon.svg`}
-            width="100"
-            height="100"
-            alt="SendMail Logó"
-          /> 
-          */}
-
           <Heading className="text-center font-bold text-2xl mt-6">
             Üdvözöljük a SendMail-nál! 👋
           </Heading>
@@ -67,7 +54,7 @@ const VerifyEmail = ({ verificationUrl, name }: VerifyEmailProps) => (
             <Text>
               © {new Date().getFullYear()} SendMail. Minden jog fenntartva.
             </Text>
-            <Link href="https://leoai.hu/">https://leoai.hu/</Link>
+            <Link href="https://sendmail.dev/">https://sendmail.dev/</Link>
           </Section>
         </Container>
       </Body>

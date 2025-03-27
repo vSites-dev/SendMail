@@ -1,11 +1,6 @@
 "use client"
 
-import { badgeVariants } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
 import { useAtom } from "jotai"
 import { ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -21,11 +16,12 @@ export default function OnboardingStepOne() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
     setLoading(true)
+
     setTimeout(() => {
-      console.log("Form submitted:", projectName)
       router.push("/uj-projekt/2")
-    }, 400)
+    }, 300)
   }
 
   return (

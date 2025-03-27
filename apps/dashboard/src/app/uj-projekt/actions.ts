@@ -11,3 +11,5 @@ export async function createDummyProject(orgId: string) {
     },
   });
 }
+
+export async function createProject() {}

@@ -18,3 +18,18 @@ export type MemberInvite = {
   email: string;
   role: MemberRole;
 };
+
+// for emails
+export interface VerifyEmailProps {
+  email: string;
+  name: string;
+  verificationUrl: string;
+}
+
+export interface ProjectInvitationEmailProps {
+  email: string;
+  invitedByUsername: string;
+  invitedByEmail: string;
+  teamName: string;
+  inviteLink: string;
+}
