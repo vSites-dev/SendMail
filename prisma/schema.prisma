@@ -123,6 +123,8 @@ model Project {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
+  from String?
+
   // relations
   campaigns Campaign[]
   contacts  Contact[]
@@ -134,8 +136,11 @@ model Project {
 }
 
 model Campaign {
-  id     String         @id @default(uuid())
-  name   String
+  id   String @id @default(uuid())
+  name String
+
+  from String?
+
   status CampaignStatus @default(DRAFT)
 
   trackLinks Boolean @default(false)
@@ -166,7 +171,6 @@ model Contact {
 
   campaigns Campaign[] // Campaigns this contact is part of
   emails    Email[]
-  tasks     Task[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -215,9 +219,6 @@ model Task {
   campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   campaignId String?
 
-  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  contactId String?
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -244,6 +245,7 @@ model Domain {
   id                String       @id @default(uuid())
   name              String       @unique
   status            DomainStatus @default(PENDING)
+  statusMessage     String?
   dkimTokens        String[]
   spfRecord         String?
   dmarcRecord       String?

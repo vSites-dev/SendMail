@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import prisma from "../../lib/prisma";
 import { EmailService } from "../emailService";
-import { Task, Campaign, Contact, TaskStatus, TaskType } from "@prisma/client";
+import { Task, Campaign, Contact, TaskStatus, TaskType, EmailStatus } from "@prisma/client";
 
 export class TaskScheduler {
   private emailService: EmailService;
@@ -18,25 +18,52 @@ export class TaskScheduler {
 
   async processScheduledTasks() {
     try {
-      // Find all pending tasks that are scheduled for now or in the past
+      console.log(`[${new Date().toISOString()}] Running scheduled task processing`);
+      
+      // Get current minute (with seconds and milliseconds set to 0)
+      const now = new Date();
+      now.setSeconds(0, 0);
+      
+      // Get end of the current minute
+      const endOfMinute = new Date(now);
+      endOfMinute.setMinutes(now.getMinutes() + 1);
+      
+      // Find all pending tasks that are scheduled for the current minute
       const tasks = await prisma.task.findMany({
         where: {
           status: TaskStatus.PENDING,
           scheduledAt: {
-            lte: new Date(),
+            gte: now,
+            lt: endOfMinute
           },
         },
         include: {
-          campaign: true,
-          contact: true,
+          campaign: {
+            include: {
+              contacts: true
+            }
+          }
         },
       });
 
+      console.log(`Found ${tasks.length} tasks due in the current minute`);
+      
+      let processed = 0;
+      let failed = 0;
+
       for (const task of tasks) {
         try {
+          // Mark task as processing
+          await prisma.task.update({
+            where: { id: task.id },
+            data: { status: TaskStatus.PROCESSING }
+          });
+          
           await this.processTask(task);
+          processed++;
         } catch (error) {
           console.error(`Error processing task ${task.id}:`, error);
+          failed++;
 
           // Update task status to FAILED
           await prisma.task.update({
@@ -49,6 +76,8 @@ export class TaskScheduler {
           });
         }
       }
+      
+      console.log(`Task processing completed: ${processed} processed, ${failed} failed`);
     } catch (error) {
       console.error("Error in task scheduler:", error);
     }
@@ -56,54 +85,57 @@ export class TaskScheduler {
 
   private async processTask(
     task: Task & {
-      campaign?: Campaign | null;
-      contact?: Contact | null;
+      campaign?: Campaign & {
+        contacts: Contact[];
+      } | null;
     }
   ) {
     switch (task.type) {
       case TaskType.SEND_EMAIL:
-        if (!task.contact?.email) {
-          throw new Error("Contact email not found");
+        throw new Error("Not implemented");
+
+      case TaskType.SEND_CAMPAIGN:
+        if (!task.campaignId) {
+          throw new Error("Campaign ID not found for SEND_CAMPAIGN task");
         }
-
-        // Create and send the email
-        const email = await prisma.email.create({
-          data: {
-            messageId: `pending_${task.id}`, // Temporary messageId until actual send
-            subject: task.campaign?.subject || "No subject",
-            body: task.campaign?.body || "No content",
-            status: "QUEUED",
-            contact: {
-              connect: { id: task.contactId! },
-            },
-            ...(task.campaignId && {
-              campaign: {
-                connect: { id: task.campaignId },
+        
+        if (!task.campaign) {
+          throw new Error(`Campaign not found for task ${task.id}`);
+        }
+        
+        // Process each contact in the campaign
+        for (const contact of task.campaign.contacts) {
+          // Find or create an email for each contact
+          const campaignEmail = await prisma.email.findFirst({
+            where: {
+              contactId: contact.id,
+              campaignId: task.campaign.id,
+              status: EmailStatus.QUEUED
+            }
+          });
+          
+          if (campaignEmail) {
+            // Send the email
+            const result = await this.emailService.sendEmail({
+              from: task.campaign.from || process.env.DEFAULT_FROM!,
+              to: contact.email,
+              subject: campaignEmail.subject,
+              body: campaignEmail.body,
+            });
+            
+            // Update email status
+            await prisma.email.update({
+              where: { id: campaignEmail.id },
+              data: {
+                messageId: result.messageId || campaignEmail.messageId,
+                status: EmailStatus.SENT,
+                sentAt: new Date(),
               },
-            }),
-          },
-        });
-
-        const result = await this.emailService.sendEmail({
-          from: process.env.DEFAULT_FROM_EMAIL || "noreply@yourdomain.com",
-          to: task.contact.email,
-          subject: email.subject,
-          body: email.body,
-        });
-
-        // Update email status
-        await prisma.email.update({
-          where: { id: email.id },
-          data: {
-            messageId: result.messageId,
-            status: "SENT",
-            sentAt: new Date(),
-          },
-        });
-
+            });
+          }
+        }
         break;
 
-      // Add other task types here
       default:
         throw new Error(`Unsupported task type: ${task.type}`);
     }

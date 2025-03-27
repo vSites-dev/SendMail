@@ -6,6 +6,7 @@ import emailRoutes from "./routes/emailRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import domainRoutes from "./routes/domainRoutes";
 import { TaskScheduler } from "./services/tasks/taskScheduler";
+import contactRoutes from './routes/contactRoutes';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -15,8 +16,9 @@ app.use(express.json());
 
 // Routes
 app.use('/email', emailRoutes);
-app.use("/api/tasks", taskRoutes);
-app.use("/api/domains", domainRoutes);
+app.use("/tasks", taskRoutes);
+app.use("/domains", domainRoutes);
+app.use("/contacts", contactRoutes)
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -24,7 +26,7 @@ app.get('/health', (req, res) => {
 });
 
 // Initialize task scheduler
-const taskScheduler = new TaskScheduler();
+export const taskScheduler = new TaskScheduler();
 taskScheduler.start();
 
 app.listen(port, () => {
