@@ -11,7 +11,7 @@ async function sendVerificationEmail({ email, name, verificationUrl }: VerifyEma
       from: "SendMail <sendmail@vsites.dev>",
       to: email,
       subject: "SendMail - Email cím megerősítése",
-      react: <VerifyEmail verificationUrl={verificationUrl} name={name} />,
+      react: <VerifyEmail email={email} verificationUrl={verificationUrl} name={name} />,
     });
 
     return res

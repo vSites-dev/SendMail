@@ -9,15 +9,31 @@ export type EmailBlock = {
 };
 
 export enum MemberRole {
-  OWNER = "OWNER",
-  ADMIN = "ADMIN",
-  MARKETING = "MARKETING",
+  owner = "owner",
+  admin = "admin",
+  member = "member",
 }
 
 export type MemberInvite = {
   email: string;
   role: MemberRole;
 };
+
+export interface InvitationData {
+  id: string;
+  organization: {
+    id: string;
+    name: string;
+    logo?: string | null;
+  };
+  email: string;
+  role: string | null;
+  inviter: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
 
 // for emails
 export interface VerifyEmailProps {

@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { api } from "@/trpc/server";
+import { db } from "@/server/db";
 
 export default async function DashboardLayout({
   children,
@@ -15,34 +16,71 @@ export default async function DashboardLayout({
 
   const headersObject = await headers();
 
-  const [session, organizations, activeOrganization] = await Promise.all([
-    auth.api.getSession({ headers: headersObject }),
-    auth.api.listOrganizations({ headers: headersObject }),
-    auth.api.getFullOrganization({ headers: headersObject }),
-  ]);
+  const session = await auth.api.getSession({ headers: headersObject });
+  const activeOrg = await auth.api.getFullOrganization({ headers: headersObject });
 
-  if (organizations.length === 0) {
+  const membersForTheUser = await db.member.findMany({
+    where: {
+      userId: session?.user.id!,
+    },
+  });
+
+  const invitations = await db.invitation.findMany({
+    where: {
+      email: session?.user.email!,
+    },
+    include: {
+      organization: true
+    },
+  });
+
+  console.log("hello????", membersForTheUser)
+  if (membersForTheUser.length === 0) {
+    if (invitations && invitations[0] && invitations[0].id) {
+      console.log("miafasz?????")
+      console.log("miafasz?????")
+      console.log("miafasz?????")
+      console.log("miafasz?????")
+      console.log("miafasz?????")
+      console.log("miafasz?????")
+
+      return redirect(`/projekt-meghivas/${invitations[0].id}`);
+    }
+
     return redirect("/uj-projekt");
-  } else if (!activeOrganization) {
+  }
+
+  const organizationsThatUserIsPartOf = await db.organization.findMany({
+    where: {
+      members: {
+        some: {
+          userId: session?.user.id!,
+        },
+      },
+    },
+  });
+
+  if (!activeOrg) {
     await auth.api.setActiveOrganization({
       body: {
-        organizationId: organizations[organizations.length - 1]!.id,
+        organizationId: organizationsThatUserIsPartOf[0]!.id,
       },
     });
   }
 
   const project = await api.project.getById({
-    organizationId: activeOrganization!.id,
+    organizationId: activeOrg?.id || organizationsThatUserIsPartOf[0]!.id,
   });
   if (!project) throw new Error("Nem talált projekt");
+
 
   return (
     <SidebarProvider>
       <AppSidebar
-        session={session}
-        organizations={organizations}
-        activeOrganizationFromServer={activeOrganization!}
+        activeOrganizationFromServer={(activeOrg || organizationsThatUserIsPartOf[0]) as any}
         activeProjectFromServer={project}
+        invitations={invitations as any}
+        organizations={organizationsThatUserIsPartOf as any}
       />
       <SidebarInset>
         <div className="min-h-[100dvh] relative h-full overflow-y-clip bg-background flex flex-col">

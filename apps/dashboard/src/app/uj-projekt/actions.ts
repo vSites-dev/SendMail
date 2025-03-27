@@ -2,14 +2,30 @@
 
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/server/db";
+import { headers } from "next/headers";
 
-export async function createDummyProject(orgId: string) {
-  return await db.project.create({
+export async function createProject(orgId: string, name: string) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  console.log("session", session);
+
+  const project = await db.project.create({
     data: {
-      name: `Dummy Project ${Math.floor(Math.random() * 1000)}`,
+      name: name,
       organizationId: orgId,
     },
   });
-}
+  console.log("created project", project);
+  if (!project)
+    throw new Error("Valami hiba történt a projekt létrehozása során");
 
-export async function createProject() {}
+  // add the owner whom created the project as member
+  await auth.api.addMember({
+    body: {
+      userId: session!.user.id,
+      role: "owner",
+    },
+  });
+  console.log("added owner", session!.user.email);
+
+  return project;
+}

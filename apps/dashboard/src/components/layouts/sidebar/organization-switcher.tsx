@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown, Plus, Rocket } from "lucide-react";
+import { ChevronsUpDown, Megaphone, Plus, Rocket } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,22 +24,23 @@ import { authClient } from "@/lib/auth/client";
 import { api } from "@/trpc/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Project } from "@prisma/client";
+import { Invitation, Project } from "@prisma/client";
 import Link from "next/link";
 
 export function OrganizationSwitcher({
   organizations,
   activeProjectFromServer,
   activeOrganizationFromServer,
+  invitations,
 }: {
   organizations: Organization[];
   activeOrganizationFromServer: Organization;
   activeProjectFromServer: Project;
+  invitations: (Invitation & { organization: Organization })[];
 }) {
   const router = useRouter();
 
   useHydrateAtoms([[activeOrganizationAtom, activeOrganizationFromServer]]);
-
   useHydrateAtoms([[activeProjectAtom, activeProjectFromServer]]);
 
   const { isMobile } = useSidebar();
@@ -127,6 +128,29 @@ export function OrganizationSwitcher({
                 <DropdownMenuShortcut>{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
+
+            {invitations.length > 0 && invitations.map((invitation, index) => (
+              <DropdownMenuItem
+                key={invitation.id}
+                onClick={() => {
+                  router.push(`/projekt-meghivas/${invitation.id}`);
+                }}
+                className="gap-2 p-2 items-center"
+              >
+                <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                  <Megaphone className="size-4 text-violet-600" />
+                </div>
+                <div>
+                  <p className="text-xs text-violet-600 mb-0">
+                    {invitation.organization.name}
+                  </p>
+                  <p className="mt-0">
+                    Meghívás elfogadása
+                  </p>
+                </div>
+              </DropdownMenuItem>
+            ))}
+
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="gap-2 p-2"

@@ -35,7 +35,7 @@ export function CampaignSettings() {
 
       <Card>
         <CardContent className="py-4">
-          <div className="space-y-8">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="campaign-name">Kampány neve</Label>
               <Input

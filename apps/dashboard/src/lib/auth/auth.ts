@@ -11,6 +11,7 @@ import getActiveOrganization from "../get-active-organization";
 export const auth = betterAuth({
   plugins: [
     organization({
+      allowUserToCreateOrganization: true,
       async sendInvitationEmail(data) {
         const inviteLink = `http://localhost:3000/projekt-meghivas/${data.id}`;
         await sendProjectInvitationEmail({

@@ -29,7 +29,7 @@ export default async function UjGomb() {
         </BreadcrumbList>
       </DashboardHeader>
 
-      <main className="max-w-2xl w-full mx-auto space-y-8 h-full py-2 px-4">
+      <main className="max-w-2xl w-full mx-auto space-y-4 h-full py-2 px-4">
         <NewContactForm />
       </main>
     </HydrateClient>

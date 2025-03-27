@@ -173,7 +173,7 @@ export function SignInForm() {
 											</div>
 										</div>
 
-										<div className="space-y-8">
+										<div className="space-y-4">
 											<FormField
 												control={form.control}
 												name="email"

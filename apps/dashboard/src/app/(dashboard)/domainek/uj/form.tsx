@@ -87,7 +87,7 @@ export default function CreateDomainForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <Card className="w-[500px] mx-auto my-4">
           <CardHeader>
             <CardTitle className="flex gap-3 items-center">

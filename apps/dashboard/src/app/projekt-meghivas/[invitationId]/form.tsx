@@ -29,15 +29,16 @@ import {
   Fingerprint,
   KeyRound,
   User,
+  UserCheck,
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { authClient } from "../../lib/auth/client";
-import { useSessionStorage } from "usehooks-ts";
-import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth/client";
+import { InvitationData } from "@/types";
+import { acceptInvitation } from "./actions";
 import { VerifyEmail } from "@/components/ui/verify-email";
 
 const formSchema = z
@@ -61,12 +62,13 @@ const formSchema = z
     },
   );
 
-export function SignUpForm() {
-  const router = useRouter();
+interface InvitationRegistrationProps {
+  invitation: InvitationData;
+}
 
+export function InvitationRegistration({ invitation }: InvitationRegistrationProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const [view, setView] = useState<"signUp" | "verifyEmail">(
     "signUp",
   );
@@ -75,7 +77,7 @@ export function SignUpForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      email: "",
+      email: invitation.email,
       password: "",
     },
   });
@@ -83,34 +85,40 @@ export function SignUpForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    const { data, error } = await authClient.signUp.email({
-      email: values.email,
-      password: values.password,
-      name: values.name,
-    });
+    try {
+      const { data, error } = await authClient.signUp.email({
+        email: values.email,
+        password: values.password,
+        name: values.name,
+      });
 
-    if (error) {
-      console.log("error", error);
+      if (error) {
+        console.log("error", error);
 
-      if (error.code === "USER_WITH_THIS_EMAIL_ALREADY_EXISTS") toast.error("Ez az email cím már regisztrálva van!");
-      else toast.error("Hiba történt a regisztráció során, kérjük, próbálja újra később.");
+        if (error.code === "USER_WITH_THIS_EMAIL_ALREADY_EXISTS") {
+          toast.error("Ez az email cím már regisztrálva van!");
+        } else {
+          toast.error("Hiba történt a regisztráció során, kérjük, próbálja újra később.");
+        }
 
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.user.id) {
+        setView("verifyEmail");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("Hiba történt a regisztráció során, kérjük, próbálja újra később.");
+    } finally {
       setIsLoading(false);
-
-      return;
     }
-
-    toast.success(
-      "Regisztráció sikeres! Kérjük, erősítsd meg az email címed a belépéshez.",
-    );
-
-    setView("verifyEmail")
-    setIsLoading(false);
   }
 
   return (
     <motion.div
-      key="signUpPage"
+      key="invitationRegistrationPage"
       initial={{ opacity: 0, scale: 0.75 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.75 }}
@@ -118,17 +126,15 @@ export function SignUpForm() {
       className="w-full mx-auto max-w-md"
     >
       <CardStyled className="w-full">
-
         <AnimatePresence mode="wait">
-          {view === "signUp" ? (
+          {view === "signUp" && (
             <motion.div
-              key="signIn"
+              key="registration"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.2 }}
             >
-
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                   <CardHeader className="space-y-3 pb-4">
@@ -142,14 +148,36 @@ export function SignUpForm() {
                       />
                     </div>
                     <CardTitle className="text-2xl font-bold">
-                      Fiók létrehozása
+                      Csatlakozás meghívással
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      <span className="block">
-                        Hozd létre ingyenes SendMail fiókodat.
-                      </span>
-                      <span className="block">
-                        Email marketing <b>egyszerűen</b> és <b>olcsón</b>.
+
+                    <div className="mt-2 rounded-lg border border-violet-200 bg-violet-50 p-4 dark:border-violet-800 dark:bg-violet-950/40">
+                      <div className="flex justify-between items-center gap-3">
+                        <div>
+                          <h3 className="text-base font-semibold text-violet-800 dark:text-violet-300">
+                            {invitation.organization.name}
+                          </h3>
+                          <p className="text-xs text-violet-600 dark:text-violet-400">
+                            {invitation.inviter.name} ({invitation.inviter.email}) meghívta Önt
+                          </p>
+                        </div>
+                        {invitation.organization.logo && (
+                          <div className="h-12 w-12 rounded-md overflow-hidden">
+                            <Image
+                              src={invitation.organization.logo}
+                              alt={`${invitation.organization.name} logó`}
+                              width={48}
+                              height={48}
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <CardDescription className="text-muted-foreground mt-4 block">
+                      <span className="block mt-2">
+                        Hozzon létre egy ingyenes SendMail fiókot a meghívó elfogadásához.
                       </span>
                     </CardDescription>
                   </CardHeader>
@@ -158,6 +186,37 @@ export function SignUpForm() {
 
                   <CardContent className="space-y-4 py-8">
                     <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-muted-foreground">
+                              Email cím
+                            </FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Input
+                                  className="peer ps-9"
+                                  placeholder={invitation.email}
+                                  type="email"
+                                  disabled={true} // Email is read-only
+                                  {...field}
+                                />
+                                <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
+                                  <AtSign
+                                    size={16}
+                                    strokeWidth={2}
+                                    aria-hidden="true"
+                                  />
+                                </div>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
                       <FormField
                         control={form.control}
                         name="name"
@@ -191,37 +250,6 @@ export function SignUpForm() {
 
                       <FormField
                         control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Email cím <span className="text-destructive">*</span>
-                            </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Input
-                                  className="peer ps-9"
-                                  placeholder="pelda@gmail.com"
-                                  type="email"
-                                  disabled={isLoading}
-                                  {...field}
-                                />
-                                <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
-                                  <AtSign
-                                    size={16}
-                                    strokeWidth={2}
-                                    aria-hidden="true"
-                                  />
-                                </div>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
                         name="password"
                         render={({ field }) => (
                           <FormItem>
@@ -230,14 +258,6 @@ export function SignUpForm() {
                                 <span>
                                   Jelszó <span className="text-destructive">*</span>
                                 </span>
-                                <div className="text-center text-sm font-normal text-muted-foreground">
-                                  <Link
-                                    href="/elfelejtett-jelszo"
-                                    className="hover:underline"
-                                  >
-                                    Elfelejtetted a jelszavad?
-                                  </Link>
-                                </div>
                               </div>
                             </FormLabel>
                             <FormControl>
@@ -281,8 +301,8 @@ export function SignUpForm() {
 
                   <CardFooter className="flex-col space-y-2 pt-4">
                     <Button type="submit" className="w-full" isLoading={isLoading}>
-                      Regisztráció
-                      {!isLoading && <Fingerprint className="mr-2 h-4 w-4" />}
+                      Regisztráció és csatlakozás
+                      {!isLoading && <UserCheck className="ml-2 h-4 w-4" />}
                     </Button>
                   </CardFooter>
                 </form>
@@ -294,19 +314,21 @@ export function SignUpForm() {
                 <div className="flex flex-col items-center justify-center">
                   <div className="px-2 py-2">
                     <div className="text-center text-sm text-muted-foreground">
-                      Már van fiókod?{" "}
+                      Már van fiókja?{" "}
                       <Link
                         href="/bejelentkezes"
                         className="text-primary hover:underline"
                       >
-                        Jelentkezz be itt
+                        Jelentkezzen be itt
                       </Link>
                     </div>
                   </div>
                 </div>
               </div>
             </motion.div>
-          ) : (
+          )}
+
+          {view === "verifyEmail" && (
             <motion.div
               key="verifyEmail"
               initial={{ opacity: 0, x: 20 }}
@@ -319,7 +341,6 @@ export function SignUpForm() {
               />
             </motion.div>
           )}
-
         </AnimatePresence>
       </CardStyled>
     </motion.div>
