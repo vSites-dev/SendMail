@@ -57,4 +57,24 @@ router.get("/status/:id", async (req, res) => {
   }
 });
 
+// Get DNS records for a domain
+router.get("/dns-records/:id", async (req, res) => {
+  try {
+    const id = z.string().uuid().parse(req.params.id);
+
+    const dnsRecords = await domainService.getDnsRecords(id);
+
+    res.json({
+      success: true,
+      data: dnsRecords,
+    });
+  } catch (error) {
+    console.error("Error getting DNS records:", error);
+    res.status(400).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    });
+  }
+});
+
 export default router;

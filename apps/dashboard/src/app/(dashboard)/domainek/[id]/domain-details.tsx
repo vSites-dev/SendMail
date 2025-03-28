@@ -38,6 +38,8 @@ interface DnsRecord {
   name: string;
   value: string;
   purpose: string;
+  recordType: string;
+  token?: string;
 }
 
 export function DomainDetails({ domain }: { domain: Domain }) {
@@ -49,7 +51,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
   const utils = api.useUtils();
 
   const { data: records, isLoading: isLoadingDnsRecords, error: dnsRecordsError } =
-    api.domain.getDnsRecords.useQuery({ id: domain.id }, {
+    api.domain.getDnsRecords.useQuery({ domainId: domain.id }, {
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
@@ -63,33 +65,45 @@ export function DomainDetails({ domain }: { domain: Domain }) {
           type: 'TXT',
           name: domain.name,
           value: records.verificationToken || '',
-          purpose: 'Domain verification'
+          purpose: 'Domain verification',
+          recordType: 'TXT',
         },
         {
           type: 'SPF',
           name: domain.name,
           value: records.spfRecord || '',
-          purpose: 'Email authentication'
+          purpose: 'Email authentication',
+          recordType: 'TXT',
         },
         {
           type: 'DMARC',
           name: `_dmarc.${domain.name}`,
           value: records.dmarcRecord || '',
-          purpose: 'Email authentication policy'
+          purpose: 'Email authentication policy',
+          recordType: 'TXT',
         },
         {
           type: 'MX',
           name: records.mailFromSubdomain || '',
           value: records.mailFromMxRecord || '',
-          purpose: 'Mail server configuration'
+          purpose: 'Mail server configuration',
+          recordType: 'MX',
         },
-        ...records.dkimTokens.map((token, index) => ({
-          type: 'DKIM',
-          name: `${index}._domainkey.${domain.name}`,
-          value: token,
-          purpose: 'Email signing key'
-        }))
       ];
+
+      // Add DKIM records if available
+      if (records.dkimTokens && records.dkimTokens.length > 0) {
+        records.dkimTokens.forEach((token, index) => {
+          dnsRecordsList.push({
+            type: 'DKIM',
+            name: `${token}._domainkey.${domain.name}`,
+            value: `${token}.dkim.amazonses.com`,
+            purpose: 'Email signing key',
+            recordType: 'CNAME',
+            token,
+          });
+        });
+      }
 
       setDnsRecords(dnsRecordsList);
       setIsLoadingRecords(false);
@@ -202,92 +216,153 @@ export function DomainDetails({ domain }: { domain: Domain }) {
               </div>
             </div>
           </div>
+          
+          {domain.statusMessage && (
+            <div className="mt-4">
+              <p className="text-xs uppercase font-bold text-muted-foreground">
+                ÁLLAPOT ÜZENET
+              </p>
+              <p className="text-sm mt-1">{domain.statusMessage}</p>
+            </div>
+          )}
+
+          <div className="mt-4">
+            <div className="text-xs uppercase font-bold text-muted-foreground mb-2">
+              DNS HITELESÍTÉS
+            </div>
+            <div className="text-sm bg-white dark:bg-neutral-900 p-3 rounded-md">
+              <p className="mb-2">
+                A domain teljes hitelesítéséhez adja hozzá az alábbi DNS rekordokat a domain beállításaiban. A beállítások elvégzése után kattintson az "Ellenőrzés" gombra.
+              </p>
+            </div>
+          </div>
         </div>
 
         <CardSeparator />
 
-        <CardContent className="my-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-neutral-700">
-              DNS Beállítások
-            </h2>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="outline" className="gap-1">
-                    {getStatusIcon(domain.status)}
-                    {domain.status === "VERIFIED"
-                      ? "Ellenőrizve"
-                      : domain.status === "FAILED"
-                        ? "Sikertelen"
-                        : "Függőben"}
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    {domain.status === "VERIFIED"
-                      ? "A domain sikeresen ellenőrizve lett"
-                      : domain.status === "FAILED"
-                        ? "A domain ellenőrzése sikertelen volt"
-                        : "A domain ellenőrzése folyamatban van"}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+        <CardContent className="p-4">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium mb-2">DNS beállítások</h3>
+            <div className="overflow-x-auto">
+              {isLoadingRecords ? (
+                <div className="space-y-2">
+                  <Skeleton className="w-full h-[60px]" />
+                  <Skeleton className="w-full h-[60px]" />
+                  <Skeleton className="w-full h-[60px]" />
+                </div>
+              ) : (
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-slate-100 dark:bg-neutral-800">
+                      <th className="text-left p-2 text-sm font-medium">Típus</th>
+                      <th className="text-left p-2 text-sm font-medium">Név (Host)</th>
+                      <th className="text-left p-2 text-sm font-medium">Érték</th>
+                      <th className="p-2 w-[70px]">Műveletek</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dnsRecords.map((record, index) => (
+                      <tr 
+                        key={index} 
+                        className={`border-b last:border-b-0 ${
+                          record.type === "DKIM" ? "bg-amber-50 dark:bg-amber-900/20" : ""
+                        }`}
+                      >
+                        <td className="p-2">
+                          <Badge variant="outline" className="font-mono bg-transparent">
+                            {record.recordType}
+                          </Badge>
+                        </td>
+                        <td className="p-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs break-all">{record.name}</span>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-5 ml-1"
+                                    onClick={() => handleCopy(record.name, `host-${record.type}-${index}`)}
+                                  >
+                                    {copiedField === `host-${record.type}-${index}` ? (
+                                      <CheckCircle className="size-3 text-green-500" />
+                                    ) : (
+                                      <Copy className="size-3" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {copiedField === `host-${record.type}-${index}`
+                                    ? "Másolva!"
+                                    : "Host másolása"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <span className="font-mono text-xs break-all">{record.value}</span>
+                        </td>
+                        <td className="p-2 text-right">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="size-6"
+                                  onClick={() => handleCopy(record.value, `${record.type}-${index}`)}
+                                >
+                                  {copiedField === `${record.type}-${index}` ? (
+                                    <CheckCircle className="size-4 text-green-500" />
+                                  ) : (
+                                    <Copy className="size-4" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {copiedField === `${record.type}-${index}`
+                                  ? "Másolva!"
+                                  : "Érték másolása"}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
 
-          <p className="text-sm text-muted-foreground mb-4">
-            Az alábbi DNS beállításokat kell elvégezned a domain szolgáltatódnál,
-            hogy az email küldés működjön. Az ellenőrzés akár 24-48 órát is
-            igénybe vehet a DNS propagáció miatt.
-          </p>
-
-          {isLoadingRecords ? (
-            <div className="space-y-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <table className="w-full">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="p-3 text-left text-sm font-medium">Típus</th>
-                    <th className="p-3 text-left text-sm font-medium">
-                      Host / Név
-                    </th>
-                    <th className="p-3 text-left text-sm font-medium">Érték</th>
-                    <th className="p-3 text-left text-sm font-medium">Cél</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dnsRecords.map((record, index) => (
-                    <tr key={index} className="border-t">
-                      <td className="p-3">{record.type}</td>
-                      <td className="p-3">{record.name}</td>
-                      <td className="group relative p-3">
-                        <span className="mr-8 break-all">{record.value}</span>
-                        <button
-                          onClick={() =>
-                            handleCopy(record.value, `record-${index}`)
-                          }
-                          className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100"
-                        >
-                          {copiedField === `record-${index}` ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Copy className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </button>
-                      </td>
-                      <td className="p-3">{record.purpose}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div className="bg-neutral-100 dark:bg-neutral-900 rounded-md p-4 mt-4">
+            <h4 className="text-sm font-medium mb-2">Útmutató a DNS beállításhoz</h4>
+            <ol className="list-decimal pl-5 text-sm space-y-2">
+              <li>
+                Lépjen be a domain regisztrációs szolgáltatója kezelőfelületére (pl. GoDaddy, Namecheap, stb.)
+              </li>
+              <li>
+                Navigáljon a domainhez tartozó DNS kezelési felületre
+              </li>
+              <li>
+                <strong>Adja hozzá a TXT rekordokat</strong> a domain hitelesítéshez és SPF, DMARC beállításokhoz
+              </li>
+              <li>
+                <strong>Adja hozzá a CNAME rekordokat</strong> a DKIM hitelesítéshez (ezek a legfontosabbak)
+              </li>
+              <li>
+                <strong>Adja hozzá az MX rekordot</strong> a visszapattanó emailek és válaszok kezeléséhez
+              </li>
+              <li>
+                A DNS változások propagációja akár 24-48 órát is igénybe vehet
+              </li>
+              <li>
+                A beállítások után kattintson az "Ellenőrzés" gombra a státusz frissítéséhez
+              </li>
+            </ol>
+          </div>
         </CardContent>
 
         <CardSeparator />

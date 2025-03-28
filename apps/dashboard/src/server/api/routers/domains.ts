@@ -145,21 +145,26 @@ export const domainRouter = createTRPCRouter({
     }),
 
   getDnsRecords: authedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ domainId: z.string() }))
     .query(async ({ ctx, input }) => {
       try {
-
         const domain = await ctx.db.domain.findUnique({
-          where: {
-            id: input.id,
-          },
+          where: { id: input.domainId },
         });
 
         if (!domain) {
           throw new Error("Domain not found");
         }
 
-        return domain;
+        // If we have existing DNS records, return them directly
+        return {
+          dkimTokens: domain.dkimTokens || [],
+          verificationToken: domain.verificationToken,
+          spfRecord: domain.spfRecord,
+          dmarcRecord: domain.dmarcRecord,
+          mailFromSubdomain: domain.mailFromSubdomain,
+          mailFromMxRecord: domain.mailFromMxRecord,
+        };
       } catch (error) {
         console.error("Error fetching DNS records:", error);
         throw new Error("Failed to fetch DNS records");
@@ -169,12 +174,39 @@ export const domainRouter = createTRPCRouter({
   verifyDomain: authedProcedure
     .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // Use the helper function for domain verification
-      return await verifyDomainHelper(
-        ctx.db,
-        input.name,
-        ctx.session.activeProjectId,
-      );
+      try {
+        // Call the Express API to verify domain
+        const response = await fetch(`${process.env.API_URL}/domains/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            domain: input.name,
+            projectId: ctx.session.activeProjectId,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || "Domain verification failed");
+        }
+
+        return {
+          success: true,
+          id: result.data.id,
+        };
+      } catch (error) {
+        console.error("Error verifying domain:", error);
+        return {
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "Hiba történt a domain ellenőrzése során.",
+        };
+      }
     }),
 
   checkVerificationStatus: authedProcedure
@@ -191,7 +223,7 @@ export const domainRouter = createTRPCRouter({
           throw new Error("Domain not found");
         }
 
-        // Call the backend API to check verification status using fetch
+        // Call the Express API to check verification status
         const response = await fetch(
           `${process.env.API_URL}/domains/status/${input.id}`,
         );
@@ -202,36 +234,28 @@ export const domainRouter = createTRPCRouter({
           );
         }
 
-        const data = await response.json();
+        const result = await response.json();
 
-        if (data.success) {
-          const statusData = data.data;
-
-          // Update domain status in database
-          await ctx.db.domain.update({
-            where: {
-              id: input.id,
-            },
-            data: {
-              status: statusData.status as DomainStatus,
-            },
-          });
-
-          return {
-            success: true,
-            status: statusData,
-          };
-        } else {
-          throw new Error(data.error || "Failed to check domain status");
+        if (!result.success) {
+          throw new Error(result.error || "Failed to check domain status");
         }
+
+        return {
+          success: true,
+          status: result.data.status,
+          statusMessage: result.data.statusMessage,
+          verificationStatus: result.data.verificationStatus,
+          dkimStatus: result.data.dkimStatus,
+          mailFromStatus: result.data.mailFromStatus,
+        };
       } catch (error) {
-        console.error("Error checking domain verification status:", error);
+        console.error("Error checking domain status:", error);
         return {
           success: false,
           error:
             error instanceof Error
               ? error.message
-              : "Hiba történt a domain státuszának ellenőrzése során.",
+              : "Hiba történt a domain ellenőrzése során.",
         };
       }
     }),

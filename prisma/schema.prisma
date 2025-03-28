@@ -123,8 +123,6 @@ model Project {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
-  from String?
-
   // relations
   campaigns Campaign[]
   contacts  Contact[]
@@ -139,7 +137,7 @@ model Campaign {
   id   String @id @default(uuid())
   name String
 
-  from String?
+  from String
 
   status CampaignStatus @default(DRAFT)
 
