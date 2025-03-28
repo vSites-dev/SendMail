@@ -2,28 +2,14 @@
 
 import * as React from "react";
 import { useAtom } from "jotai";
-import { campaignSettingsAtom } from "@/store/global";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { campaignNameAtom } from "@/store/global";
 
 export function CampaignSettings() {
-  const [settings, setSettings] = useAtom(campaignSettingsAtom);
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSettings(prev => ({
-      name: e.target.value,
-      trackLinks: prev?.trackLinks ?? false
-    }));
-  };
-
-  const handleTrackLinksChange = (checked: boolean) => {
-    setSettings(prev => ({
-      name: prev?.name || "",
-      trackLinks: checked
-    }));
-  };
+  const [name, setName] = useAtom(campaignNameAtom);
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -41,14 +27,14 @@ export function CampaignSettings() {
               <Input
                 id="campaign-name"
                 placeholder="Adj nevet a kampánynak"
-                value={settings?.name || ""}
-                onChange={handleNameChange}
+                value={name || ""}
+                onChange={(e) => setName(e.target.value)}
               />
               <p className="text-sm text-muted-foreground">
                 Ez a név segít azonosítani a kampányt a rendszerben.
               </p>
             </div>
-
+            {/* 
             <div className="flex flex-row items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <Label htmlFor="track-links" className="text-base">Linkek követése</Label>
@@ -61,7 +47,7 @@ export function CampaignSettings() {
                 checked={settings?.trackLinks || false}
                 onCheckedChange={handleTrackLinksChange}
               />
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>

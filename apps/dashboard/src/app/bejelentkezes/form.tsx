@@ -147,7 +147,8 @@ export function SignInForm() {
 											type="button"
 											className="w-full text-neutral-800"
 											onClick={handleGoogleSignIn}
-											isLoading={isGoogleLoading || isLoading}
+											disabled={isLoading}
+											isLoading={isGoogleLoading}
 										>
 											{!(isGoogleLoading || isLoading) && (
 												<div className="h-4 w-4">

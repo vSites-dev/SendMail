@@ -7,8 +7,6 @@ import { InvitationData } from "@/types";
 import DotPattern from "@/components/ui/dot-pattern";
 import { cn } from "@/lib/utils";
 
-
-
 export default async function ProjectInvitationPage({
   params,
 }: {
@@ -41,32 +39,33 @@ export default async function ProjectInvitationPage({
 
   // If invitation doesn't exist or has expired, redirect to home
   if (!invitation || invitation.expiresAt < new Date()) {
+    console.log("invitation doesn't exist or has expired")
     return redirect("/");
   }
 
   // If user is already logged in
   if (session) {
-    const user = await db.user.findUnique({
-      where: { id: session.user.id },
-    });
-
     // If the logged-in user's email matches the invitation email, accept the invitation
-    if (user && user.email === invitation.email) {
-      auth.api.acceptInvitation({
+    if (session.user.email === invitation.email) {
+      console.log("trying to accept the invitation", invitationId)
+
+      const res = await auth.api.acceptInvitation({
         body: {
           invitationId
         }
       })
+
+      console.log("accepted invitation", res)
       // // Accept the invitation
-      // await db.member.create({
-      //   data: {
-      //     id: crypto.randomUUID(),
-      //     organizationId: invitation.organizationId,
-      //     userId: user.id,
-      //     role: invitation.role || "member",
-      //     createdAt: new Date(),
-      //   },
-      // });
+      await db.member.create({
+        data: {
+          id: crypto.randomUUID(),
+          organizationId: invitation.organizationId,
+          userId: session.user.id,
+          role: invitation.role || "member",
+          createdAt: new Date(),
+        },
+      });
 
       // // Update invitation status
       // await db.invitation.update({

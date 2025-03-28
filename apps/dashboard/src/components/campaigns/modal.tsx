@@ -23,7 +23,7 @@ import { CampaignOverview } from "@/components/campaigns/overview";
 import { CampaignFlow } from "@/components/campaigns/flow";
 import { Contact, Template } from "@prisma/client";
 import { useAtom } from "jotai";
-import { campaignEmailBlocksAtom, campaignSettingsAtom, selectedCampaignContactsAtom } from "@/store/global";
+import { campaignEmailBlocksAtom, campaignNameAtom, selectedCampaignContactsAtom } from "@/store/global";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { Badge } from "../ui/badge";
@@ -53,11 +53,11 @@ export function CampaignModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
+  const [name, setName] = useAtom(campaignNameAtom);
   const [selectedContacts, setSelectedContacts] = useAtom(
     selectedCampaignContactsAtom
   );
   const [emailBlocks, setEmailBlocks] = useAtom(campaignEmailBlocksAtom);
-  const [settings] = useAtom(campaignSettingsAtom);
 
   const steps: Step[] = [
     {
@@ -105,55 +105,6 @@ export function CampaignModal({
       window.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
-
-  useEffect(() => {
-    if (isOpen && modalRef.current) {
-      previousFocusRef.current = document.activeElement as HTMLElement;
-
-      const focusableElements = modalRef.current.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      );
-
-      if (focusableElements.length > 0) {
-        (focusableElements[0] as HTMLElement).focus();
-      } else {
-        modalRef.current.focus();
-      }
-
-      const handleTabKey = (e: KeyboardEvent) => {
-        if (e.key === "Tab") {
-          if (!modalRef.current?.contains(document.activeElement)) return;
-
-          const focusableElements = Array.from(
-            modalRef.current.querySelectorAll(
-              'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-            ),
-          ) as HTMLElement[];
-
-          if (focusableElements.length === 0) return;
-
-          const firstElement = focusableElements[0];
-          const lastElement = focusableElements[focusableElements.length - 1];
-
-          if (e.shiftKey && document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement?.focus();
-          } else if (!e.shiftKey && document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement?.focus();
-          }
-        }
-      };
-
-      window.addEventListener("keydown", handleTabKey);
-
-      return () => {
-        window.removeEventListener("keydown", handleTabKey);
-
-        if (previousFocusRef.current) previousFocusRef.current.focus();
-      };
-    }
-  }, [isOpen]);
 
   const { mutateAsync: createCampaign, isPending } = api.campaign.createWithTask.useMutation();
 
@@ -218,7 +169,7 @@ export function CampaignModal({
 
     if (currentStep === 3) {
       // Check if settings exist and name is at least 3 characters long
-      return !settings || !settings.name || settings.name.length < 3;
+      return !name;
     }
 
     return false;
