@@ -10,6 +10,13 @@ const config: NextConfig = {
       {
         hostname: "lh3.googleusercontent.com",
       },
+      {
+        hostname: "picsum.photos",
+      },
+      {
+        hostname: "localhost",
+        port: "8080",
+      },
     ],
   },
 };

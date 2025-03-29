@@ -191,7 +191,7 @@ export function ImageUpload<
               src={field.value}
               alt="Feltöltött kép"
               fill
-              className="object-cover"
+              className="object-contain bg-gradient-to-br from-neutral-50 to-neutral-100"
             />
           </div>
           <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">

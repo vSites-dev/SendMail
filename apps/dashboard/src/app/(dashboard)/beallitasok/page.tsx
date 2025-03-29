@@ -13,8 +13,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Settings2 } from "lucide-react";
 import PersonalSettings from "./personal-settings";
 import ProjectSettings from "./project-settings";
+import { auth } from "@/lib/auth/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {
+  const session = await auth.api.getSession({ headers: await headers() })
+
+  if (!session) redirect("/bejelentkezes")
+
   return (
     <HydrateClient>
       <DashboardHeader>
@@ -55,7 +62,7 @@ export default async function SettingsPage() {
           </TabsList>
 
           <TabsContent value="personal">
-            <PersonalSettings />
+            <PersonalSettings user={session.user} />
           </TabsContent>
 
           <TabsContent value="project">
