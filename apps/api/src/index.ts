@@ -1,34 +1,41 @@
-import 'dotenv/config';
-import express from "express";
-import cors from "cors";
-import prisma from "./lib/prisma";
-import emailRoutes from "./routes/emailRoutes";
-import taskRoutes from "./routes/taskRoutes";
-import domainRoutes from "./routes/domainRoutes";
-import { TaskScheduler } from "./services/tasks/taskScheduler";
-import contactRoutes from './routes/contactRoutes';
+import 'dotenv/config'
+import express from 'express'
+import cors from 'cors'
+import path from 'path'
+import prisma from './lib/prisma'
+import emailRoutes from './routes/emailRoutes'
+import taskRoutes from './routes/taskRoutes'
+import domainRoutes from './routes/domainRoutes'
+import { TaskScheduler } from './services/tasks/taskScheduler'
+import contactRoutes from './routes/contactRoutes'
+import imageRoutes from './routes/imageRoutes'
 
-const app = express();
-const port = process.env.PORT || 8080;
+const app = express()
+const port = process.env.PORT || 8080
 
-app.use(cors());
-app.use(express.json());
+app.use(cors())
+app.use(express.json())
+
+// Set up static file serving for uploaded images
+const uploadsPath = path.join(__dirname, '../uploads')
+app.use('/images', express.static(uploadsPath))
 
 // Routes
-app.use('/email', emailRoutes);
-app.use("/tasks", taskRoutes);
-app.use("/domains", domainRoutes);
-app.use("/contacts", contactRoutes)
+app.use('/email', emailRoutes)
+app.use('/tasks', taskRoutes)
+app.use('/domains', domainRoutes)
+app.use('/contacts', contactRoutes)
+app.use('/images', imageRoutes)
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
+  res.json({ status: 'OK', timestamp: new Date().toISOString() })
+})
 
 // Initialize task scheduler
-export const taskScheduler = new TaskScheduler();
-taskScheduler.start();
+export const taskScheduler = new TaskScheduler()
+taskScheduler.start()
 
 app.listen(port, () => {
-  console.log(`API server running on port ${port}`);
-});
+  console.log(`API server running on port ${port}`)
+})
