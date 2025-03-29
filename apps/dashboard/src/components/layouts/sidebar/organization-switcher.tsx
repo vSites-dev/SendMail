@@ -89,13 +89,14 @@ export function OrganizationSwitcher({
             >
               <div className="flex aspect-square size-8 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground rounded-sm relative">
                 <img
+                  suppressHydrationWarning
                   className="size-8"
                   src={activeOrganization.logo ?? "/brand/icon.jpg"}
                   alt={activeOrganization?.name ?? "Porjekt#" + activeOrganization.id}
                 />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
+                <span className="truncate font-semibold" suppressHydrationWarning>
                   {activeOrganization?.name}
                 </span>
               </div>
@@ -116,9 +117,11 @@ export function OrganizationSwitcher({
                 key={organization.slug}
                 onClick={() => switchOrganization(organization.id)}
                 className="gap-2 p-2"
+                suppressHydrationWarning
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border relative">
                   <img
+                    suppressHydrationWarning
                     className="size-6"
                     src={organization.logo ?? "/brand/icon.jpg"}
                     alt={organization.name}
@@ -129,7 +132,7 @@ export function OrganizationSwitcher({
               </DropdownMenuItem>
             ))}
 
-            {invitations.length > 0 && invitations.map((invitation, index) => (
+            {invitations.length > 0 && invitations.filter(invitation => invitation.status === "pending").map((invitation, index) => (
               <DropdownMenuItem
                 key={invitation.id}
                 onClick={() => {
@@ -137,11 +140,18 @@ export function OrganizationSwitcher({
                 }}
                 className="gap-2 p-2 items-center"
               >
-                <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                  <Megaphone className="size-4 text-violet-600" />
+                <div className="flex size-6 items-center justify-center rounded-sm border relative">
+                  <img
+                    suppressHydrationWarning
+                    className="size-6"
+                    src={invitation.organization.logo ?? "/brand/icon.jpg"}
+                    alt={invitation.organization.name}
+                  />
                 </div>
                 <div>
-                  <p className="text-xs text-violet-600 mb-0">
+                  <p className="text-xs text-violet-600 mb-0 flex items-center gap-1" suppressHydrationWarning>
+                    <Megaphone className="size-3 text-violet-600" />
+
                     {invitation.organization.name}
                   </p>
                   <p className="mt-0">
@@ -161,7 +171,7 @@ export function OrganizationSwitcher({
                   <Rocket className="size-4 text-indigo-600" />
                 </div>
                 <span>
-                  Új projekt
+                  Új SendMail projekt
                 </span>
               </Link>
             </DropdownMenuItem>

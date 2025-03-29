@@ -10,6 +10,7 @@ import MainStats from "@/components/dashboard/main-stats";
 import { ChartColumnBig, Home } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import ActionsPanel from "@/components/dashboard/actions-panel";
 
 
 
@@ -31,6 +32,10 @@ export default async function Dashboard() {
       </DashboardHeader>
 
       <main className="flex flex-col py-8 px-4 md:px-8 relative mx-auto space-y-6 container">
+        <ActionsPanel />
+
+        <div className="h-4" />
+
         <div className="flex items-center justify-between gap-2">
           <div className="flex gap-3 items-center">
             <div
@@ -48,7 +53,6 @@ export default async function Dashboard() {
         </div>
 
         <MainStats />
-
         <EmailsLineChart />
       </main>
     </HydrateClient>

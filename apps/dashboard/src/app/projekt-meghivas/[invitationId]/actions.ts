@@ -2,7 +2,6 @@
 
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/server/db";
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
 export async function acceptInvitation(invitationId: string) {

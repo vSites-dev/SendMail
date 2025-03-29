@@ -3,13 +3,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import {
-  DatabaseZap,
-  Eye,
-  FlaskConical,
-  MessageCircleMore,
-  PenSquare,
-  ScrollText,
-  Zap,
+  Mail,
+  Megaphone,
+  UserPlus,
 } from "lucide-react";
 import Link from "next/link";
 import DotPattern from "../ui/dot-pattern";
@@ -46,7 +42,7 @@ const ActionsPanel = () => {
       />
 
       <CardContent className="p-0">
-        <h2 className="text-xl font-semibold mb-4 text-neutral-700">
+        <h2 className="title font-semibold mb-4 text-lg">
           Gyors műveletek
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -56,10 +52,10 @@ const ActionsPanel = () => {
             transition={{ delay: 0.1 }}
           >
             <ActionCard
-              icon={MessageCircleMore}
-              title="Beszélgetések"
-              href="/beszelgetesek"
-              gradient="bg-gradient-to-br from-blue-500/80 to-blue-700/80"
+              icon={Megaphone}
+              title="Kampányok"
+              href="/kampanyok"
+              gradient="bg-gradient-to-br from-violet-500/80 to-purple-700/80"
             />
           </motion.div>
           <motion.div
@@ -68,10 +64,10 @@ const ActionsPanel = () => {
             transition={{ delay: 0.2 }}
           >
             <ActionCard
-              icon={Zap}
-              title="Leó tudásbázisa"
-              href="/tudasbazis"
-              gradient="bg-gradient-to-br from-green-500/80 to-emerald-700/80"
+              icon={UserPlus}
+              title="Új kontakt"
+              href="/kontaktok/uj"
+              gradient="bg-gradient-to-br from-blue-500/80 to-blue-700/80"
             />
           </motion.div>
 
@@ -81,10 +77,10 @@ const ActionsPanel = () => {
             transition={{ delay: 0.3 }}
           >
             <ActionCard
-              icon={ScrollText}
-              title="Bejegyzések"
-              href="/bejegyzesek"
-              gradient="bg-gradient-to-br from-violet-500/80 to-purple-700/80"
+              icon={Mail}
+              title="Kiküldött emailek"
+              href="/emailek"
+              gradient="bg-gradient-to-br from-green-500/80 to-emerald-700/80"
             />
           </motion.div>
         </div>

@@ -150,7 +150,7 @@ export function SignInForm() {
 											disabled={isLoading}
 											isLoading={isGoogleLoading}
 										>
-											{!(isGoogleLoading || isLoading) && (
+											{!isGoogleLoading && (
 												<div className="h-4 w-4">
 													<Image
 														src="/google.svg"
