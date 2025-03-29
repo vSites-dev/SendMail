@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import MemberInviteInput from "./member-invite-input";
 import { authClient } from "@/lib/auth/client";
 import { createProject } from "../actions";
+import { createSlug } from "@/lib/utils";
 
 export default function OnboardingStepTwo() {
   const router = useRouter();
@@ -34,11 +35,9 @@ export default function OnboardingStepTwo() {
       memberInvites.length > 0 &&
       memberInvites.every((invite) => invite.email && invite.role)
     ) {
-      const organizationSlug = name.toLowerCase().replace(/\s+/g, "-");
-
       const org = await authClient.organization.create({
         name,
-        slug: organizationSlug,
+        slug: createSlug(name),
       })
       console.log("created org", org);
       if (!org.data) throw new Error("Valami hiba történt a projekt létrehozása során");
@@ -85,6 +84,30 @@ export default function OnboardingStepTwo() {
     ]);
   };
 
+  const handleEmailChange = (id: number, email: string) => {
+    setMemberInvites((prev) => {
+      const newInvites = [...prev];
+      newInvites[id - 1]!.email = email;
+      return newInvites;
+    });
+  };
+
+  const handleRoleChange = (id: number, role: MemberRole) => {
+    setMemberInvites((prev) => {
+      const newInvites = [...prev];
+      newInvites[id - 1]!.role = role;
+      return newInvites;
+    });
+  };
+
+  const handleRemove = (id: number) => {
+    setMemberInvites((prev) => {
+      const newInvites = [...prev];
+      newInvites.splice(id - 1, 1);
+      return newInvites;
+    });
+  };
+
   return (
     <div className="mx-auto p-4">
       <div
@@ -115,6 +138,9 @@ export default function OnboardingStepTwo() {
                 id={index + 1}
                 email={invite.email}
                 role={invite.role}
+                onEmailChange={(email) => handleEmailChange(index + 1, email)}
+                onRoleChange={(role) => handleRoleChange(index + 1, role)}
+                onRemove={() => handleRemove(index + 1)}
               />
             ))}
           </div>

@@ -5,6 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const createSlug = (name: string) =>
+  name.toLowerCase().replace(/\s+/g, "-");
+
 export const contactStatuses = {
   SUBSCRIBED: {
     label: "Feliratkozva",

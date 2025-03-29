@@ -29,7 +29,6 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function PersonalSettings({ user }: { user: User }) {
-  const router = useRouter();
   const [isLoading, setLoading] = useState(false);
 
   const form = useForm<FormValues>({

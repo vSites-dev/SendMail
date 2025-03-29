@@ -34,7 +34,6 @@ export default async function DashboardLayout({
     },
   });
 
-  console.log("hello????", membersForTheUser)
   if (membersForTheUser.length === 0) {
     if (invitations && invitations[0] && invitations[0].id) {
       console.log("miafasz?????")

@@ -23,6 +23,37 @@ export const projectRouter = createTRPCRouter({
       });
     }),
 
+  getFullOrganization: authedProcedure.query(async ({ ctx }) => {
+    if (!ctx.session.session.activeOrganizationId) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Nem található az aktív organizáció",
+      });
+    }
+
+    const data = await ctx.db.organization.findUnique({
+      where: {
+        id: ctx.session.session.activeOrganizationId,
+      },
+      include: {
+        project: true,
+        invitations: true,
+        members: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!data || !data.project) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Nem található a projekt",
+      });
+    } else return data;
+  }),
+
   // Get invitation details
   getInvitationById: publicProcedure
     .input(
@@ -188,3 +219,5 @@ export const projectRouter = createTRPCRouter({
 type ProjectRouter = typeof projectRouter;
 
 type ProjectRouterOutputs = inferRouterOutputs<ProjectRouter>;
+
+export type FullOrganization = ProjectRouterOutputs["getFullOrganization"];

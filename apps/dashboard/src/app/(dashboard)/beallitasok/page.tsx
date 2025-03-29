@@ -5,22 +5,32 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { HydrateClient } from "@/trpc/server";
+import { api, HydrateClient } from "@/trpc/server";
 import { Cog, Home } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Settings2 } from "lucide-react";
-import PersonalSettings from "./personal-settings";
-import ProjectSettings from "./project-settings";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import SettingsTabs from "./tabs";
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() })
-
   if (!session) redirect("/bejelentkezes")
+
+  const fullOrganization = await api.project.getFullOrganization()
+
+  const headersList = await headers();
+  const urlStr = headersList.get("x-url");
+  let defaultTab = "personal";
+  if (urlStr) {
+    try {
+      const url = new URL(urlStr);
+      defaultTab = url.searchParams.get("tab") || "personal";
+    } catch (e) {
+      console.error("Invalid URL:", e);
+    }
+  }
 
   return (
     <HydrateClient>
@@ -49,26 +59,7 @@ export default async function SettingsPage() {
           <h1 className="text-2xl title">Beállítások</h1>
         </div>
 
-        <Tabs defaultValue="personal" className="w-full mt-6">
-          <TabsList>
-            <TabsTrigger value="personal" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Személyes beállítások
-            </TabsTrigger>
-            <TabsTrigger value="project" className="flex items-center gap-2">
-              <Settings2 className="h-4 w-4" />
-              Projekt beállítások
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="personal">
-            <PersonalSettings user={session.user} />
-          </TabsContent>
-
-          <TabsContent value="project">
-            <ProjectSettings />
-          </TabsContent>
-        </Tabs>
+        <SettingsTabs defaultTab={defaultTab} user={session.user} fullOrganization={fullOrganization} />
       </main>
     </HydrateClient>
   );
