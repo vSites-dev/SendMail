@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
+  Cog,
   CreditCard,
   LogOut,
   Sparkles,
@@ -81,28 +82,15 @@ export function NavUser({ user }: { user: User }) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {/* <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+            <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href="/beallitasok">
+                  <Cog />
+                  Beállítások
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator /> */}
             <DropdownMenuItem asChild>
               <Link href="/kijelentkezes">
                 <LogOut />
@@ -112,9 +100,6 @@ export function NavUser({ user }: { user: User }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
-      <div className="flex items-center border-t pb-2 pt-4 justify-center">
-        <Image src="/brand/logo.svg" alt="SendMail logó" height={20} width={100} quality={100} />
-      </div>
     </SidebarMenu>
   );
 }

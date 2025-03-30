@@ -15,8 +15,6 @@ export const adminRouter = createTRPCRouter({
         },
       });
 
-      return {
-        exists: !!user,
-      };
+      return !!user;
     }),
 });

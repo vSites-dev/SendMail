@@ -37,9 +37,8 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { authClient } from "@/lib/auth/client";
-import { InvitationData } from "@/types";
-import { acceptInvitation } from "./actions";
 import { VerifyEmail } from "@/components/ui/verify-email";
+import { GetInvitationById } from "@/server/api/routers/projects";
 
 const formSchema = z
   .object({
@@ -62,11 +61,7 @@ const formSchema = z
     },
   );
 
-interface InvitationRegistrationProps {
-  invitation: InvitationData;
-}
-
-export function InvitationRegistration({ invitation }: InvitationRegistrationProps) {
+export function InvitationRegistration({ invitation }: { invitation: GetInvitationById }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [view, setView] = useState<"signUp" | "verifyEmail">(
@@ -158,7 +153,7 @@ export function InvitationRegistration({ invitation }: InvitationRegistrationPro
                             {invitation.organization.name}
                           </h3>
                           <p className="text-xs text-violet-600 dark:text-violet-400">
-                            {invitation.inviter.name} ({invitation.inviter.email}) meghívta Önt
+                            {invitation.user.name} ({invitation.user.email}) meghívta Önt
                           </p>
                         </div>
                         {invitation.organization.logo && (

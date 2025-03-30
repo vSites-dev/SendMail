@@ -38,6 +38,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { authClient } from "@/lib/auth/client";
 import { InvitationData } from "@/types";
 import { useRouter } from "next/navigation";
+import { GetInvitationById } from "@/server/api/routers/projects";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -48,11 +49,7 @@ const formSchema = z.object({
   }),
 });
 
-interface InvitationSignInProps {
-  invitation: InvitationData;
-}
-
-export function InvitationSignIn({ invitation }: InvitationSignInProps) {
+export function InvitationSignIn({ invitation }: { invitation: GetInvitationById }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -140,7 +137,7 @@ export function InvitationSignIn({ invitation }: InvitationSignInProps) {
                           {invitation.organization.name}
                         </h3>
                         <p className="text-xs text-violet-600 dark:text-violet-400">
-                          {invitation.inviter.name} ({invitation.inviter.email}) meghívta Önt
+                          {invitation.user.name} ({invitation.user.email}) meghívta Önt
                         </p>
                       </div>
                       {invitation.organization.logo && (
