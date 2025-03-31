@@ -86,7 +86,10 @@ export function InvitationSignIn({ invitation }: { invitation: GetInvitationById
 
       if (data.user.id) {
         toast.success("Sikeres bejelentkezés!");
-        router.refresh();
+        await authClient.organization.acceptInvitation({
+          invitationId: invitation.id,
+        });
+        router.push("/")
       }
     } catch (error) {
       console.error("Sign in error:", error);

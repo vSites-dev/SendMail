@@ -132,7 +132,7 @@ export function OrganizationSwitcher({
               </DropdownMenuItem>
             ))}
 
-            {invitations.length > 0 && invitations.filter(invitation => invitation.status === "pending").map((invitation, index) => (
+            {invitations?.map((invitation, index) => (
               <DropdownMenuItem
                 key={invitation.id}
                 onClick={() => {

@@ -94,13 +94,6 @@ export const projectRouter = createTRPCRouter({
         });
       }
 
-      if (invitation.expiresAt < new Date()) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Invitation has expired",
-        });
-      }
-
       return invitation;
     }),
 

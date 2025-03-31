@@ -76,11 +76,13 @@ export function AppSidebar({
 }) {
   const session = authClient.useSession()
 
+  const pendingNotExpiredInvitations = invitations.filter(invitation => invitation.status === "pending" && invitation.expiresAt > new Date());
+
   return (
     <Sidebar collapsible="icon" {...sidebarProps}>
       <SidebarHeader className="border-b">
         <OrganizationSwitcher
-          invitations={invitations}
+          invitations={pendingNotExpiredInvitations}
           organizations={organizations}
           activeOrganizationFromServer={activeOrganizationFromServer}
           activeProjectFromServer={activeProjectFromServer}

@@ -26,6 +26,10 @@ export default async function ProjectInvitationPage({
       try {
         console.log("trying to accept the invitation", invitationId)
 
+        if (invitation.expiresAt < new Date()) {
+          return redirect("/")
+        }
+
         const res = await auth.api.acceptInvitation({
           body: {
             invitationId: invitationId,
