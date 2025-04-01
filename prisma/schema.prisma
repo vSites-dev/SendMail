@@ -193,7 +193,6 @@ model Email {
   clicks Click[]
 
   sentAt    DateTime?
-  openedAt  DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -288,8 +287,6 @@ enum EmailStatus {
   SENT
   DELIVERED
   BOUNCED
-  OPENED
-  CLICKED
   COMPLAINED
   FAILED
 }

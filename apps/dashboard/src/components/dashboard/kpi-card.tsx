@@ -4,42 +4,38 @@ import { Card, CardSeparator } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Eye,
-  FolderOpen,
   TrendingDown,
   TrendingUp,
   MousePointerClick,
   Minus,
-  Sigma,
-  Mail,
+  Mails,
+  Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { useAtom } from "jotai";
 import { selectedIntervalAtom } from "@/store/global";
-import { useEffect, useState } from "react";
 
 interface KpiCardProps {
   title: string;
   value: number;
   previousValue: number;
-  type: "sent" | "opens" | "clicks";
+  type: "campaigns" | "emails" | "clicks";
   className?: string;
   loading?: boolean;
 }
 
 const icons = {
-  sent: Mail,
-  opens: FolderOpen,
+  campaigns: Megaphone,
+  emails: Mails,
   clicks: MousePointerClick,
 };
 
 const iconColorByType = {
-  sent: "text-blue-500",
-  opens: "text-green-500",
+  campaigns: "text-blue-500",
+  emails: "text-green-500",
   clicks: "text-yellow-500",
 };
-
 const KpiCard = ({
   title,
   value,
@@ -78,7 +74,7 @@ const KpiCard = ({
                 </div>
                 <h3 className="text-base font-medium">{title}</h3>
               </div>
-              <Skeleton className="h-8 w-48 mt-4" />
+              <Skeleton className="h-8 w-48 mt-4" suppressHydrationWarning />
             </motion.div>
           ) : (
             <motion.div
@@ -98,12 +94,18 @@ const KpiCard = ({
                 </div>
                 <h3 className="text-base font-medium">{title}</h3>
               </div>
-              <p className="text-3xl mt-3 font-bold">
-                <NumberTicker
-                  value={value}
-                  decimalPlaces={Number.isInteger(value) ? 0 : 2}
-                  className="text-3xl font-mono tracking-tight font-semibold"
-                />
+              <p className="text-3xl mt-3 font-bold" suppressHydrationWarning>
+                {value === 0 ? (
+                  <span className="text-3xl font-mono tracking-tight font-semibold">
+                    0
+                  </span>
+                ) : (
+                  <NumberTicker
+                    value={value}
+                    decimalPlaces={Number.isInteger(value) ? 0 : 2}
+                    className="text-3xl font-mono tracking-tight font-semibold"
+                  />
+                )}
                 <span className="text-xs ml-2 font-medium text-muted-foreground">
                   vs.
                 </span>

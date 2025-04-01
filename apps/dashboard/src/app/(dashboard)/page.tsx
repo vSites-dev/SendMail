@@ -15,9 +15,9 @@ import ActionsPanel from "@/components/dashboard/actions-panel";
 
 
 export default async function Dashboard() {
-  // void api.dashboard.sentEmailCount.prefetch({ timeInterval: 30 });
-  // void api.dashboard.openedEmailCount.prefetch({ timeInterval: 30 });
-  // void api.dashboard.openedLinkCount.prefetch({ timeInterval: 30 });
+  void api.campaign.scheduledCampaignsCount.prefetch({ timeInterval: 30 });
+  void api.email.emailCount.prefetch({ timeInterval: 30 });
+  void api.email.clickCount.prefetch({ timeInterval: 30 });
 
   return (
     <HydrateClient>

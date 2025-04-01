@@ -9,6 +9,46 @@ import { z } from "zod";
 import { CampaignStatus, TaskStatus, TaskType } from "@prisma/client";
 
 export const campaignRouter = createTRPCRouter({
+  scheduledCampaignsCount: authedProcedure
+    .input(
+      z.object({
+        timeInterval: z.number(),
+      }),
+    )
+    .query(async ({ input: { timeInterval }, ctx }) => {
+      if (!ctx.session.activeProjectId) return;
+
+      const [currentCount, previousCount] = await Promise.all([
+        // current period
+        ctx.db.campaign.count({
+          where: {
+            projectId: ctx.session.activeProjectId,
+            status: CampaignStatus.SCHEDULED,
+            createdAt: {
+              gte: new Date(Date.now() - timeInterval * 24 * 60 * 60 * 1000),
+            },
+          },
+        }),
+
+        // for previous period
+        ctx.db.campaign.count({
+          where: {
+            projectId: ctx.session.activeProjectId,
+            status: CampaignStatus.SCHEDULED,
+            createdAt: {
+              lt: new Date(Date.now() - timeInterval * 24 * 60 * 60 * 1000),
+              gte: new Date(Date.now() - timeInterval * 2 * 24 * 60 * 60 * 1000),
+            },
+          },
+        }),
+      ]);
+
+      return {
+        value: currentCount ?? 0,
+        previousValue: previousCount ?? 0,
+      };
+    }),
+
   getAll: authedProcedure.query(async ({ ctx }) => {
     return await ctx.db.campaign.findMany({
       where: {

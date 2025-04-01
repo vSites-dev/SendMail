@@ -9,6 +9,98 @@ import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
 
 export const emailRouter = createTRPCRouter({
+  clickCount: authedProcedure
+    .input(
+      z.object({
+        timeInterval: z.number(),
+      }),
+    )
+    .query(async ({ input: { timeInterval }, ctx }) => {
+      if (!ctx.session.activeProjectId) return;
+
+      const [currentCount, previousCount] = await Promise.all([
+        // current period
+        ctx.db.click.count({
+          where: {
+            email: {
+              campaign: {
+                projectId: ctx.session.activeProjectId,
+              },
+            },
+            createdAt: {
+              gte: new Date(Date.now() - timeInterval * 24 * 60 * 60 * 1000),
+            },
+          },
+        }),
+
+        // for previous period
+        ctx.db.click.count({
+          where: {
+            email: {
+              campaign: {
+                projectId: ctx.session.activeProjectId,
+              },
+            },
+            createdAt: {
+              lt: new Date(Date.now() - timeInterval * 24 * 60 * 60 * 1000),
+              gte: new Date(
+                Date.now() - timeInterval * 2 * 24 * 60 * 60 * 1000,
+              ),
+            },
+          },
+        }),
+      ]);
+
+      return {
+        value: currentCount ?? 0,
+        previousValue: previousCount ?? 0,
+      };
+    }),
+
+  emailCount: authedProcedure
+    .input(
+      z.object({
+        timeInterval: z.number(),
+      }),
+    )
+    .query(async ({ input: { timeInterval }, ctx }) => {
+      if (!ctx.session.activeProjectId) return;
+
+      const [currentCount, previousCount] = await Promise.all([
+        // current period
+        ctx.db.email.count({
+          where: {
+            contact: {
+              projectId: ctx.session.activeProjectId,
+            },
+            createdAt: {
+              gte: new Date(Date.now() - timeInterval * 24 * 60 * 60 * 1000),
+            },
+          },
+        }),
+
+        // for previous period
+        ctx.db.email.count({
+          where: {
+            contact: {
+              projectId: ctx.session.activeProjectId,
+            },
+            createdAt: {
+              lt: new Date(Date.now() - timeInterval * 24 * 60 * 60 * 1000),
+              gte: new Date(
+                Date.now() - timeInterval * 2 * 24 * 60 * 60 * 1000,
+              ),
+            },
+          },
+        }),
+      ]);
+
+      return {
+        value: currentCount ?? 0,
+        previousValue: previousCount ?? 0,
+      };
+    }),
+
   getAll: authedProcedure.query(async ({ ctx }) => {
     return await ctx.db.email.findMany({
       where: {
@@ -153,9 +245,9 @@ export const emailRouter = createTRPCRouter({
           "QUEUED",
           "SENT",
           "DELIVERED",
-          "OPENED",
           "BOUNCED",
-          "ERROR",
+          "COMPLAINED",
+          "FAILED",
         ]),
       }),
     )
@@ -165,7 +257,6 @@ export const emailRouter = createTRPCRouter({
           where: { id: input.id },
           data: {
             status: input.status,
-            ...(input.status === "OPENED" ? { openedAt: new Date() } : {}),
           },
         });
 

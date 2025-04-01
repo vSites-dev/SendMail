@@ -3,45 +3,91 @@
 import { selectedIntervalAtom } from "@/store/global";
 import { useAtom } from "jotai";
 import KpiCard from "./kpi-card";
-
-const kpiData = [
-  {
-    title: "Elküldött emailek száma",
-    value: "484",
-    previousValue: "400",
-    type: "sent",
-    loading: false,
-  },
-  {
-    title: "Megnyitott emailek száma",
-    value: "263",
-    previousValue: "203",
-    type: "opens",
-    loading: false,
-  },
-  {
-    title: "Kattintások száma",
-    value: "30",
-    previousValue: "0",
-    type: "clicks",
-    loading: false,
-  },
-]
+import { api } from "@/trpc/react";
+import { useMemo } from "react";
 
 export default function MainStats() {
   const [timeInterval, setTimeInterval] = useAtom(selectedIntervalAtom);
 
+  const { data: campaignCount, isFetching: campaignCountFetching } =
+    api.campaign.scheduledCampaignsCount.useQuery(
+      {
+        timeInterval,
+      },
+      {
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      },
+    );
+  const {
+    data: emailCount,
+    isFetching: emailCountFetching,
+  } = api.email.emailCount.useQuery(
+    {
+      timeInterval,
+    },
+    {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  );
+  const { data: clickCount, isFetching: clickCountFetching } =
+    api.email.clickCount.useQuery(
+      {
+        timeInterval,
+      },
+      {
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      },
+    );
+
+  const kpiData = useMemo(() => {
+    return [
+      {
+        title: "Kampányok száma",
+        value: campaignCount?.value,
+        previousValue: campaignCount?.previousValue,
+        type: "campaigns",
+        loading: campaignCountFetching,
+      },
+      {
+        title: "Emailek száma",
+        value: emailCount?.value,
+        previousValue: emailCount?.previousValue,
+        type: "emails",
+        loading: emailCountFetching,
+      },
+      {
+        title: "Kattintások száma",
+        value: clickCount?.value,
+        previousValue: clickCount?.previousValue,
+        type: "clicks",
+        loading: clickCountFetching,
+      },
+    ];
+  }, [
+    campaignCount,
+    emailCount,
+    clickCount,
+    campaignCountFetching,
+    emailCountFetching,
+    clickCountFetching,
+  ]);
+
   return (
     <div className="z-10 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       {kpiData.map((kpi) => (
-        <KpiCard
-          key={kpi.title}
-          title={kpi.title}
-          value={parseFloat(kpi.value) || 0}
-          previousValue={parseFloat(kpi.previousValue) || 0}
-          type={kpi.type as any}
-          loading={kpi.loading}
-        />
+        <div key={kpi.title}>
+          <KpiCard
+            key={kpi.title}
+            title={kpi.title}
+            value={kpi.value || 0}
+            previousValue={kpi.previousValue || 0}
+            type={kpi.type as "campaigns" | "emails" | "clicks"}
+            loading={kpi.loading}
+          />
+        </div>
       ))}
     </div>
   );
