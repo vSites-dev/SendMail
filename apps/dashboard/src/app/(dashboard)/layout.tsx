@@ -36,17 +36,10 @@ export default async function DashboardLayout({
 
   if (membersForTheUser.length === 0) {
     if (invitations && invitations[0] && invitations[0].id) {
-      console.log("miafasz?????")
-      console.log("miafasz?????")
-      console.log("miafasz?????")
-      console.log("miafasz?????")
-      console.log("miafasz?????")
-      console.log("miafasz?????")
-
       return redirect(`/projekt-meghivas/${invitations[0].id}`);
     }
 
-    return redirect("/uj-projekt");
+    return redirect("/uj-projekt/1");
   }
 
   const organizationsThatUserIsPartOf = await db.organization.findMany({

@@ -110,6 +110,7 @@
     "jotai": "^2.12.1",
     "lucide-react": "^0.462.0",
     "next": "^15.2.4",
+    "nodemailer": "^6.10.0",
     "oslo": "^1.2.1",
     "pdf-lib": "^1.17.1",
     "pg": "^8.13.1",
@@ -142,6 +143,7 @@
   "devDependencies": {
     "@types/eslint": "^8.56.10",
     "@types/node": "^20.14.10",
+    "@types/nodemailer": "^6.4.17",
     "@types/pg": "^8.11.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
