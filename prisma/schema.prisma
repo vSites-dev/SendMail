@@ -137,8 +137,6 @@ model Campaign {
   id   String @id @default(uuid())
   name String
 
-  from String
-
   status CampaignStatus @default(DRAFT)
 
   projectId String
@@ -176,11 +174,13 @@ model Contact {
   @@map("contacts")
 }
 
+// TODO: handle from field for each email block
 model Email {
   id String @id @default(uuid())
 
   messageId String      @unique() // this is coming from SES
   subject   String
+  from      String
   body      String
   status    EmailStatus @default(QUEUED)
 

@@ -37,7 +37,7 @@ const MemberInviteInput = ({
   email: string;
   role: MemberRole;
   onRemove: () => void;
-  onEmailChange: (email: string) => void;
+  onEmailChange?: (email: string) => void;
   onRoleChange: (role: MemberRole) => void;
   emailDisabled?: boolean;
   roleDisabled?: boolean;
@@ -56,7 +56,7 @@ const MemberInviteInput = ({
         <Input
           type="email"
           value={email}
-          onChange={(e) => onEmailChange(e.target.value)}
+          onChange={(e) => onEmailChange?.(e.target.value)}
           placeholder={`${id}. Email cím`}
           disabled={emailDisabled || deleteDisabled}
           readOnly={emailDisabled || deleteDisabled}

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Rocket } from "lucide-react";
 import React, { useEffect } from "react";
 import { toast } from "sonner";
-import MemberInviteInput from "./member-invite-input";
+import MemberInviteInput from "@/components/ui/member-invite-input";
 import { authClient } from "@/lib/auth/client";
 import { createProject } from "../actions";
 import { createSlug } from "@/lib/utils";

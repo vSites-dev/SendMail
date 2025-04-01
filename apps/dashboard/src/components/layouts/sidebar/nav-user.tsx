@@ -7,7 +7,9 @@ import {
   Cog,
   CreditCard,
   LogOut,
+  Settings2,
   Sparkles,
+  User as UserIcon,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -68,7 +70,7 @@ export function NavUser({ user }: { user: User }) {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.image ?? undefined} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">
+                  <AvatarFallback className="rounded-lg bg-gradient-to-br text-white font-bold shadow-lg from-sky-500/60 to-blue-700/40">
                     {user.name
                       .split(" ")
                       .map((name) => name[0])
@@ -84,9 +86,15 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/beallitasok">
-                  <Cog />
-                  Beállítások
+                <Link href="/beallitasok?tab=szemelyes">
+                  <UserIcon />
+                  Személyes beállítások
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/beallitasok?tab=projekt">
+                  <Settings2 />
+                  Projekt beállítások
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>

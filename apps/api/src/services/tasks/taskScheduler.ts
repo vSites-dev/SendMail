@@ -117,34 +117,30 @@ export class TaskScheduler {
   ) {
     switch (task.type) {
       case TaskType.SEND_EMAIL:
-        if (!task.email?.id) {
+        if (!task.email?.id)
           throw new Error('Email ID not found for SEND_EMAIL task')
-        }
 
         const email = await prisma.email.findUnique({
           where: { id: task.email.id },
           include: { campaign: true, contact: true }
         })
 
-        if (!email) {
-          throw new Error(`Email not found for task ${task.id}`)
-        }
+        if (!email) throw new Error(`Email not found for task ${task.id}`)
 
-        if (!email.campaign) {
+        if (!email.campaign)
           throw new Error(`Campaign not found for email ${email.id}`)
-        }
 
         // Process the email
         if (process.env.NODE_ENV === 'development') {
           await this.emailService.sendEmailToMailHog({
-            from: email.campaign.from || process.env.DEFAULT_FROM!,
+            from: email.from || process.env.DEFAULT_FROM!,
             to: email.contact.email,
             subject: email.subject,
             body: email.body
           })
         } else {
           const result = await this.emailService.sendEmail({
-            from: email.campaign.from || process.env.DEFAULT_FROM!,
+            from: email.from || process.env.DEFAULT_FROM!,
             to: email.contact.email,
             subject: email.subject,
             body: email.body
@@ -163,55 +159,7 @@ export class TaskScheduler {
         break
 
       case TaskType.SEND_CAMPAIGN:
-        if (!task.campaignId) {
-          throw new Error('Campaign ID not found for SEND_CAMPAIGN task')
-        }
-
-        if (!task.campaign) {
-          throw new Error(`Campaign not found for task ${task.id}`)
-        }
-
-        // Process each contact in the campaign
-        for (const contact of task.campaign.contacts) {
-          // Find or create an email for each contact
-          const campaignEmail = await prisma.email.findFirst({
-            where: {
-              contactId: contact.id,
-              campaignId: task.campaign.id,
-              status: EmailStatus.QUEUED
-            }
-          })
-
-          if (campaignEmail) {
-            // Send the email
-            if (process.env.NODE_ENV === 'development') {
-              await this.emailService.sendEmailToMailHog({
-                from: task.campaign.from || process.env.DEFAULT_FROM!,
-                to: contact.email,
-                subject: campaignEmail.subject,
-                body: campaignEmail.body
-              })
-            } else {
-              const result = await this.emailService.sendEmail({
-                from: task.campaign.from || process.env.DEFAULT_FROM!,
-                to: contact.email,
-                subject: campaignEmail.subject,
-                body: campaignEmail.body
-              })
-
-              // Update email status
-              await prisma.email.update({
-                where: { id: campaignEmail.id },
-                data: {
-                  messageId: result.messageId || campaignEmail.messageId,
-                  status: EmailStatus.SENT,
-                  sentAt: new Date()
-                }
-              })
-            }
-          }
-        }
-        break
+        throw new Error('SEND_CAMPAIGN Task not implemented')
       default:
         throw new Error(`Unsupported task type: ${task.type}`)
     }

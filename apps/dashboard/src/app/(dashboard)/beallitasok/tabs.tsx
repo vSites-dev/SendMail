@@ -20,21 +20,21 @@ export default function SettingsTabs({ defaultTab, user, fullOrganization }) {
   return (
     <Tabs value={tab} onValueChange={handleTabChange} className="w-full mt-6">
       <TabsList>
-        <TabsTrigger value="personal" className="flex items-center gap-2">
+        <TabsTrigger value="szemelyes" className="flex items-center gap-2">
           <User className="h-4 w-4" />
           Személyes beállítások
         </TabsTrigger>
-        <TabsTrigger value="project" className="flex items-center gap-2">
+        <TabsTrigger value="projekt" className="flex items-center gap-2">
           <Settings2 className="h-4 w-4" />
           Projekt beállítások
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="personal">
+      <TabsContent value="szemelyes">
         <PersonalSettings user={user} />
       </TabsContent>
 
-      <TabsContent value="project">
+      <TabsContent value="projekt">
         <ProjectSettings user={user} fullOrganization={fullOrganization} />
       </TabsContent>
     </Tabs>

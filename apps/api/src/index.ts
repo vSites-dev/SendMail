@@ -9,6 +9,7 @@ import domainRoutes from './routes/domainRoutes'
 import { TaskScheduler } from './services/tasks/taskScheduler'
 import contactRoutes from './routes/contactRoutes'
 import imageRoutes from './routes/imageRoutes'
+import seedDatabase from './lib/seed'
 
 const app = express()
 const port = process.env.PORT || 8080
@@ -26,6 +27,11 @@ app.use('/tasks', taskRoutes)
 app.use('/domains', domainRoutes)
 app.use('/contacts', contactRoutes)
 app.use('/images', imageRoutes)
+
+app.get('/seed', async (req, res) => {
+  await seedDatabase()
+  res.json({ message: 'Database seeded successfully' })
+})
 
 // Health check endpoint
 app.get('/health', (req, res) => {
