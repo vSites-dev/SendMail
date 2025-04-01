@@ -96,7 +96,7 @@ const KpiCard = ({
               </div>
               <p className="text-3xl mt-3 font-bold" suppressHydrationWarning>
                 {value === 0 ? (
-                  <span className="text-3xl font-mono tracking-tight font-semibold">
+                  <span className="text-3xl font-mono tracking-tight font-semibold" suppressHydrationWarning>
                     0
                   </span>
                 ) : (

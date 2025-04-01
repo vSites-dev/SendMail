@@ -4,7 +4,7 @@ import {
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
 import DashboardHeader from "@/components/layouts/dashboard-header";
-import { EmailsLineChart } from "@/components/dashboard/emails-line-chart";
+import { EmailsAndClicksChart } from "@/components/dashboard/emails-and-clicks-chart";
 import IntervalSelect from "@/components/dashboard/interval-select";
 import MainStats from "@/components/dashboard/main-stats";
 import { ChartColumnBig, Home } from "lucide-react";
@@ -18,6 +18,7 @@ export default async function Dashboard() {
   void api.campaign.scheduledCampaignsCount.prefetch({ timeInterval: 30 });
   void api.email.emailCount.prefetch({ timeInterval: 30 });
   void api.email.clickCount.prefetch({ timeInterval: 30 });
+  void api.email.emailsAndClicksChartData.prefetch({ timeInterval: 30 });
 
   return (
     <HydrateClient>
@@ -53,7 +54,8 @@ export default async function Dashboard() {
         </div>
 
         <MainStats />
-        <EmailsLineChart />
+
+        <EmailsAndClicksChart />
       </main>
     </HydrateClient>
   );

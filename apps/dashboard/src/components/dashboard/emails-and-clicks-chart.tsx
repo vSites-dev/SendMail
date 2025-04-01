@@ -8,8 +8,8 @@ import {
   CardSeparator,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquareMore, BarChartBig, Mails } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { MessageSquareMore, BarChartBig, Mails, MousePointerClick } from "lucide-react";
+import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -23,58 +23,55 @@ import { api } from "@/trpc/react";
 import { Skeleton } from "../ui/skeleton";
 
 const chartConfig = {
-  desktop: {
+  emails: {
     label: "Emailek",
     color: "hsl(var(--chart-2))",
   },
+  clicks: {
+    label: "Kattintások",
+    color: "hsl(var(--chart-1))",
+  },
 } satisfies ChartConfig;
 
-const generateDummyData = (days: number): any[] => {
-  const data: any[] = [];
-  const endDate = new Date();
+// const generateDummyData = (days: number): any[] => {
+//   const data: any[] = [];
+//   const endDate = new Date();
 
-  for (let i = days; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(endDate.getDate() - i);
-    data.push({
-      date: date.toLocaleDateString("hu-HU"),
-      emails: Math.floor(Math.random() * 100) + 20,
-    });
-  }
-  return data;
-};
+//   for (let i = days; i >= 0; i--) {
+//     const date = new Date();
+//     date.setDate(endDate.getDate() - i);
+//     data.push({
+//       date: date.toLocaleDateString("hu-HU"),
+//       emails: Math.floor(Math.random() * 100) + 20,
+//       clicks: Math.floor(Math.random() * 50) + 10,
+//     });
+//   }
+//   return data;
+// };
 
 
-export function EmailsLineChart({
-  initialEmailsData,
+export function EmailsAndClicksChart({
+  initialData,
 }: {
-  initialEmailsData?: {
+  initialData?: {
     date: string;
     emails: number;
+    clicks: number;
   }[];
 }) {
 
-  const [chartData, setChartData] = React.useState<any[]>([]);
-
-  React.useEffect(() => {
-    setChartData(initialEmailsData ?? generateDummyData(30));
-  }, []);
-
   const [selectedInterval] = useAtom(selectedIntervalAtom);
-  // const { data: emailsData, isFetching } =
-  //   api.dashboard.emailsChartData.useQuery(
-  //     {
-  //       timeInterval: selectedInterval,
-  //     },
-  //     {
-  //       refetchOnWindowFocus: false,
-  //       refetchOnReconnect: false,
-  //     },
-  //   );
-
-  // const chartData = React.useMemo(() => {
-  //   return emailsData ?? initialEmailsData ?? [];
-  // }, [emailsData, initialEmailsData]);
+  const { data: chartData, isFetching } =
+    api.email.emailsAndClicksChartData.useQuery(
+      {
+        timeInterval: selectedInterval,
+      },
+      {
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        initialData: initialData,
+      },
+    );
 
   return (
     <Card className="w-full">
@@ -87,9 +84,9 @@ export function EmailsLineChart({
             <div className="space-y-1">
               <CardTitle className="font-normal text-xl">
                 <b className="font-bold tracking-wide text-neutral-800">
-                  Emailek
+                  Emailek és Kattintások
                 </b>{" "}
-                az elmúlt {selectedInterval} napba
+                az elmúlt {selectedInterval} napban
               </CardTitle>
             </div>
           </div>
@@ -97,12 +94,11 @@ export function EmailsLineChart({
       </CardHeader>
       <CardSeparator />
       <CardContent className="overflow-hidden p-0 z-10">
-        {/* TODO: for trpc isFetching */}
-        {false ? (
+        {isFetching ? (
           <div className="p-6">
             <Skeleton className="h-[250px] w-full" />
           </div>
-        ) : chartData.length === 0 ? (
+        ) : chartData?.length === 0 || chartData?.every((x) => x.emails === 0 && x.clicks === 0) ? (
           <div className="relative h-[250px] overflow-hidden w-full">
             <DotPattern
               width={6}
@@ -144,22 +140,36 @@ export function EmailsLineChart({
                     labelKey="date"
                     indicator="dot"
                     formatter={(value, name, payload, index) => (
-                      <div className="border-[#2a9d90] border-l-2 pl-2 rounded-[3px]">
-                        <div>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(payload.payload.date).toLocaleDateString(
-                              "hu-HU",
-                            )}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="font-bold text-lg mr-1">
-                            {payload?.value}
-                          </span>
-                          <span className="text-base text-muted-foreground">
-                            elküldött email
-                          </span>
-                        </div>
+                      <div>
+                        {name === "emails" && (
+                          <>
+                            <div>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(payload.payload.date).toLocaleDateString(
+                                  "hu-HU",
+                                )}
+                              </span>
+                            </div>
+                            <div className="border-[#2a9d90] border-l-2 pl-2 rounded-[2px] mt-1">
+                              <span className="font-bold text-lg mr-1">
+                                {payload?.value}
+                              </span>
+                              <span className="text-base text-muted-foreground">
+                                elküldött email
+                              </span>
+                            </div>
+                          </>
+                        )}
+                        {name === "clicks" && (
+                          <div className="border-[#6366f1] border-l-2 pl-2 rounded-[2px]">
+                            <span className="font-bold text-lg mr-1">
+                              {payload?.value}
+                            </span>
+                            <span className="text-base text-muted-foreground">
+                              kattintás
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                   />
@@ -190,6 +200,22 @@ export function EmailsLineChart({
                 stroke="#2a9d90"
                 strokeWidth={2}
                 dot={false}
+                name="emails"
+              />
+              <Line
+                dataKey="clicks"
+                type="natural"
+                stroke="#6366f1"
+                strokeWidth={2}
+                dot={false}
+                name="clicks"
+              />
+              <Legend
+                verticalAlign="top"
+                height={36}
+                formatter={(value) => {
+                  return value === "emails" ? "Emailek" : "Kattintások";
+                }}
               />
             </LineChart>
           </ChartContainer>

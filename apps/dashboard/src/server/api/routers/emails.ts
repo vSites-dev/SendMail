@@ -9,6 +9,78 @@ import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
 
 export const emailRouter = createTRPCRouter({
+  emailsAndClicksChartData: authedProcedure
+    .input(
+      z.object({
+        timeInterval: z.number(),
+      }),
+    )
+    .query(async ({ input: { timeInterval }, ctx }) => {
+      if (!ctx.session.activeProjectId) return [];
+
+      // Generate date series for the specified interval
+      const emailsByDate = await ctx.db.$queryRaw`
+        SELECT
+          dates.date AS date,
+          COALESCE(email_counts.count, 0) AS emails,
+          COALESCE(click_counts.count, 0) AS clicks
+        FROM
+          (
+            SELECT
+              generate_series(
+                NOW()::date - ${timeInterval} * INTERVAL '1 day',
+                NOW()::date,
+                INTERVAL '1 day'
+              ) AS date
+          ) AS dates
+        LEFT JOIN
+          (
+            SELECT
+              DATE("createdAt") AS date,
+              COUNT(*) AS count
+            FROM
+              "emails"
+            WHERE
+              "emails"."contactId" IN (
+                SELECT id FROM "contacts" WHERE "projectId" = ${ctx.session.activeProjectId}
+              )
+              AND "createdAt" >= NOW() - ${timeInterval} * INTERVAL '1 day'
+            GROUP BY
+              DATE("createdAt")
+          ) AS email_counts
+        ON
+          dates.date = email_counts.date
+        LEFT JOIN
+          (
+            SELECT
+              DATE("clicks"."createdAt") AS date,
+              COUNT(*) AS count
+            FROM
+              "clicks"
+            JOIN
+              "emails" ON "clicks"."emailId" = "emails"."id"
+            WHERE
+              "emails"."contactId" IN (
+                SELECT id FROM "contacts" WHERE "projectId" = ${ctx.session.activeProjectId}
+              )
+              AND "clicks"."createdAt" >= NOW() - ${timeInterval} * INTERVAL '1 day'
+            GROUP BY
+              DATE("clicks"."createdAt")
+          ) AS click_counts
+        ON
+          dates.date = click_counts.date
+        ORDER BY
+          dates.date
+      `;
+
+      return (emailsByDate as any[]).map((item) => ({
+        date: new Date(item.date as string | number | Date).toLocaleDateString(
+          "hu-HU",
+        ),
+        emails: Number(item.emails),
+        clicks: Number(item.clicks),
+      }));
+    }),
   clickCount: authedProcedure
     .input(
       z.object({
