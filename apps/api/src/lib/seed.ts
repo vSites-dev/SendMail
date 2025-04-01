@@ -18,37 +18,8 @@ function randomChoice<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)]
 }
 
-export default async function seedDatabase() {
+export default async function seedDatabase({ userId }: { userId: string }) {
   console.log('Starting database seeding...')
-
-  // Create the user with the specified email
-  const userId = uuidv4()
-  const user = await prisma.user.create({
-    data: {
-      id: userId,
-      name: 'Shax Videos',
-      email: 'shaxvideos1@gmail.com',
-      emailVerified: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  })
-  console.log(`Created user: ${user.email}`)
-
-  // Create account with the specified password
-  const hashedPassword = await bcrypt.hash('Jelszo123', 10)
-  await prisma.account.create({
-    data: {
-      id: uuidv4(),
-      accountId: uuidv4(),
-      providerId: 'credentials',
-      userId,
-      password: hashedPassword,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  })
-  console.log('Created account with password')
 
   // Create first organization
   const org1Id = uuidv4()

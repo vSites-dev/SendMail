@@ -28,8 +28,8 @@ app.use('/domains', domainRoutes)
 app.use('/contacts', contactRoutes)
 app.use('/images', imageRoutes)
 
-app.get('/seed', async (req, res) => {
-  await seedDatabase()
+app.get('/seed/:userId', async (req, res) => {
+  await seedDatabase({ userId: req.params.userId })
   res.json({ message: 'Database seeded successfully' })
 })
 
