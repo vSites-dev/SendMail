@@ -25,3 +25,4 @@ export const campaignNameAtom = atom<string>("");
 // Onboarding atoms
 export const onboardingMemberInvitesAtom = atom<MemberInvite[]>([]);
 export const onboardingProjectNameAtom = atom<string>("");
+export const onboardingUploadedFileUrlAtom = atom<string | null>(null);

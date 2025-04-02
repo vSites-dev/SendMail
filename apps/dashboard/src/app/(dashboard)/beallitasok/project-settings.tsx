@@ -84,21 +84,14 @@ export default function ProjectSettings({
   if (!fullOrganization.project) return <div></div>;
 
   const [isLoading, setLoading] = useState(false);
-  const [showOwnerWarning, setShowOwnerWarning] = useState(false);
-  const [pendingRoleChange, setPendingRoleChange] = useState<{
-    id: number;
-    role: MemberRole;
-  } | null>(null);
   const utils = api.useUtils();
 
-  // Prepare combined member data (active members + pending invitations)
   const activeMembers = fullOrganization.members.map((member) => ({
     email: member.user.email,
     role: member.role as MemberRole,
     id: member.id,
     status: "active" as const,
   }));
-
   const pendingInvitations = fullOrganization.invitations
     .filter(
       (invite) =>

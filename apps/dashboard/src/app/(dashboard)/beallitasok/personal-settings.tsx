@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageUpload } from "@/components/ui/ImageUpload";
 import { AtSign, Save, User as UserIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User } from "better-auth";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
@@ -36,9 +36,10 @@ export default function PersonalSettings({ user }: { user: User }) {
     defaultValues: {
       name: user.name,
       email: user.email,
-      image: user.image || "",
+      image: user.image ?? undefined,
     },
   });
+
 
   const { mutateAsync: updateUser } = api.settings.updateUser.useMutation();
 

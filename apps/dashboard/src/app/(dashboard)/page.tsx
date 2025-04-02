@@ -12,8 +12,6 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import ActionsPanel from "@/components/dashboard/actions-panel";
 
-
-
 export default async function Dashboard() {
   void api.campaign.scheduledCampaignsCount.prefetch({ timeInterval: 30 });
   void api.email.emailCount.prefetch({ timeInterval: 30 });

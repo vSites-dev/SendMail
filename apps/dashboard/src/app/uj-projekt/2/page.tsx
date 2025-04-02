@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { onboardingMemberInvitesAtom, onboardingProjectNameAtom } from "@/store/global";
+import { onboardingMemberInvitesAtom, onboardingProjectNameAtom, onboardingUploadedFileUrlAtom } from "@/store/global";
 import { MemberRole } from "@/types";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
@@ -20,12 +20,13 @@ export default function OnboardingStepTwo() {
     onboardingMemberInvitesAtom,
   );
   const [name, setName] = useAtom(onboardingProjectNameAtom)
+  const [logo, setLogo] = useAtom(onboardingUploadedFileUrlAtom)
 
   const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
-    if (!name) router.push("/uj-projekt/1");
-  }, [name])
+    if (!name || !logo) router.push("/uj-projekt/1");
+  }, [name, logo])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,6 +39,7 @@ export default function OnboardingStepTwo() {
       const org = await authClient.organization.create({
         name,
         slug: createSlug(name),
+        logo: logo ?? undefined,
       })
       console.log("created org", org);
       if (!org.data) throw new Error("Valami hiba történt a projekt létrehozása során");
