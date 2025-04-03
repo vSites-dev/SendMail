@@ -50,7 +50,7 @@ export default async function seedDatabase({ userId }: { userId: string }) {
       id: uuidv4(),
       organizationId: org1Id,
       userId,
-      role: 'OWNER',
+      role: 'owner',
       createdAt: new Date()
     }
   })
@@ -60,7 +60,7 @@ export default async function seedDatabase({ userId }: { userId: string }) {
       id: uuidv4(),
       organizationId: org2Id,
       userId,
-      role: 'OWNER',
+      role: 'owner',
       createdAt: new Date()
     }
   })

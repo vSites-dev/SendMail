@@ -181,8 +181,14 @@ export default function ProjectSettings({
     window.location.reload();
   }
 
-  const isRoleDisabled = (role: MemberRole) => role === "owner";
-  const isDeleteDisabled = (email: string, role: MemberRole) => email === user.email || role === "owner";
+  const isRoleDisabled = (role: MemberRole) => {
+    const activeMember = activeMembers.find((member) => member.email === user.email);
+    return activeMember?.role !== "owner" && role === "owner";
+  };
+  const isDeleteDisabled = (email: string, role: MemberRole) => {
+    const activeMember = activeMembers.find((member) => member.email === user.email);
+    return email === user.email || role === "owner" || activeMember?.role !== "owner";
+  };
 
   const handleMemberRoleChange = (index: number, newRole: MemberRole) => {
     const members = [...form.getValues("members")];
@@ -368,17 +374,19 @@ export default function ProjectSettings({
                     ))}
                   </div>
 
-                  <div className="mt-4">
-                    <Button
-                      type="button"
-                      variant={"outline"}
-                      onClick={handleAddMember}
-                      className="disabled:bg-gray-200 w-full"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span className="ml-2">Új meghívó hozzáadása</span>
-                    </Button>
-                  </div>
+                  {activeMembers.find((member) => member.email === user.email)?.role === "owner" && (
+                    <div className="mt-4">
+                      <Button
+                        type="button"
+                        variant={"outline"}
+                        onClick={handleAddMember}
+                        className="disabled:bg-gray-200 w-full"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span className="ml-2">Új meghívó hozzáadása</span>
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
