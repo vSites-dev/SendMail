@@ -91,11 +91,18 @@ export const ContactsTable = () => {
     if (data?.items) setContacts(data.items);
   }, [data]);
 
+  const { data: searchResults } = api.contact.getByEmail.useQuery({
+    searchText: globalFilter,
+  }, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+  });
+
   const table = useReactTable({
-    data: contacts,
+    data: searchResults?.items || contacts,
     columns,
     state: {
-      globalFilter,
       columnVisibility,
       sorting,
     },

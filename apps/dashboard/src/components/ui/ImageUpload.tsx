@@ -186,7 +186,7 @@ export function ImageUpload<
         </div>
       ) : (
         <div className="relative overflow-hidden rounded-lg border">
-          <div className="aspect-video relative">
+          <div className="h-32 relative">
             <Image
               src={field.value}
               alt="Feltöltött kép"
@@ -194,7 +194,7 @@ export function ImageUpload<
               className="object-contain bg-gradient-to-br from-neutral-50 to-neutral-100"
             />
           </div>
-          <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className={cn("absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center", disabled && "hidden")}>
             <Button
               type="button"
               variant="secondary"

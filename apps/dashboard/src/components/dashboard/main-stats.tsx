@@ -5,6 +5,7 @@ import { useAtom } from "jotai";
 import KpiCard from "./kpi-card";
 import { api } from "@/trpc/react";
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 export default function MainStats() {
   const [timeInterval, setTimeInterval] = useAtom(selectedIntervalAtom);
@@ -78,7 +79,7 @@ export default function MainStats() {
   return (
     <div className="z-10 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
       {kpiData.map((kpi) => (
-        <div key={kpi.title}>
+        <div className={cn(kpi.type === "clicks" && "col-span-1 lg:col-span-2 xl:col-span-1")} key={kpi.title}>
           <KpiCard
             key={kpi.title}
             title={kpi.title}

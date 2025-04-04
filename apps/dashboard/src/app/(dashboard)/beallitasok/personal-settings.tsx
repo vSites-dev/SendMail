@@ -149,6 +149,10 @@ export default function PersonalSettings({ user }: { user: User }) {
                   </FormItem>
                 )}
               />
+              <div className="space-y-1">
+                <p className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-neutral-800 tracking-wide text-[15px]">Azonosító</p>
+                <Input className="bg-white" value={user.id} readOnly disabled />
+              </div>
             </div>
           </CardContent>
 

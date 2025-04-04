@@ -25,6 +25,49 @@ export const contactRouter = createTRPCRouter({
     });
   }),
 
+  getByEmail: authedProcedure
+    .input(
+      z.object({
+        searchText: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { searchText } = input;
+
+      await withOrganization({
+        organizationId: ctx.session.session.activeOrganizationId,
+      });
+
+      const [items, totalCount] = await Promise.all([
+        ctx.db.contact.findMany({
+          where: {
+            projectId: ctx.session.activeProjectId,
+            email: {
+              contains: searchText,
+              mode: "insensitive",
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        }),
+        ctx.db.contact.count({
+          where: {
+            projectId: ctx.session.activeProjectId,
+            email: {
+              contains: searchText,
+              mode: "insensitive",
+            },
+          },
+        }),
+      ]);
+
+      return {
+        items,
+        totalCount,
+      };
+    }),
+
   getForTable: authedProcedure
     .input(
       z.object({

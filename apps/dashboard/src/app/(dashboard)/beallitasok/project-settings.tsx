@@ -28,8 +28,9 @@ import {
   Plus,
   Save,
   User as UserIcon,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User } from "better-auth";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
@@ -84,7 +85,18 @@ export default function ProjectSettings({
   if (!fullOrganization.project) return <div></div>;
 
   const [isLoading, setLoading] = useState(false);
+  const [loggedInUsersRole, setLoggedInUsersRole] = useState<MemberRole>(
+    "member" as MemberRole,
+  );
   const utils = api.useUtils();
+
+  useEffect(() => {
+    setLoggedInUsersRole(
+      fullOrganization.members.find(
+        (member) => member.user.email === user.email,
+      )?.role as MemberRole,
+    );
+  }, [fullOrganization.members, user.email]);
 
   const activeMembers = fullOrganization.members.map((member) => ({
     email: member.user.email,
@@ -182,12 +194,12 @@ export default function ProjectSettings({
   }
 
   const isRoleDisabled = (role: MemberRole) => {
-    const activeMember = activeMembers.find((member) => member.email === user.email);
-    return activeMember?.role !== "owner" && role === "owner";
+    return loggedInUsersRole !== "owner" && role === "owner";
   };
   const isDeleteDisabled = (email: string, role: MemberRole) => {
-    const activeMember = activeMembers.find((member) => member.email === user.email);
-    return email === user.email || role === "owner" || activeMember?.role !== "owner";
+    return (
+      email === user.email || role === "owner" || loggedInUsersRole !== "owner"
+    );
   };
 
   const handleMemberRoleChange = (index: number, newRole: MemberRole) => {
@@ -235,7 +247,8 @@ export default function ProjectSettings({
         <CardHeader className="border-b pb-4">
           <CardTitle>Projekt beállítások</CardTitle>
           <CardDescription>
-            Itt módosíthatod az alapvető projekt adataidat.
+            Itt {loggedInUsersRole === "owner" ? "módosíthatod" : "tekintheted"}{" "}
+            a <b>{fullOrganization.name}</b> projekt beállításait.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -249,6 +262,7 @@ export default function ProjectSettings({
                     <FormItem>
                       <FormLabel>Logó</FormLabel>
                       <ImageUpload
+                        disabled={isLoading || loggedInUsersRole !== "owner"}
                         name="logo"
                         control={form.control}
                         label="Logó feltöltése"
@@ -269,7 +283,9 @@ export default function ProjectSettings({
                             className="peer ps-9"
                             placeholder="Kiss János"
                             type="text"
-                            disabled={isLoading}
+                            disabled={
+                              isLoading || loggedInUsersRole !== "owner"
+                            }
                             {...field}
                           />
                           <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
@@ -325,7 +341,10 @@ export default function ProjectSettings({
                             role={member.role as MemberRole}
                             shouldAnimate={false}
                             emailDisabled={true}
-                            deleteDisabled={isDeleteDisabled(member.email, member.role as MemberRole)}
+                            deleteDisabled={isDeleteDisabled(
+                              member.email,
+                              member.role as MemberRole,
+                            )}
                             roleDisabled={isRoleDisabled(
                               member.role as MemberRole,
                             )}
@@ -374,7 +393,7 @@ export default function ProjectSettings({
                     ))}
                   </div>
 
-                  {activeMembers.find((member) => member.email === user.email)?.role === "owner" && (
+                  {loggedInUsersRole === "owner" && (
                     <div className="mt-4">
                       <Button
                         type="button"
@@ -391,12 +410,24 @@ export default function ProjectSettings({
               </div>
             </CardContent>
 
-            <CardFooter className="w-full flex justify-end border-t py-4">
-              <Button type="submit" isLoading={isLoading}>
-                {!isLoading && <Save className="size-4" />}
-                Mentés
-              </Button>
-            </CardFooter>
+            {loggedInUsersRole !== "owner" && <div className="h-2" />}
+
+            {loggedInUsersRole === "owner" && (
+              <CardFooter className="w-full flex justify-end gap-2 border-t py-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => form.reset()}
+                >
+                  <X className="size-4" />
+                  <span className="ml-2">Alaphelyzet</span>
+                </Button>
+                <Button type="submit" isLoading={isLoading}>
+                  {!isLoading && <Save className="size-4" />}
+                  Mentés
+                </Button>
+              </CardFooter>
+            )}
           </form>
         </Form>
       </Card>

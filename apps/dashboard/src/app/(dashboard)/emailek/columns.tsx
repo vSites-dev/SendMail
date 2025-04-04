@@ -1,10 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import {
-  MoreHorizontal,
-  Eye,
-  Trash2,
-} from "lucide-react";
+import { MoreHorizontal, Eye, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,16 +47,6 @@ export const emailStatuses: Record<
     bgColor: "bg-green-400",
     textColor: "text-green-500",
   },
-  OPENED: {
-    label: "Megnyitva",
-    bgColor: "bg-violet-400",
-    textColor: "text-violet-500",
-  },
-  CLICKED: {
-    label: "Kattintott",
-    bgColor: "bg-purple-400",
-    textColor: "text-purple-500",
-  },
   COMPLAINED: {
     label: "Panasz",
     bgColor: "bg-orange-400",
@@ -80,15 +66,29 @@ export const emailStatuses: Record<
 
 export const columns: ColumnDef<Email>[] = [
   {
+    accessorKey: "campaign",
+    header: "Kampány",
+    enableSorting: true,
+    cell: ({ row }) => {
+      return row.original?.campaignId ? (
+        <Link
+          className="hover:underline"
+          href={`/kampanyok/${row.original?.campaignId}`}
+        >
+          {row.original?.campaignId || "N/A"}
+        </Link>
+      ) : (
+        <Badge variant="outline">Manuális</Badge>
+      );
+    },
+  },
+  {
     accessorKey: "subject",
     header: "Tárgy",
     enableSorting: true,
     cell: ({ row }) => {
       return (
-        <Link
-          className="hover:underline"
-          href={`/emailek/${row.original?.id}`}
-        >
+        <Link className="hover:underline" href={`/emailek/${row.original?.id}`}>
           {row.original?.subject}
         </Link>
       );
@@ -128,50 +128,17 @@ export const columns: ColumnDef<Email>[] = [
     },
   },
   {
-    accessorKey: "campaign",
-    header: "Kampány",
-    enableSorting: false,
-    cell: ({ row }) => {
-      return row.original?.campaignId ? (
-        <Link
-          className="hover:underline"
-          href={`/kampanyok/${row.original?.campaignId}`}
-        >
-          {row.original?.campaignId || "N/A"}
-        </Link>
-      ) : (
-        <Badge variant="outline">Manuális</Badge>
-      );
-    },
-  },
-  {
     accessorKey: "sentAt",
     header: "Küldés ideje",
     enableSorting: true,
     cell: ({ row }) => {
       return row.original.sentAt
-        ? new Date(row.original.sentAt).toLocaleDateString('hu-HU', {
-          year: 'numeric',
-          month: 'numeric',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })
-        : "N/A";
-    },
-  },
-  {
-    accessorKey: "openedAt",
-    header: "Megnyitás ideje",
-    enableSorting: true,
-    cell: ({ row }) => {
-      return row.original.openedAt
-        ? new Date(row.original.openedAt).toLocaleDateString('hu-HU', {
-          year: 'numeric',
-          month: 'numeric',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
+        ? new Date(row.original.sentAt).toLocaleDateString("hu-HU", {
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
         })
         : "N/A";
     },

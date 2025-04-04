@@ -309,13 +309,7 @@ export function InvitationRegistration({ invitation }: { invitation: GetInvitati
                 <div className="flex flex-col items-center justify-center">
                   <div className="px-2 py-2">
                     <div className="text-center text-sm text-muted-foreground">
-                      Már van fiókja?{" "}
-                      <Link
-                        href="/bejelentkezes"
-                        className="text-primary hover:underline"
-                      >
-                        Jelentkezzen be itt
-                      </Link>
+                      Regisztráció után egyből csatlakozik a projekthez.
                     </div>
                   </div>
                 </div>
