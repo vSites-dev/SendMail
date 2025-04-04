@@ -190,6 +190,97 @@ export const emailRouter = createTRPCRouter({
     });
   }),
 
+  getBySearchText: authedProcedure
+    .input(
+      z.object({
+        searchText: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { searchText } = input;
+
+      await withOrganization({
+        organizationId: ctx.session.session.activeOrganizationId,
+      });
+
+      const [items, totalCount] = await Promise.all([
+        ctx.db.email.findMany({
+          where: {
+            contact: {
+              projectId: ctx.session.activeProjectId,
+            },
+            OR: [
+              {
+                contact: {
+                  email: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+              },
+              {
+                subject: {
+                  contains: searchText,
+                  mode: "insensitive",
+                },
+              },
+              {
+                campaign: {
+                  name: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            ],
+          },
+          include: {
+            contact: true,
+            campaign: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        }),
+        ctx.db.email.count({
+          where: {
+            contact: {
+              projectId: ctx.session.activeProjectId,
+            },
+            OR: [
+              {
+                contact: {
+                  email: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+              }
+              {
+                subject: {
+                  contains: searchText,
+                  mode: "insensitive",
+                },
+              },
+              {
+                campaign: {
+                  name: {
+                    contains: searchText,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            ],
+          },
+        }),
+      ]);
+
+      return {
+        items,
+        totalCount,
+      };
+    }),
+
   getForTable: authedProcedure
     .input(
       z.object({
@@ -352,11 +443,12 @@ export const emailRouter = createTRPCRouter({
         subject: z.string(),
         body: z.string(),
         contactIds: z.array(z.string()),
+        from: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        const { subject, body, contactIds } = input;
+        const { subject, body, contactIds, from } = input;
 
         // Create email records for each contact
         const emailPromises = contactIds.map(async (contactId) => {
@@ -367,6 +459,7 @@ export const emailRouter = createTRPCRouter({
               status: "QUEUED",
               messageId: `manual_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
               contactId,
+              from,
             },
           });
         });
@@ -393,3 +486,6 @@ export const emailRouter = createTRPCRouter({
 export type EmailRouterOutputs = inferRouterOutputs<typeof emailRouter>;
 
 export type ExtendedEmail = EmailRouterOutputs["getById"];
+
+export type GetForTableEmail =
+  EmailRouterOutputs["getForTable"]["items"][number];

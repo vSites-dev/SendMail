@@ -27,6 +27,7 @@ import { emailDataTableAtom } from "@/store/global";
 import { cn } from "@/lib/utils";
 import { useAtom } from "jotai";
 import { Badge } from "@/components/ui/badge";
+import { GetForTableEmail } from "@/server/api/routers/emails";
 
 export const emailStatuses: Record<
   EmailStatus,
@@ -64,18 +65,18 @@ export const emailStatuses: Record<
   },
 };
 
-export const columns: ColumnDef<Email>[] = [
+export const columns: ColumnDef<GetForTableEmail>[] = [
   {
     accessorKey: "campaign",
     header: "Kampány",
     enableSorting: true,
     cell: ({ row }) => {
-      return row.original?.campaignId ? (
+      return row.original?.campaign?.name ? (
         <Link
           className="hover:underline"
-          href={`/kampanyok/${row.original?.campaignId}`}
+          href={`/kampanyok/${row.original?.campaign.id}`}
         >
-          {row.original?.campaignId || "N/A"}
+          {row.original?.campaign.name || "N/A"}
         </Link>
       ) : (
         <Badge variant="outline">Manuális</Badge>
@@ -95,16 +96,16 @@ export const columns: ColumnDef<Email>[] = [
     },
   },
   {
-    accessorKey: "contact.email",
+    accessorKey: "contact",
     header: "Címzett",
     enableSorting: true,
     cell: ({ row }) => {
       return (
         <Link
           className="hover:underline"
-          href={`/kontaktok/${row.original?.contactId}`}
+          href={`/kontaktok/${row.original?.contact.id}`}
         >
-          {row.original?.contactId || "N/A"}
+          {row.original?.contact.email || "N/A"}
         </Link>
       );
     },

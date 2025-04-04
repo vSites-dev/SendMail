@@ -65,6 +65,14 @@ export const EmailsTable = () => {
 
   const [emails, setEmails] = useAtom(emailDataTableAtom);
 
+  const { data: searchResults } = api.email.getByEmail.useQuery({
+    searchText: globalFilter,
+  }, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+  });
+
   const { data, isLoading } = api.email.getForTable.useQuery({
     limit: pageSize,
     offset: (currentPage - 1) * pageSize,
@@ -78,19 +86,20 @@ export const EmailsTable = () => {
     if (
       data?.totalCount &&
       data.totalCount > 0 &&
-      data.totalCount !== totalCount
+      data.totalCount !== totalCount &&
+      searchResults?.totalCount !== totalCount
     ) {
-      setTotalPages(Math.ceil(data.totalCount / pageSize));
-      setTotalCount(data.totalCount);
+      setTotalPages(Math.ceil((searchResults?.totalCount || data.totalCount) / pageSize));
+      setTotalCount(searchResults?.totalCount || data.totalCount);
     }
-  }, [data, totalPages, pageSize, totalCount]);
+  }, [data, totalPages, pageSize, totalCount, searchResults]);
 
   useEffect(() => {
     if (data?.items) setEmails(data.items);
   }, [data, setEmails]);
 
   const table = useReactTable({
-    data: emails,
+    data: searchResults?.items || emails,
     columns,
     state: {
       globalFilter,
@@ -156,7 +165,7 @@ export const EmailsTable = () => {
       </div>
 
       <div className="rounded-md shadow-sm border overflow-hidden">
-        <Table>
+        <Table className="min-w-[1000px]">
           <TableHeader className="bg-neutral-100 text-neutral-900">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

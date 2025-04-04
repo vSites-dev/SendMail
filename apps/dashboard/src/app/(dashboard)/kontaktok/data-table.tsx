@@ -165,7 +165,7 @@ export const ContactsTable = () => {
       </div>
 
       <div className="rounded-md shadow-sm border overflow-hidden">
-        <Table>
+        <Table className="min-w-[1000px]">
           <TableHeader className="bg-neutral-100 text-neutral-900">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

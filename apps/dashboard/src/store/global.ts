@@ -1,6 +1,7 @@
 "use client";
 
 import type { Organization } from "@/lib/auth/auth";
+import { GetForTableEmail } from "@/server/api/routers/emails";
 import { EmailBlock, MemberInvite } from "@/types";
 import { Contact, Domain, Email, Project } from "@prisma/client";
 import { atom, createStore } from "jotai";
@@ -14,7 +15,7 @@ export const selectedIntervalAtom = atom<7 | 30 | 90 | 180 | 365>(30);
 
 export const contactDataTableAtom = atom<Contact[]>([]);
 export const domainDataTableAtom = atom<Domain[]>([]);
-export const emailDataTableAtom = atom<Email[]>([]);
+export const emailDataTableAtom = atom<GetForTableEmail[]>([]);
 
 // Campaign creation atoms
 export const selectedCampaignContactsAtom = atom<string[]>([]);
