@@ -92,6 +92,49 @@ export const domainRouter = createTRPCRouter({
     });
   }),
 
+  getByName: authedProcedure
+    .input(
+      z.object({
+        searchText: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { searchText } = input;
+
+      await withOrganization({
+        organizationId: ctx.session.session.activeOrganizationId,
+      });
+
+      const [items, totalCount] = await Promise.all([
+        ctx.db.domain.findMany({
+          where: {
+            projectId: ctx.session.activeProjectId,
+            name: {
+              contains: searchText,
+              mode: "insensitive",
+            },
+          },
+          orderBy: {
+            updatedAt: "desc",
+          },
+        }),
+        ctx.db.domain.count({
+          where: {
+            projectId: ctx.session.activeProjectId,
+            name: {
+              contains: searchText,
+              mode: "insensitive",
+            },
+          },
+        }),
+      ]);
+
+      return {
+        items,
+        totalCount,
+      };
+    }),
+
   getForTable: authedProcedure
     .input(
       z.object({

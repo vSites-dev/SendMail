@@ -150,7 +150,7 @@ export function CampaignContacts({ contacts }: { contacts: Contact[] }) {
           </div>
         ) : (
           <div className="rounded-md shadow-sm border overflow-hidden">
-            <Table className="min-w-[1000px]">
+            <Table className="">
               <TableHeader className="bg-neutral-100 text-neutral-900">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>

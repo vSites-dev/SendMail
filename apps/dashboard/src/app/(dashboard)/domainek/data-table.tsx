@@ -76,6 +76,14 @@ export const DomainsTable = () => {
     refetchOnMount: true,
   });
 
+  const { data: searchResults, isFetching: isSearchResultsFetching } = api.domain.getByName.useQuery({
+    searchText: globalFilter,
+  }, {
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+  });
+
   useEffect(() => {
     if (
       data?.totalCount &&
@@ -107,6 +115,13 @@ export const DomainsTable = () => {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
+
+  // Check if search is active and we have results
+  const isSearchActive = globalFilter.trim().length > 0;
+  const searchHasResults = searchResults?.items && searchResults.items.length > 0;
+
+  // Disable pagination when search is active
+  const shouldDisablePagination = isSearchActive && searchHasResults;
 
   return (
     <div className="space-y-4 w-full">
@@ -158,7 +173,7 @@ export const DomainsTable = () => {
       </div>
 
       <div className="rounded-md shadow-sm border overflow-hidden">
-        <Table className="min-w-[1000px]">
+        <Table className="">
           <TableHeader className="bg-neutral-100 text-neutral-900">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -194,7 +209,7 @@ export const DomainsTable = () => {
           </TableHeader>
 
           <TableBody className="bg-white">
-            {isLoading ? (
+            {isLoading || isSearchResultsFetching ? (
               [...Array(10)].map((_, idx) => (
                 <TableRow key={idx}>
                   {columns.map((_, colIdx) => (
@@ -258,63 +273,71 @@ export const DomainsTable = () => {
 
       <div className="flex w-full justify-between items-center">
         <p className="text-muted-foreground text-sm w-full">
-          {totalCount} domain
+          {shouldDisablePagination && searchResults?.items
+            ? `${searchResults.items.length} találat`
+            : `${totalCount} domain`}
         </p>
 
-        <Pagination className="w-full">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className={
-                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+        {!shouldDisablePagination ? (
+          <Pagination className="w-full">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className={
+                    currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                  }
+                />
+              </PaginationItem>
+              {[...Array(totalPages)].map((_, idx) => {
+                const page = idx + 1;
+                if (
+                  page === 1 ||
+                  page === totalPages ||
+                  (page >= currentPage - 1 && page <= currentPage + 1)
+                ) {
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(page)}
+                        isActive={currentPage === page}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                } else if (page === currentPage - 2 || page === currentPage + 2) {
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
                 }
-              />
-            </PaginationItem>
-            {[...Array(totalPages)].map((_, idx) => {
-              const page = idx + 1;
-              if (
-                page === 1 ||
-                page === totalPages ||
-                (page >= currentPage - 1 && page <= currentPage + 1)
-              ) {
-                return (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onClick={() => setCurrentPage(page)}
-                      isActive={currentPage === page}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              } else if (page === currentPage - 2 || page === currentPage + 2) {
-                return (
-                  <PaginationItem key={page}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                );
-              }
-              return null;
-            })}
-            <PaginationItem>
-              <PaginationNext
-                isActive={currentPage === totalPages || totalPages === 0}
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                }
-                className={
-                  currentPage === totalPages || totalPages === 0
-                    ? "pointer-events-none opacity-50 !bg-transparent border-none shadow-none"
-                    : ""
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+                return null;
+              })}
+              <PaginationItem>
+                <PaginationNext
+                  isActive={currentPage === totalPages || totalPages === 0}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  className={
+                    currentPage === totalPages || totalPages === 0
+                      ? "pointer-events-none opacity-50 !bg-transparent border-none shadow-none"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        ) : (
+          <div className="w-full text-center text-muted-foreground text-sm">
+            Keresési találatok megjelenítése
+          </div>
+        )}
 
         <div className="w-full text-right text-muted-foreground text-sm">
-          {totalPages} oldal
+          {shouldDisablePagination ? "1 oldal" : `${totalPages} oldal`}
         </div>
       </div>
     </div>

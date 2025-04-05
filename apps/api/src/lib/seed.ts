@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 function randomDate(): Date {
   const end = new Date() // today
   const start = new Date()
-  start.setDate(end.getDate() - 30) // 30 days ago
+  start.setDate(end.getDate() - 45) // 45 days ago
   return new Date(
     start.getTime() + Math.random() * (end.getTime() - start.getTime())
   )

@@ -255,7 +255,7 @@ export const emailRouter = createTRPCRouter({
                     mode: "insensitive",
                   },
                 },
-              }
+              },
               {
                 subject: {
                   contains: searchText,
