@@ -137,7 +137,7 @@ model Campaign {
   id   String @id @default(uuid())
   name String
 
-  status CampaignStatus @default(DRAFT)
+  status CampaignStatus @default(SCHEDULED)
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -174,15 +174,14 @@ model Contact {
   @@map("contacts")
 }
 
-// TODO: handle from field for each email block
 model Email {
   id String @id @default(uuid())
 
-  messageId String      @unique() // this is coming from SES
-  subject   String
-  from      String
-  body      String
-  status    EmailStatus @default(QUEUED)
+  // messageId String      @unique() // this is coming from SES
+  subject String
+  from    String
+  body    String
+  status  EmailStatus @default(QUEUED)
 
   campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   campaignId String?
@@ -281,7 +280,6 @@ enum ContactStatus {
 }
 
 enum CampaignStatus {
-  DRAFT
   SCHEDULED
   COMPLETED
 }
@@ -304,7 +302,6 @@ enum DomainStatus {
 }
 
 enum TaskType {
-  SEND_CAMPAIGN
   SEND_EMAIL
 }
 

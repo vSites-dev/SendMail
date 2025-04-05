@@ -96,13 +96,5 @@ export const columns: ColumnDef<Contact>[] = [
         </div>
       );
     },
-  },
-  {
-    accessorKey: "updatedAt",
-    header: "Frissítve",
-    enableSorting: true,
-    cell: ({ row }) => {
-      return new Date(row.original.updatedAt).toLocaleDateString();
-    },
-  },
+  }
 ];

@@ -5,8 +5,7 @@ export type EmailBlock = {
   template: Template;
   subject: string;
   from: string;
-  scheduledDate?: Date;
-  scheduledTime?: string;
+  date: Date;
 };
 
 export enum MemberRole {

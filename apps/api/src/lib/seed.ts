@@ -1,4 +1,4 @@
-import { Contact, EmailStatus, PrismaClient } from '@prisma/client'
+import { Contact, EmailStatus, PrismaClient, TaskStatus } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 
 const prisma = new PrismaClient()
@@ -295,7 +295,7 @@ async function createCampaign(
     data: {
       id: uuidv4(),
       name,
-      status: randomChoice(['DRAFT', 'SCHEDULED', 'COMPLETED']),
+      status: randomChoice(['SCHEDULED', 'COMPLETED']),
       projectId,
       createdAt: randomDate(),
       updatedAt: new Date()
@@ -451,10 +451,9 @@ async function createEmailsAndTasks(
       '{{name}}',
       contact.name || 'there'
     )
-    const messageId = `${uuidv4()}@mail.example.com`
+    // const messageId = `${uuidv4()}@mail.example.com`
     const from = 'notifications@example.com'
     const status = randomChoice([
-      'QUEUED',
       'SENT',
       'DELIVERED',
       'BOUNCED',
@@ -465,7 +464,6 @@ async function createEmailsAndTasks(
     const email = await prisma.email.create({
       data: {
         id: uuidv4(),
-        messageId,
         subject,
         from,
         body,
@@ -483,14 +481,9 @@ async function createEmailsAndTasks(
       data: {
         id: uuidv4(),
         type: 'SEND_EMAIL',
-        status:
-          status === 'QUEUED'
-            ? 'PENDING'
-            : status === 'FAILED'
-            ? 'FAILED'
-            : 'COMPLETED',
+        status: TaskStatus.COMPLETED,
         scheduledAt: randomDate(),
-        processedAt: status !== 'QUEUED' ? randomDate() : null,
+        processedAt: randomDate(),
         error:
           status === 'FAILED'
             ? 'Failed to deliver: recipient mailbox unavailable'
@@ -528,19 +521,4 @@ async function createEmailsAndTasks(
       }
     }
   }
-
-  // Create campaign task
-  await prisma.task.create({
-    data: {
-      id: uuidv4(),
-      type: 'SEND_CAMPAIGN',
-      status: randomChoice(['PENDING', 'PROCESSING', 'COMPLETED']),
-      scheduledAt: randomDate(),
-      processedAt: randomDate(),
-      projectId,
-      campaignId,
-      createdAt: randomDate(),
-      updatedAt: new Date()
-    }
-  })
 }

@@ -31,21 +31,11 @@ export class TaskScheduler {
         `[${new Date().toISOString()}] Running scheduled task processing`
       )
 
-      // Get current minute (with seconds and milliseconds set to 0)
-      const now = new Date()
-      now.setSeconds(0, 0)
-
-      // Get end of the current minute
-      const endOfMinute = new Date(now)
-      endOfMinute.setMinutes(now.getMinutes() + 1)
-
-      // Find all pending tasks that are scheduled for the current minute
+      // Find all pending and failed tasks
       const tasks = await prisma.task.findMany({
         where: {
-          status: TaskStatus.PENDING,
-          scheduledAt: {
-            gte: now,
-            lt: endOfMinute
+          status: {
+            in: [TaskStatus.PENDING, TaskStatus.FAILED]
           }
         },
         include: {
@@ -72,7 +62,14 @@ export class TaskScheduler {
           // Mark task as processing
           await prisma.task.update({
             where: { id: task.id },
-            data: { status: TaskStatus.PROCESSING }
+            data: {
+              status: TaskStatus.PROCESSING,
+              // For failed tasks, track the retry attempt
+              error:
+                task.status === TaskStatus.FAILED
+                  ? `Retrying previously failed task: ${task.error}`
+                  : null
+            }
           })
 
           await this.processTask(task)
@@ -90,6 +87,16 @@ export class TaskScheduler {
               processedAt: new Date()
             }
           })
+
+          // Update email status to FAILED if this was a send email task
+          if (task.type === TaskType.SEND_EMAIL && task.email?.id) {
+            await prisma.email.update({
+              where: { id: task.email.id },
+              data: {
+                status: EmailStatus.FAILED
+              }
+            })
+          }
         }
       }
 
@@ -115,63 +122,94 @@ export class TaskScheduler {
         | null
     }
   ) {
-    switch (task.type) {
-      case TaskType.SEND_EMAIL:
-        if (!task.email?.id)
-          throw new Error('Email ID not found for SEND_EMAIL task')
+    try {
+      switch (task.type) {
+        case TaskType.SEND_EMAIL:
+          if (!task.email?.id)
+            throw new Error('Email ID not found for SEND_EMAIL task')
 
-        const email = await prisma.email.findUnique({
-          where: { id: task.email.id },
-          include: { campaign: true, contact: true }
-        })
-
-        if (!email) throw new Error(`Email not found for task ${task.id}`)
-
-        if (!email.campaign)
-          throw new Error(`Campaign not found for email ${email.id}`)
-
-        // Process the email
-        if (process.env.NODE_ENV === 'development') {
-          await this.emailService.sendEmailToMailHog({
-            from: email.from || process.env.DEFAULT_FROM!,
-            to: email.contact.email,
-            subject: email.subject,
-            body: email.body
-          })
-        } else {
-          const result = await this.emailService.sendEmail({
-            from: email.from || process.env.DEFAULT_FROM!,
-            to: email.contact.email,
-            subject: email.subject,
-            body: email.body
+          const email = await prisma.email.findUnique({
+            where: { id: task.email.id },
+            include: { campaign: true, contact: true }
           })
 
-          // Update email status
-          await prisma.email.update({
-            where: { id: email.id },
-            data: {
-              messageId: result.messageId || email.messageId,
-              status: EmailStatus.SENT,
-              sentAt: new Date()
-            }
-          })
-        }
-        break
+          if (!email) throw new Error(`Email not found for task ${task.id}`)
 
-      case TaskType.SEND_CAMPAIGN:
-        throw new Error('SEND_CAMPAIGN Task not implemented')
-      default:
-        throw new Error(`Unsupported task type: ${task.type}`)
-    }
+          if (!email.campaign)
+            throw new Error(`Campaign not found for email ${email.id}`)
 
-    // Mark task as completed
-    await prisma.task.update({
-      where: { id: task.id },
-      data: {
-        status: TaskStatus.COMPLETED,
-        processedAt: new Date()
+          // Process the email
+          if (process.env.NODE_ENV === 'development') {
+            await this.emailService.sendEmailToMailHog({
+              from: email.from || process.env.DEFAULT_FROM!,
+              to: email.contact.email,
+              subject: email.subject,
+              body: email.body
+            })
+
+            // Update email status even in development mode
+            await prisma.email.update({
+              where: { id: email.id },
+              data: {
+                status: EmailStatus.SENT,
+                sentAt: new Date()
+              }
+            })
+          } else {
+            const result = await this.emailService.sendEmail({
+              from: email.from || process.env.DEFAULT_FROM!,
+              to: email.contact.email,
+              subject: email.subject,
+              body: email.body
+            })
+
+            // Update email status
+            await prisma.email.update({
+              where: { id: email.id },
+              data: {
+                status: EmailStatus.SENT,
+                sentAt: new Date()
+              }
+            })
+          }
+          break
+        default:
+          throw new Error(`Unsupported task type: ${task.type}`)
       }
-    })
+
+      // Mark task as completed
+      await prisma.task.update({
+        where: { id: task.id },
+        data: {
+          status: TaskStatus.COMPLETED,
+          processedAt: new Date(),
+          error: null // Clear any previous error messages
+        }
+      })
+    } catch (error) {
+      // Update task status to FAILED
+      await prisma.task.update({
+        where: { id: task.id },
+        data: {
+          status: TaskStatus.FAILED,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          processedAt: new Date()
+        }
+      })
+
+      // Update email status to FAILED if this was a send email task
+      if (task.type === TaskType.SEND_EMAIL && task.email?.id) {
+        await prisma.email.update({
+          where: { id: task.email.id },
+          data: {
+            status: EmailStatus.FAILED
+          }
+        })
+      }
+
+      // Re-throw the error to be caught by the outer catch block
+      throw error
+    }
   }
 
   start() {

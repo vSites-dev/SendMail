@@ -6,7 +6,12 @@ import {
 
 import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
-import { CampaignStatus, TaskStatus, TaskType } from "@prisma/client";
+import {
+  CampaignStatus,
+  EmailStatus,
+  TaskStatus,
+  TaskType,
+} from "@prisma/client";
 
 export const campaignRouter = createTRPCRouter({
   scheduledCampaignsCount: authedProcedure
@@ -37,7 +42,9 @@ export const campaignRouter = createTRPCRouter({
             status: CampaignStatus.SCHEDULED,
             createdAt: {
               lt: new Date(Date.now() - timeInterval * 24 * 60 * 60 * 1000),
-              gte: new Date(Date.now() - timeInterval * 2 * 24 * 60 * 60 * 1000),
+              gte: new Date(
+                Date.now() - timeInterval * 2 * 24 * 60 * 60 * 1000,
+              ),
             },
           },
         }),
@@ -164,7 +171,7 @@ export const campaignRouter = createTRPCRouter({
       }
     }),
 
-  createWithTask: authedProcedure
+  createWithEmailsAndTasks: authedProcedure
     .input(
       z.object({
         name: z.string(),
@@ -172,60 +179,82 @@ export const campaignRouter = createTRPCRouter({
         emailBlocks: z.array(
           z.object({
             templateId: z.string(),
-            scheduledDate: z.date().optional(),
-            scheduledTime: z.string().optional(),
+            subject: z.string(),
+            from: z.string(),
+            date: z.date(),
           }),
         ),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        // Create the campaign with status SCHEDULED
         const campaign = await ctx.db.campaign.create({
           data: {
             name: input.name,
             status: CampaignStatus.SCHEDULED,
             projectId: ctx.session.activeProjectId,
-            // Connect contacts to the campaign
             contacts: {
               connect: input.contactIds.map((id) => ({ id })),
             },
           },
         });
 
-        // Create a task for sending the campaign
-        // Using the first email block's scheduled date/time or current time if not provided
-        const firstBlock = input.emailBlocks[0];
-        let scheduledAt = new Date();
-
-        if (firstBlock?.scheduledDate) {
-          scheduledAt = new Date(firstBlock.scheduledDate);
-
-          // If time is provided, parse and set it
-          if (firstBlock.scheduledTime) {
-            const timeParts = firstBlock.scheduledTime.split(":").map(Number);
-            const hours = timeParts[0] || 0;
-            const minutes = timeParts[1] || 0;
-            const seconds = timeParts[2] || 0;
-
-            scheduledAt.setHours(hours, minutes, seconds);
-          }
-        }
-
-        const task = await ctx.db.task.create({
-          data: {
-            type: TaskType.SEND_CAMPAIGN,
-            status: TaskStatus.PENDING,
-            scheduledAt,
-            projectId: ctx.session.activeProjectId,
-            campaignId: campaign.id, // Use campaignId directly rather than connect syntax
+        const templates = await ctx.db.template.findMany({
+          where: {
+            id: {
+              in: input.emailBlocks.map((block) => block.templateId),
+            },
           },
         });
+
+        // For each contact and each email block, create an email
+        const emails = await Promise.all(
+          input.contactIds.flatMap((contactId) =>
+            input.emailBlocks.map(async (block) => {
+              const t = templates.find(
+                (template) => template.id === block.templateId,
+              );
+              if (!t) throw new Error("Template not found");
+
+              return ctx.db.email.create({
+                data: {
+                  subject: block.subject,
+                  from: block.from,
+                  body: t.body,
+                  status: EmailStatus.QUEUED,
+                  campaignId: campaign.id,
+                  contactId: contactId,
+                },
+              });
+            }),
+          ),
+        );
+
+        // For each email, create a task
+        const tasks = await Promise.all(
+          input.emailBlocks.map(async (block) => {
+            return ctx.db.task.create({
+              data: {
+                type: TaskType.SEND_EMAIL,
+                status: TaskStatus.PENDING,
+                scheduledAt: block.date,
+                projectId: ctx.session.activeProjectId,
+                campaignId: campaign.id,
+                emailId: emails.find(
+                  (email) =>
+                    email.from === block.from &&
+                    email.subject === block.subject,
+                )?.id,
+              },
+            });
+          }),
+        );
 
         return {
           success: true,
           campaign,
-          task,
+          emails,
+          tasks,
         };
       } catch (error) {
         console.error("Error creating campaign with task:", error);

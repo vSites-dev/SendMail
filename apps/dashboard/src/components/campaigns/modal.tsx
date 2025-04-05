@@ -19,7 +19,6 @@ import { Card } from "@/components/ui/card";
 import { CampaignSteps } from "@/components/campaigns/steps";
 import { CampaignContacts } from "@/components/campaigns/contacts";
 import { CampaignSettings } from "@/components/campaigns/settings";
-import { CampaignOverview } from "@/components/campaigns/overview";
 import { CampaignFlow } from "@/components/campaigns/flow";
 import { Contact, Template } from "@prisma/client";
 import { useAtom } from "jotai";
@@ -27,6 +26,7 @@ import { campaignEmailBlocksAtom, campaignNameAtom, selectedCampaignContactsAtom
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { Badge } from "../ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 export type Step = {
   id: number;
@@ -79,14 +79,7 @@ export function CampaignModal({
       isActive: currentStep === 3,
       isCompleted: currentStep > 3,
       Icon: <Cog />,
-    },
-    {
-      id: 4,
-      title: "Áttekintés",
-      isActive: currentStep === 4,
-      isCompleted: currentStep > 4,
-      Icon: <Eye />,
-    },
+    }
   ];
 
   useEffect(() => {
@@ -105,7 +98,7 @@ export function CampaignModal({
     };
   }, [onClose]);
 
-  const { mutateAsync: createCampaign, isPending } = api.campaign.createWithTask.useMutation();
+  const { mutateAsync: createCampaign, isPending } = api.campaign.createWithEmailsAndTasks.useMutation();
 
   const handleNext = async () => {
     if (currentStep < steps.length) {
@@ -128,8 +121,8 @@ export function CampaignModal({
           emailBlocks: emailBlocks.map(block => ({
             subject: block.subject,
             templateId: block.template.id,
-            scheduledDate: block.scheduledDate,
-            scheduledTime: block.scheduledTime
+            from: block.from,
+            date: block.date
           }))
         });
 
@@ -214,7 +207,6 @@ export function CampaignModal({
           {currentStep === 1 && <CampaignContacts contacts={contacts} />}
           {currentStep === 2 && <CampaignFlow templates={templates} />}
           {currentStep === 3 && <CampaignSettings />}
-          {currentStep === 4 && <CampaignOverview />}
         </div>
 
         <div className="flex items-center justify-between border-t p-4">
@@ -228,12 +220,29 @@ export function CampaignModal({
           </Button>
 
           <div className="text-xs text-muted-foreground flex items-center gap-2">
-            A kampány el lesz küldve <div className="bg-violet-50 border-violet-500 border text-violet-500 font-semibold tracking-wide rounded-full px-2 py-1 flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              {selectedContacts.length} kontaktnak</div>
+            A kampány el lesz küldve
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="bg-violet-50 border-violet-500 border text-violet-500 font-semibold tracking-wide rounded-full px-2 py-1 flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    {selectedContacts.length} kontaktnak
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-h-[200px] overflow-y-auto p-2">
+                  <div className="space-y-1">
+                    {contacts.filter(contact => selectedContacts.includes(contact.id)).map((contact) => (
+                      <div key={contact.id} className="text-sm border-b">
+                        {contact.name || contact.email}
+                      </div>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-          <Button onClick={handleNext} disabled={isButtonDisabled()} isLoading={isPending}>
-            {currentStep === steps.length ? "Befejezés" : "Következő"}
+          <Button onClick={handleNext} disabled={isButtonDisabled() || isPending} isLoading={isPending}>
+            {currentStep === steps.length ? "Létrehozás" : "Következő"}
             {!isPending && (
               <>
                 {currentStep === steps.length && <Check className="h-4 w-4" />}

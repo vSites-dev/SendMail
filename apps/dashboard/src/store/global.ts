@@ -24,6 +24,6 @@ export const campaignEmailBlocksAtom = atom<EmailBlock[]>([]);
 export const campaignNameAtom = atom<string>("");
 
 // Onboarding atoms
-export const onboardingMemberInvitesAtom = atom<MemberInvite[]>([]);
+export const onboardingMemberInvitesAtom = atom<MemberInvite[] | null>(null);
 export const onboardingProjectNameAtom = atom<string>("");
 export const onboardingUploadedFileUrlAtom = atom<string | null>(null);

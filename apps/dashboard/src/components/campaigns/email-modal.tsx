@@ -24,6 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { EmailBlock } from "@/types";
 
@@ -48,12 +49,12 @@ export function BlockModal({
     initialData?.template || null,
   );
   const [date, setDate] = useState<Date | undefined>(
-    initialData?.scheduledDate || undefined,
+    initialData?.date || undefined,
   );
 
   const [id] = useState(initialData?.id || `email-${Date.now()}`);
-  const [senderName, setSenderName] = useState("");
-  const [selectedDomain, setSelectedDomain] = useState("");
+  const [senderName, setSenderName] = useState(initialData?.from?.split("@")[0] || "");
+  const [selectedDomain, setSelectedDomain] = useState(initialData?.from?.split("@")[1] || "");
 
   useEffect(() => {
     setIsMounted(true);
@@ -71,19 +72,20 @@ export function BlockModal({
 
   const handleSave = () => {
     if (!selectedTemplate || !subject.trim()) return;
+    if (!date) return;
 
     onSave({
       id,
       template: selectedTemplate,
       subject,
       from: `${senderName}@${selectedDomain}`,
-      scheduledDate: date,
+      date: date,
     });
 
     onClose();
   };
 
-  const isValid = subject.trim() !== "" && selectedTemplate !== null;
+  const isValid = subject.trim() !== "" && selectedTemplate !== null && date !== undefined && senderName.trim() !== "" && selectedDomain !== "" && domains.includes(selectedDomain);
 
   if (!isMounted || !isOpen) return null;
 
@@ -101,12 +103,9 @@ export function BlockModal({
         aria-modal="true"
       >
         <div className="flex items-center justify-between border-b p-4">
-          <div className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-primary" />
-            <h2 className="text-xl font-semibold">
-              {initialData ? "Email szerkesztése" : "Új email hozzáadása"}
-            </h2>
-          </div>
+          <h2 className="text-xl font-semibold">
+            {initialData ? "Email blokk szerkesztése" : "Új email blokk hozzáadása"}
+          </h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
             <span className="sr-only">Bezárás</span>
@@ -124,8 +123,8 @@ export function BlockModal({
                   id="sender-name"
                   value={senderName}
                   onChange={(e) => setSenderName(e.target.value)}
-                  placeholder="küldő név"
-                  className="rounded-r-none border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="Küldő név"
+                  className="rounded-r-none border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0 !shadow-none !drop-shadow-none pr-6"
                 />
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
                   <span className="text-muted-foreground">@</span>
@@ -158,7 +157,7 @@ export function BlockModal({
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Írja be az email tárgyát"
-              className="w-full"
+              className="w-full focus-visible:ring-0 focus-visible:ring-offset-0 !shadow-none !drop-shadow-none"
             />
           </div>
 
@@ -220,41 +219,61 @@ export function BlockModal({
                 </div>
               </PopoverTrigger>
               <PopoverContent
-                className="w-auto p-0 rounded-md border"
+                className="w-[420px] p-0 rounded-md border"
                 align="start"
               >
-                <Calendar
-                  mode="single"
-                  className="p-2"
-                  selected={date}
-                  onSelect={setDate}
-                />
-                <div className="border-t p-3">
-                  <div className="flex items-center gap-3">
-                    <Label className="text-xs">Időpont:</Label>
-                    <div className="relative grow">
-                      <Input
-                        type="time"
-                        step="1"
-                        value={date && `${date?.getHours()}:${date?.getMinutes()}:${date?.getSeconds()}`}
-                        onChange={(e) =>
-                          date ?
-                            setDate(
-                              new Date(
-                                date.setHours(
-                                  Number(e.target.value.split(":")[0] ?? 12),
-                                  Number(e.target.value.split(":")[1] ?? 0),
-                                  Number(e.target.value.split(":")[2] ?? 0),
-                                ),
-                              ),
-                            ) : setDate(new Date())
-                        }
-                        className="peer appearance-none ps-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-                      />
-                      <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
-                        <ClockIcon size={16} aria-hidden="true" />
-                      </div>
+                <div className="flex">
+                  <div className="border-r w-[280px]">
+                    <Calendar
+                      mode="single"
+                      className="p-2"
+                      selected={date}
+                      onSelect={setDate}
+                    />
+                  </div>
+                  <div className="w-[140px]">
+                    <div className="p-2 border-b">
+                      <Label className="text-xs font-medium">Időpont</Label>
                     </div>
+                    <ScrollArea className="h-[230px] p-2">
+                      {Array.from({ length: 48 }).map((_, index) => {
+                        const hours = Math.floor(index / 2);
+                        const minutes = index % 2 === 0 ? 0 : 30;
+                        const timeString = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+
+                        const currentHours = date?.getHours() || 0;
+                        const currentMinutes = date?.getMinutes() || 0;
+                        const isSelected =
+                          date &&
+                          currentHours === hours &&
+                          (currentMinutes >= 0 && currentMinutes < 30 ? minutes === 0 : minutes === 30);
+
+                        return (
+                          <Button
+                            key={timeString}
+                            type="button"
+                            variant={"ghost"}
+                            className={cn(
+                              "w-full justify-start h-10",
+                              isSelected ? "bg-primary text-primary-foreground" : "hover:bg-accent hover:text-accent-foreground"
+                            )}
+                            onClick={() => {
+                              if (date) {
+                                const newDate = new Date(date);
+                                newDate.setHours(hours, minutes, 0);
+                                setDate(newDate);
+                              } else {
+                                const newDate = new Date();
+                                newDate.setHours(hours, minutes, 0);
+                                setDate(newDate);
+                              }
+                            }}
+                          >
+                            {timeString}
+                          </Button>
+                        );
+                      })}
+                    </ScrollArea>
                   </div>
                 </div>
               </PopoverContent>

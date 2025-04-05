@@ -77,10 +77,10 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
   };
 
   const formatSchedule = (block: EmailBlock) => {
-    if (!block.scheduledDate) return "Nincs időzítve";
+    if (!block.date) return "Nincs időzítve";
 
-    const dateString = format(block.scheduledDate, "yyyy. MMMM d.");
-    return `${dateString}, ${block.scheduledDate.toTimeString().slice(0, 5)}`;
+    const dateString = format(block.date, "yyyy. MMMM d.");
+    return `${dateString}, ${block.date.toTimeString().slice(0, 5)}`;
   };
 
   return (

@@ -1,7 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { onboardingMemberInvitesAtom, onboardingProjectNameAtom, onboardingUploadedFileUrlAtom } from "@/store/global";
+import {
+  onboardingMemberInvitesAtom,
+  onboardingProjectNameAtom,
+  onboardingUploadedFileUrlAtom,
+} from "@/store/global";
 import { MemberRole } from "@/types";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
@@ -19,32 +23,30 @@ export default function OnboardingStepTwo() {
   const [memberInvites, setMemberInvites] = useAtom(
     onboardingMemberInvitesAtom,
   );
-  const [name, setName] = useAtom(onboardingProjectNameAtom)
-  const [logo, setLogo] = useAtom(onboardingUploadedFileUrlAtom)
+  const [name, setName] = useAtom(onboardingProjectNameAtom);
+  const [logo, setLogo] = useAtom(onboardingUploadedFileUrlAtom);
 
   const [loading, setLoading] = React.useState(false);
 
   useEffect(() => {
     if (!name || !logo) router.push("/uj-projekt/1");
-  }, [name, logo])
+  }, [name, logo]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
-    if (
-      memberInvites.length > 0 &&
-      memberInvites.every((invite) => invite.email && invite.role)
-    ) {
+    try {
       const org = await authClient.organization.create({
         name,
         slug: createSlug(name),
         logo: logo ?? undefined,
-      })
+      });
       console.log("created org", org);
-      if (!org.data) throw new Error("Valami hiba történt a projekt létrehozása során");
+      if (!org.data)
+        throw new Error("Valami hiba történt a projekt létrehozása során");
 
-      const res = await createProject(org.data.id, name)
+      const res = await createProject(org.data.id, name);
 
       if (!res) {
         toast.error("Hiba történt a projekt létrehozásakor");
@@ -54,40 +56,43 @@ export default function OnboardingStepTwo() {
 
       toast.success("A projekt sikeresen létrehozva");
 
-      for (const invite of memberInvites) {
-        try {
-          console.log("sending invite to: ", invite.email)
-          await authClient.organization.inviteMember({
-            email: invite.email,
-            role: invite.role,
-            organizationId: org.data.id,
-          });
-        } catch (error) {
-          console.error(`Failed to invite ${invite.email}:`, error);
-          toast.error(`Hiba történt ${invite.email} meghívása során`);
+      if (memberInvites && memberInvites.length > 0) {
+        for (const invite of memberInvites) {
+          if (invite.email && invite.role) {
+            try {
+              console.log("sending invite to: ", invite.email);
+              await authClient.organization.inviteMember({
+                email: invite.email,
+                role: invite.role,
+                organizationId: org.data.id,
+              });
+            } catch (error) {
+              console.error(`Failed to invite ${invite.email}:`, error);
+              toast.error(`Hiba történt ${invite.email} meghívása során`);
+            }
+          }
         }
       }
 
       router.push("/");
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast.error("Hiba történt a projekt létrehozása során");
+    } finally {
       setLoading(false);
-    } else {
-      setLoading(false);
-      toast.error(
-        "Minden meghívottnak szükséges megadni az email címét és szerepkörét!",
-      );
-      return;
     }
   };
 
   const handleAddMember = () => {
     setMemberInvites((prev) => [
-      ...prev,
+      ...(prev ?? []),
       { email: "", role: MemberRole.member },
     ]);
   };
 
   const handleEmailChange = (id: number, email: string) => {
     setMemberInvites((prev) => {
+      if (!prev) return null;
       const newInvites = [...prev];
       newInvites[id - 1]!.email = email;
       return newInvites;
@@ -96,6 +101,7 @@ export default function OnboardingStepTwo() {
 
   const handleRoleChange = (id: number, role: MemberRole) => {
     setMemberInvites((prev) => {
+      if (!prev) return null;
       const newInvites = [...prev];
       newInvites[id - 1]!.role = role;
       return newInvites;
@@ -104,6 +110,7 @@ export default function OnboardingStepTwo() {
 
   const handleRemove = (id: number) => {
     setMemberInvites((prev) => {
+      if (!prev) return null;
       const newInvites = [...prev];
       newInvites.splice(id - 1, 1);
       return newInvites;
@@ -126,15 +133,16 @@ export default function OnboardingStepTwo() {
 
         <form onSubmit={handleSubmit} className="mt-4">
           <div className="space-y-2">
-            {memberInvites.length > 0 && (
+            {memberInvites && memberInvites.length > 0 && (
               <div
                 style={{ animationDuration: "500ms" }}
-                className="motion-safe:animate-revealBottom flex items-center text-sm text-muted-foreground">
+                className="motion-safe:animate-revealBottom flex items-center text-sm text-muted-foreground"
+              >
                 <span className="flex-grow">Email cím</span>
                 <span className="w-[134px] sm:w-[204px]">Szerepkör</span>
               </div>
             )}
-            {memberInvites.map((invite, index) => (
+            {memberInvites?.map((invite, index) => (
               <MemberInviteInput
                 key={index}
                 id={index + 1}
