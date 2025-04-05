@@ -232,22 +232,24 @@ export const campaignRouter = createTRPCRouter({
 
         // For each email, create a task
         const tasks = await Promise.all(
-          input.emailBlocks.map(async (block) => {
-            return ctx.db.task.create({
-              data: {
-                type: TaskType.SEND_EMAIL,
-                status: TaskStatus.PENDING,
-                scheduledAt: block.date,
-                projectId: ctx.session.activeProjectId,
-                campaignId: campaign.id,
-                emailId: emails.find(
-                  (email) =>
-                    email.from === block.from &&
-                    email.subject === block.subject,
-                )?.id,
-              },
-            });
-          }),
+          input.contactIds.flatMap((contactId) =>
+            input.emailBlocks.map(async (block) => {
+              return ctx.db.task.create({
+                data: {
+                  type: TaskType.SEND_EMAIL,
+                  status: TaskStatus.PENDING,
+                  scheduledAt: block.date,
+                  projectId: ctx.session.activeProjectId,
+                  campaignId: campaign.id,
+                  emailId: emails.find(
+                    (email) =>
+                      email.from === block.from &&
+                      email.subject === block.subject,
+                  )?.id,
+                },
+              });
+            }),
+          ),
         );
 
         return {

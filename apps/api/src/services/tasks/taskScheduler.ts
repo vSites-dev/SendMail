@@ -31,11 +31,16 @@ export class TaskScheduler {
         `[${new Date().toISOString()}] Running scheduled task processing`
       )
 
-      // Find all pending and failed tasks
+      const currentDate = new Date()
+
+      // Find all pending and failed tasks that are due
       const tasks = await prisma.task.findMany({
         where: {
           status: {
             in: [TaskStatus.PENDING, TaskStatus.FAILED]
+          },
+          scheduledAt: {
+            lte: currentDate
           }
         },
         include: {
