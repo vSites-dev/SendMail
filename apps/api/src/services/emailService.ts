@@ -22,7 +22,7 @@ export class EmailService {
           Charset: 'UTF-8'
         },
         Body: {
-          Text: {
+          Html: {
             Data: params.body,
             Charset: 'UTF-8'
           }
@@ -46,7 +46,7 @@ export class EmailService {
         from: params.from,
         to: params.to,
         subject: params.subject,
-        text: params.body
+        html: params.body
       })
       return { success: true }
     } catch (error) {
