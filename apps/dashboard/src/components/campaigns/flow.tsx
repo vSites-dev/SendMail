@@ -1,39 +1,52 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Mail, Plus, MoreVertical, Power, Edit, Trash2, Wand2 } from "lucide-react";
+import {
+  Mail,
+  Plus,
+  MoreVertical,
+  Power,
+  Edit,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Template } from "@prisma/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { BlockModal } from "./email-modal";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 import { useAtom } from "jotai";
 import { campaignEmailBlocksAtom } from "@/store/global";
 import { EmailBlock } from "@/types";
+import { api } from "@/trpc/react";
 
 export function CampaignFlow({ templates }: { templates: Template[] }) {
   const [emailBlocks, setEmailBlocks] = useAtom(campaignEmailBlocksAtom);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingBlock, setEditingBlock] = useState<EmailBlock | undefined>(undefined);
+  const [editingBlock, setEditingBlock] = useState<EmailBlock | undefined>(
+    undefined,
+  );
 
-  useEffect(() => {
-    if (emailBlocks.length === 0) {
-      setEmailBlocks([
-        {
-          id: `email-${Date.now()}`,
-          template: templates[0]!,
-          subject: "Példa tárgy",
-          scheduledDate: new Date()
-        }
-      ])
-    }
-  }, [emailBlocks])
+  const { data: domains } = api.domain.getAll.useQuery();
 
   const handleAddEmail = () => {
     if (templates.length === 0) {
       toast.error("Először hozz létre egy sablont!");
+      return;
+    }
+    if (
+      !domains ||
+      domains.length === 0 ||
+      !domains.some((domain) => domain.status === "VERIFIED")
+    ) {
+      toast.error("Először hozz létre egy domain!");
       return;
     }
 
@@ -54,7 +67,7 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
   const handleSaveEmail = (data: EmailBlock) => {
     if (editingBlock) {
       setEmailBlocks(
-        emailBlocks.map((block) => (block.id === data.id ? data : block))
+        emailBlocks.map((block) => (block.id === data.id ? data : block)),
       );
       toast.success("Email blokk frissítve");
     } else {
@@ -82,28 +95,23 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
           Kampány kezdete
         </div>
 
-        {emailBlocks.map((block) => (
-          <div
-            key={block.id}
-            className="relative z-10 mb-8 w-max"
-          >
+        {emailBlocks.map((block, index) => (
+          <div key={block.id} className="relative z-10 mb-8 w-max">
             <Card className="overflow-hidden rounded-sm">
-              <div className="flex items-center border-b p-4 gap-14">
+              <div className="flex items-center justify-between border-b p-4 gap-14">
                 <div className="flex items-center">
                   <div className="flex h-8 w-8 items-center justify-center text-violet-600 border rounded-full text-primary">
                     <Mail className="h-4 w-4" />
                   </div>
                   <div className="ml-3 flex-1">
-                    <div className="font-medium">
-                      {block.subject}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">{index + 1}. email</p>
+                    <div className="text-sm font-medium">
                       {formatSchedule(block)}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <TooltipProvider>
+                  <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -121,7 +129,7 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
                     </Tooltip>
                   </TooltipProvider>
 
-                  <TooltipProvider>
+                  <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -142,25 +150,36 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
               </div>
               <div className="p-4">
                 <div className="text-sm mb-1">
+                  <span className="text-muted-foreground mr-2">Küldő:</span>
+                  <span className="text-sm font-medium">{block.from}</span>
+                </div>
+                <div className="mb-2 pb-2 text-sm border-b">
                   <span className="text-muted-foreground mr-2">Tárgy:</span>
                   <span className="text-sm font-medium">{block.subject}</span>
                 </div>
                 <div className="mb-2 pb-2 text-sm border-b">
                   <span className="text-muted-foreground mr-2">Sablon:</span>
-                  <span className="text-sm font-medium">{block.template.name}</span>
+                  <span className="text-sm font-medium">
+                    {block.template.name}
+                  </span>
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground max-w-[400px] leading-relaxed">
                   {block.template.body
-                    .replace(/<[^>]*>|[#*_`]/g, '')
-                    .split('<br>')
+                    .replace(/<[^>]*>|[#*_`]/g, "")
+                    .split("<br>")
                     .map((line, index) => (
                       <React.Fragment key={index}>
                         {line}
-                        {index < block.template.body.split('<br>').length - 1 && <br />}
+                        {index <
+                          block.template.body.split("<br>").length - 1 && (
+                            <br />
+                          )}
                       </React.Fragment>
                     ))
-                    .slice(0, 3)}
-                  {block.template.body.split('<br>').length > 3 && <div>...</div>}
+                    .slice(0, 2)}
+                  {block.template.body.split("<br>").length > 2 && (
+                    <div>...</div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -183,6 +202,7 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
           onClose={() => setIsModalOpen(false)}
           templates={templates}
           onSave={handleSaveEmail}
+          domains={domains?.map((d) => d.name) ?? []}
           initialData={editingBlock}
         />
       )}

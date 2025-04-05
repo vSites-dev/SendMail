@@ -216,7 +216,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
               </div>
             </div>
           </div>
-          
+
           {domain.statusMessage && (
             <div className="mt-4">
               <p className="text-xs uppercase font-bold text-muted-foreground">
@@ -262,11 +262,10 @@ export function DomainDetails({ domain }: { domain: Domain }) {
                   </thead>
                   <tbody>
                     {dnsRecords.map((record, index) => (
-                      <tr 
-                        key={index} 
-                        className={`border-b last:border-b-0 ${
-                          record.type === "DKIM" ? "bg-amber-50 dark:bg-amber-900/20" : ""
-                        }`}
+                      <tr
+                        key={index}
+                        className={`border-b last:border-b-0 ${record.type === "DKIM" ? "bg-amber-50 dark:bg-amber-900/20" : ""
+                          }`}
                       >
                         <td className="p-2">
                           <Badge variant="outline" className="font-mono bg-transparent">
@@ -276,7 +275,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
                         <td className="p-2">
                           <div className="flex items-center gap-2">
                             <span className="font-mono text-xs break-all">{record.name}</span>
-                            <TooltipProvider>
+                            <TooltipProvider delayDuration={0}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
@@ -305,7 +304,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
                           <span className="font-mono text-xs break-all">{record.value}</span>
                         </td>
                         <td className="p-2 text-right">
-                          <TooltipProvider>
+                          <TooltipProvider delayDuration={0}>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button

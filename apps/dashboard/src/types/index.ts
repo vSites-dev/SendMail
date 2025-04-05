@@ -4,6 +4,7 @@ export type EmailBlock = {
   id: string;
   template: Template;
   subject: string;
+  from: string;
   scheduledDate?: Date;
   scheduledTime?: string;
 };

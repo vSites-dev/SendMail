@@ -93,7 +93,7 @@ export function ColorDropdownMenuItems({
       )}
       {...props}
     >
-      <TooltipProvider>
+      <TooltipProvider delayDuration={0}>
         {colors.map(({ isBrightColor, name, value }) => (
           <ColorDropdownMenuItem
             name={name}

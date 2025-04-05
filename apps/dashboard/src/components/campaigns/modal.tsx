@@ -28,7 +28,6 @@ import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { Badge } from "../ui/badge";
 
-
 export type Step = {
   id: number;
   title: string;
@@ -119,7 +118,7 @@ export function CampaignModal({
         const firstEmailBlock = emailBlocks[0];
 
         if (!firstEmailBlock) {
-          toast.error('Legalább egy email blokkra van szükgség a kampány létrehozásához');
+          toast.error('Legalább egy email blokkra van szükség a kampány létrehozásához');
           return;
         }
 

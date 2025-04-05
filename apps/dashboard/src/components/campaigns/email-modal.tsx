@@ -2,8 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Mail, CalendarIcon, ClockIcon, FolderClosed } from "lucide-react";
+import { X, Mail, CalendarIcon, ClockIcon } from "lucide-react";
 import { format } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Template } from "@prisma/client";
 import { TemplateCard } from "@/components/ui/template-card";
 import { Card } from "@/components/ui/card";
@@ -25,12 +32,14 @@ export function BlockModal({
   onClose,
   templates,
   onSave,
+  domains,
   initialData,
 }: {
   isOpen: boolean;
   onClose: () => void;
   templates: Template[];
   onSave: (data: EmailBlock) => void;
+  domains: string[];
   initialData?: EmailBlock;
 }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -43,6 +52,8 @@ export function BlockModal({
   );
 
   const [id] = useState(initialData?.id || `email-${Date.now()}`);
+  const [senderName, setSenderName] = useState("");
+  const [selectedDomain, setSelectedDomain] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
@@ -65,6 +76,7 @@ export function BlockModal({
       id,
       template: selectedTemplate,
       subject,
+      from: `${senderName}@${selectedDomain}`,
       scheduledDate: date,
     });
 
@@ -83,7 +95,7 @@ export function BlockModal({
         aria-hidden="true"
       />
       <Card
-        className="relative max-h-[90vh] w-[90vw] max-w-3xl flex flex-col overflow-hidden bg-white animate-in fade-in slide-in-from-bottom-4 duration-300"
+        className="relative max-h-[90vh] w-full max-w-xl flex flex-col overflow-hidden bg-white animate-in fade-in slide-in-from-bottom-4 duration-300"
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
@@ -102,7 +114,42 @@ export function BlockModal({
         </div>
 
         <div className="flex-1 overflow-auto p-6 space-y-6">
-          <div className="space-y-2">
+          <div className="space-y-1">
+            <Label htmlFor="sender-email" className="text-base font-medium">
+              Küldő email címe
+            </Label>
+            <div className="flex w-full items-center gap-0">
+              <div className="relative flex-1">
+                <Input
+                  id="sender-name"
+                  value={senderName}
+                  onChange={(e) => setSenderName(e.target.value)}
+                  placeholder="küldő név"
+                  className="rounded-r-none border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
+                  <span className="text-muted-foreground">@</span>
+                </div>
+              </div>
+              <Select
+                value={selectedDomain}
+                onValueChange={setSelectedDomain}
+              >
+                <SelectTrigger className="w-[180px] rounded-l-none border-l-0 focus:ring-0 focus:ring-offset-0">
+                  <SelectValue placeholder="Domain választás" />
+                </SelectTrigger>
+                <SelectContent>
+                  {domains.map((domain) => (
+                    <SelectItem key={domain} value={domain}>
+                      {domain}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
             <Label htmlFor="subject" className="text-base font-medium">
               Email tárgya
             </Label>
@@ -115,7 +162,7 @@ export function BlockModal({
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-1">
             <Label className="text-base font-medium">Válasszon sablont</Label>
 
             <RadioGroup
@@ -151,7 +198,7 @@ export function BlockModal({
             </RadioGroup>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label className="text-base font-medium">Időzítés</Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -159,7 +206,7 @@ export function BlockModal({
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-[240px] pl-3 text-left font-normal",
+                      "w-full pl-3 text-left font-normal",
                       !date && "text-muted-foreground",
                     )}
                   >
