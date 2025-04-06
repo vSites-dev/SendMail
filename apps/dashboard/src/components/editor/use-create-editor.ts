@@ -99,6 +99,7 @@ import { TableRowElement } from "@/components/plate-ui/table-row-element";
 import { TocElement } from "@/components/plate-ui/toc-element";
 import { ToggleElement } from "@/components/plate-ui/toggle-element";
 import { MarkdownPlugin } from "@udecode/plate-markdown";
+import remarkGfm from "remark-gfm";
 
 export const useCreateEditor = () => {
   return usePlateEditor({
@@ -153,10 +154,14 @@ export const useCreateEditor = () => {
       }),
     },
     plugins: [
-      ...copilotPlugins,
       ...editorPlugins,
       FixedToolbarPlugin,
       FloatingToolbarPlugin,
+      MarkdownPlugin.configure({
+        options: {
+          remarkPlugins: [remarkGfm],
+        },
+      }),
     ],
   });
 };

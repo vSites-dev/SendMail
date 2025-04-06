@@ -27,11 +27,14 @@ export function TemplateEditor({ template }: { template?: Template }) {
   const [name, setName] = React.useState("");
 
   useEffect(() => {
-    if (template) {
-      editor.tf.setValue(editor.api.markdown.deserialize(template?.body));
+    if (template?.body) {
+      console.log(template.body)
+      editor.children = editor.api.markdown.deserialize(template?.body, {
+        splitLineBreaks: true,
+      });
       setName(template?.name);
     }
-  }, [template]);
+  }, []);
 
   const { mutateAsync: updateTemplate } = api.template.update.useMutation();
 
