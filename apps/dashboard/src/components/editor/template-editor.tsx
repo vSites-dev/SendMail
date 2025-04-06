@@ -28,7 +28,6 @@ export function TemplateEditor({ template }: { template?: Template }) {
 
   useEffect(() => {
     if (template?.body) {
-      console.log(template.body)
       editor.children = editor.api.markdown.deserialize(template?.body, {
         splitLineBreaks: true,
       });

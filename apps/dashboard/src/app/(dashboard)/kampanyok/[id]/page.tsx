@@ -330,7 +330,7 @@ export default function CampaignDetailPage() {
                                           : email.status === "DELIVERED"
                                             ? "Kézbesítve"
                                             : email.status === "QUEUED"
-                                              ? "Várakozik"
+                                              ? "Küldés alatt"
                                               : email.status === "FAILED"
                                                 ? "Sikertelen"
                                                 : email.status}

@@ -101,7 +101,7 @@ export function CampaignContacts({
     } else if (sentCount > 0) {
       return `${sentCount}/${emails.length} elküldve`;
     } else {
-      return "Várakozik";
+      return "Küldés alatt";
     }
   };
 
@@ -127,7 +127,7 @@ export function CampaignContacts({
         </Badge>
       );
     } else {
-      return <Badge variant="outline">Várakozik</Badge>;
+      return <Badge variant="outline">Küldés alatt</Badge>;
     }
   };
 

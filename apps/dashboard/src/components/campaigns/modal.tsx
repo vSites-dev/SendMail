@@ -52,6 +52,8 @@ export function CampaignModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
+  const utils = api.useUtils();
+
   const [name, setName] = useAtom(campaignNameAtom);
   const [selectedContacts, setSelectedContacts] = useAtom(
     selectedCampaignContactsAtom
@@ -105,18 +107,13 @@ export function CampaignModal({
       setCurrentStep(currentStep + 1);
     } else {
       try {
-        console.log("Campaign submitted for processing!");
-
-        const campaignName = `Campaign ${new Date().toLocaleDateString()}`;
-        const firstEmailBlock = emailBlocks[0];
-
-        if (!firstEmailBlock) {
-          toast.error('Legalább egy email blokkra van szükség a kampány létrehozásához');
+        if (!emailBlocks[0]) {
+          toast.error('Legalább egy email blokkra van szükség a kampány létrehozásához!');
           return;
         }
 
         const res = await createCampaign({
-          name: campaignName,
+          name: name,
           contactIds: selectedContacts,
           emailBlocks: emailBlocks.map(block => ({
             subject: block.subject,
@@ -136,10 +133,12 @@ export function CampaignModal({
           setEmailBlocks([]);
         }
 
+        utils.campaign.invalidate();
+
         onClose();
       } catch (error) {
         console.error('Error creating campaign:', error);
-        toast.error('Failed to create campaign. Please try again.');
+        toast.error('Valami hiba történt a kampány létrehozása során.');
       }
     }
   };

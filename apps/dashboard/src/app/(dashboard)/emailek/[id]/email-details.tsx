@@ -23,6 +23,8 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { emailStatuses } from "../columns";
 import { ExtendedEmail } from "@/server/api/routers/emails";
+import MarkdownIt from "markdown-it";
+import remarkGfm from "remark-gfm";
 
 export function EmailDetails({ email }: { email: ExtendedEmail }) {
   if (!email) return;
@@ -198,7 +200,13 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
           <CardContent className="my-4">
             <div
               className="prose p-4 border rounded-md shadow-sm bg-white"
-              dangerouslySetInnerHTML={{ __html: email.body }}
+              dangerouslySetInnerHTML={{
+                __html: new MarkdownIt({
+                  html: true,
+                  breaks: true,
+                  linkify: true,
+                }).render(email.body)
+              }}
             />
           </CardContent>
         </Card>

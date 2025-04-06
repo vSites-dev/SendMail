@@ -34,7 +34,7 @@ export const emailStatuses: Record<
   { label: string; bgColor: string; textColor: string }
 > = {
   QUEUED: {
-    label: "Várakozik",
+    label: "Küldés alatt",
     bgColor: "bg-yellow-400",
     textColor: "text-yellow-500",
   },

@@ -26,6 +26,7 @@ import { useAtom } from "jotai";
 import { campaignEmailBlocksAtom } from "@/store/global";
 import { EmailBlock } from "@/types";
 import { api } from "@/trpc/react";
+import MarkdownIt from "markdown-it";
 
 export function CampaignFlow({ templates }: { templates: Template[] }) {
   const [emailBlocks, setEmailBlocks] = useAtom(campaignEmailBlocksAtom);
@@ -163,23 +164,28 @@ export function CampaignFlow({ templates }: { templates: Template[] }) {
                     {block.template.name}
                   </span>
                 </div>
-                <div className="text-sm text-muted-foreground max-w-[400px] leading-relaxed">
-                  {block.template.body
-                    .replace(/<[^>]*>|[#*_`]/g, "")
-                    .split("<br>")
-                    .map((line, index) => (
-                      <React.Fragment key={index}>
-                        {line}
-                        {index <
-                          block.template.body.split("<br>").length - 1 && (
-                            <br />
-                          )}
-                      </React.Fragment>
-                    ))
-                    .slice(0, 2)}
-                  {block.template.body.split("<br>").length > 2 && (
-                    <div>...</div>
-                  )}
+                <div className="text-sm max-w-[400px] prose prose-sm">
+                  {(() => {
+                    const md = new MarkdownIt({
+                      html: true,
+                      breaks: true,
+                      linkify: true,
+                    });
+
+                    const contentLines = block.template.body.split('\n').filter(line => line.trim().length > 0);
+                    const previewLines = contentLines.slice(0, 3);
+                    const hasMore = contentLines.length > 3;
+
+                    const previewContent = previewLines.join('\n');
+                    const htmlContent = md.render(previewContent);
+
+                    return (
+                      <>
+                        <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+                        {hasMore && <div className="mt-1 text-lg font-bold">...</div>}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </Card>
