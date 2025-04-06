@@ -39,7 +39,7 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4 rounded-lg">
           <div
@@ -66,47 +66,6 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
       </div>
 
       <div className="flex flex-col gap-6">
-        <div className="space-y-6">
-          {email.clicks.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Kattintási adatok</CardTitle>
-              </CardHeader>
-              <CardSeparator />
-              <CardContent className="my-4">
-                <div className="space-y-4">
-                  {email.clicks.map((click) => (
-                    <div key={click.id} className="border-b pb-3">
-                      <div className="flex items-center gap-2">
-                        <Link2 className="size-4 text-muted-foreground" />
-                        <a
-                          href={click.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:underline flex items-center gap-1"
-                        >
-                          {click.link}
-                          <ExternalLink className="size-3" />
-                        </a>
-                      </div>
-                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                        <Clock className="size-3" />
-                        {new Date(click.createdAt).toLocaleDateString("hu-HU", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -188,23 +147,43 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
               </div>
             </CardContent>
           </Card>
+        </div>
 
+        <div className="space-y-6">
           {email.clicks.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Kattintási statisztika</CardTitle>
+                <CardTitle>Kattintási adatok ({email.clicks.length})</CardTitle>
               </CardHeader>
               <CardSeparator />
-              <CardContent className="my-4">
-                <div className="flex items-center justify-center p-4">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold">
-                      {email.clicks.length}
+              <CardContent className="mt-4">
+                <div className="space-y-4">
+                  {email.clicks.map((click, index) => (
+                    <div key={click.id} className={cn(email.clicks.length > 1 && index < email.clicks.length - 1 && "border-b pb-3")}>
+                      <div className="flex items-center gap-2">
+                        <Link2 className="size-4 text-muted-foreground" />
+                        <a
+                          href={click.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline flex items-center gap-1"
+                        >
+                          {click.link}
+                          <ExternalLink className="size-3" />
+                        </a>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <Clock className="size-3" />
+                        {new Date(click.createdAt).toLocaleDateString("hu-HU", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Összes kattintás
-                    </p>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>

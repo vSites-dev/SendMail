@@ -38,13 +38,14 @@ export function AddContactsModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const router = useRouter();
+  const utils = api.useUtils();
 
   const { data: contacts, isLoading: isLoadingContacts } = api.contact.getAll.useQuery(undefined, {
     refetchOnWindowFocus: false,
   });
 
-  const { data: campaign } = api.campaign.getById.useQuery({ 
-    id: campaignId 
+  const { data: campaign } = api.campaign.getById.useQuery({
+    id: campaignId
   }, {
     refetchOnWindowFocus: false,
   });
@@ -65,6 +66,7 @@ export function AddContactsModal({
     onSuccess: () => {
       toast.success("Kontaktok sikeresen hozzáadva a kampányhoz");
       onClose();
+      utils.campaign.invalidate();
       router.refresh();
     },
     onError: (error) => {
@@ -114,6 +116,8 @@ export function AddContactsModal({
       campaignId,
       contactIds: selectedContacts,
     });
+
+
   };
 
   if (!isMounted || !isOpen) return null;
@@ -230,9 +234,9 @@ export function AddContactsModal({
         </div>
 
         <div className="border-t p-4 flex justify-end">
-          <Button 
-            variant="outline" 
-            onClick={onClose} 
+          <Button
+            variant="outline"
+            onClick={onClose}
             className="mr-2"
           >
             Mégsem

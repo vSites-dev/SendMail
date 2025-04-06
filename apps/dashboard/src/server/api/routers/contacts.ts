@@ -267,6 +267,104 @@ export const contactRouter = createTRPCRouter({
       total,
     };
   }),
+
+  removeFromCampaign: authedProcedure
+    .input(
+      z.object({
+        contactId: z.string(),
+        campaignId: z.string()
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Get the campaign to verify it exists
+        const campaign = await ctx.db.campaign.findUnique({
+          where: {
+            id: input.campaignId,
+          },
+          include: {
+            contacts: {
+              where: {
+                id: input.contactId
+              },
+              select: {
+                id: true
+              }
+            }
+          }
+        });
+
+        if (!campaign) {
+          return {
+            success: false,
+            error: "A kampány nem található."
+          };
+        }
+
+        if (campaign.contacts.length === 0) {
+          return {
+            success: false,
+            error: "A kontakt nem található a kampányban."
+          };
+        }
+
+        // Find all queued emails for this contact in the campaign
+        const emails = await ctx.db.email.findMany({
+          where: {
+            campaignId: input.campaignId,
+            contactId: input.contactId,
+            status: "QUEUED"
+          },
+          select: {
+            id: true
+          }
+        });
+
+        // Delete all tasks related to these emails
+        if (emails.length > 0) {
+          await ctx.db.task.deleteMany({
+            where: {
+              emailId: {
+                in: emails.map(email => email.id)
+              }
+            }
+          });
+        }
+
+        // Delete all emails associated with this contact in the campaign
+        await ctx.db.email.deleteMany({
+          where: {
+            campaignId: input.campaignId,
+            contactId: input.contactId,
+            status: "QUEUED"
+          }
+        });
+
+        // Remove the contact from the campaign
+        await ctx.db.campaign.update({
+          where: {
+            id: input.campaignId
+          },
+          data: {
+            contacts: {
+              disconnect: {
+                id: input.contactId
+              }
+            }
+          }
+        });
+
+        return {
+          success: true,
+        };
+      } catch (error) {
+        console.error("Error removing contact from campaign:", error);
+        return {
+          success: false,
+          error: "Hiba történt a kontakt eltávolítása során a kampányból."
+        };
+      }
+    }),
 });
 
 type ContactRouter = typeof contactRouter;

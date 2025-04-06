@@ -12,32 +12,71 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Mail, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Search,
+  Mail,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  AlertCircle,
+} from "lucide-react";
 import { GetByIdCampaignType } from "@/server/api/routers/campaigns";
 import { cn } from "@/lib/utils";
+import { api } from "@/trpc/react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface CampaignContactsProps {
   campaign: GetByIdCampaignType;
+  onContactRemoved?: () => void;
 }
 
-export function CampaignContacts({ campaign }: CampaignContactsProps) {
+export function CampaignContacts({
+  campaign,
+  onContactRemoved,
+}: CampaignContactsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [contactToDelete, setContactToDelete] = useState<{
+    id: string;
+    name: string;
+    email: string;
+  } | null>(null);
   const itemsPerPage = 10;
+  const router = useRouter();
+  const utils = api.useUtils();
 
   // Filter contacts based on search term
-  const filteredContacts = campaign?.contacts?.filter(
-    (contact) =>
-      contact.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredContacts =
+    campaign?.contacts?.filter(
+      (contact) =>
+        contact.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contact.email.toLowerCase().includes(searchTerm.toLowerCase()),
+    ) || [];
 
   // Get current page of contacts
   const indexOfLastContact = currentPage * itemsPerPage;
   const indexOfFirstContact = indexOfLastContact - itemsPerPage;
   const currentContacts = filteredContacts.slice(
     indexOfFirstContact,
-    indexOfLastContact
+    indexOfLastContact,
   );
 
   // Change page
@@ -46,18 +85,17 @@ export function CampaignContacts({ campaign }: CampaignContactsProps) {
 
   // Get email status for a contact
   const getContactEmailStatus = (contactId: string) => {
-    const emails = campaign?.emails?.filter(
-      (email) => email.contactId === contactId
-    ) || [];
-    
+    const emails =
+      campaign?.emails?.filter((email) => email.contactId === contactId) || [];
+
     if (emails.length === 0) {
       return "No emails";
     }
 
     const sentCount = emails.filter(
-      (email) => email.status === "SENT" || email.status === "DELIVERED"
+      (email) => email.status === "SENT" || email.status === "DELIVERED",
     ).length;
-    
+
     if (sentCount === emails.length) {
       return "Összes elküldve";
     } else if (sentCount > 0) {
@@ -70,13 +108,24 @@ export function CampaignContacts({ campaign }: CampaignContactsProps) {
   // Render a status badge for a contact
   const renderStatusBadge = (contactId: string) => {
     const status = getContactEmailStatus(contactId);
-    
+
     if (status === "No emails") {
       return <Badge variant="outline">Nincs email</Badge>;
     } else if (status === "Összes elküldve") {
-      return <Badge variant="default" className="bg-green-600">Összes elküldve</Badge>;
+      return (
+        <Badge variant="default" className="bg-green-600">
+          Összes elküldve
+        </Badge>
+      );
     } else if (status.includes("elküldve")) {
-      return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Részben elküldve</Badge>;
+      return (
+        <Badge
+          variant="outline"
+          className="bg-amber-50 text-amber-700 border-amber-200"
+        >
+          Részben elküldve
+        </Badge>
+      );
     } else {
       return <Badge variant="outline">Várakozik</Badge>;
     }
@@ -107,19 +156,21 @@ export function CampaignContacts({ campaign }: CampaignContactsProps) {
           </div>
           <h3 className="font-medium text-lg">Nincsenek kontaktok</h3>
           <p className="text-muted-foreground text-center max-w-sm pt-1">
-            Még nem adtál hozzá kontaktokat ehhez a kampányhoz. Adj hozzá kontaktokat a kampányhoz a jobb felső sarokban lévő gombbal.
+            Még nem adtál hozzá kontaktokat ehhez a kampányhoz. Adj hozzá
+            kontaktokat a kampányhoz a jobb felső sarokban lévő gombbal.
           </p>
         </div>
       ) : (
         <>
           <div className="rounded-md border bg-white overflow-hidden">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-neutral-50">
                 <TableRow>
                   <TableHead>Név</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Státusz</TableHead>
                   <TableHead>Hozzáadva</TableHead>
+                  <TableHead className="text-right">Műveletek</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -136,11 +187,35 @@ export function CampaignContacts({ campaign }: CampaignContactsProps) {
                         {contact.name || "Névtelen"}
                       </TableCell>
                       <TableCell>{contact.email}</TableCell>
-                      <TableCell>
-                        {renderStatusBadge(contact.id)}
-                      </TableCell>
+                      <TableCell>{renderStatusBadge(contact.id)}</TableCell>
                       <TableCell>
                         {new Date(contact.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              onClick={() =>
+                                setContactToDelete({
+                                  id: contact.id,
+                                  name: contact.name || "Névtelen",
+                                  email: contact.email,
+                                })
+                              }
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 hover:text-red-600"
+                            >
+                              <span className="sr-only">
+                                Eltávolítás a kampányból
+                              </span>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-sm">Eltávolítás a kampányból</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   ))
@@ -168,7 +243,7 @@ export function CampaignContacts({ campaign }: CampaignContactsProps) {
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                     const pageNumber = i + 1;
                     const isCurrentPage = pageNumber === currentPage;
-                    
+
                     // Show 5 pages with current page in the middle when possible
                     let pageToShow = pageNumber;
                     if (totalPages > 5 && currentPage > 3) {
@@ -178,14 +253,19 @@ export function CampaignContacts({ campaign }: CampaignContactsProps) {
                         pageToShow = totalPages - 4 + i;
                       }
                     }
-                    
+
                     if (pageToShow <= totalPages) {
                       return (
                         <Button
                           key={pageToShow}
-                          variant={pageToShow === currentPage ? "default" : "outline"}
+                          variant={
+                            pageToShow === currentPage ? "default" : "outline"
+                          }
                           size="sm"
-                          className={cn("w-8 h-8 mx-1", pageToShow === currentPage && "pointer-events-none")}
+                          className={cn(
+                            "w-8 h-8 mx-1",
+                            pageToShow === currentPage && "pointer-events-none",
+                          )}
                           onClick={() => paginate(pageToShow)}
                         >
                           {pageToShow}
@@ -198,7 +278,9 @@ export function CampaignContacts({ campaign }: CampaignContactsProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                  onClick={() =>
+                    paginate(Math.min(totalPages, currentPage + 1))
+                  }
                   disabled={currentPage === totalPages}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -208,6 +290,91 @@ export function CampaignContacts({ campaign }: CampaignContactsProps) {
           )}
         </>
       )}
+      {/* Warning Dialog for contact removal */}
+      <ContactRemoveDialog
+        isOpen={contactToDelete !== null}
+        contactToDelete={contactToDelete}
+        campaignId={campaign?.id || ""}
+        onClose={() => setContactToDelete(null)}
+        onSuccess={() => {
+          setContactToDelete(null);
+          utils.campaign.invalidate();
+          if (onContactRemoved) onContactRemoved();
+          router.refresh();
+        }}
+      />
     </div>
+  );
+}
+
+interface ContactRemoveDialogProps {
+  isOpen: boolean;
+  contactToDelete: { id: string; name: string; email: string } | null;
+  campaignId: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function ContactRemoveDialog({
+  isOpen,
+  contactToDelete,
+  campaignId,
+  onClose,
+  onSuccess,
+}: ContactRemoveDialogProps) {
+  const { mutate: removeFromCampaign, isPending } =
+    api.contact.removeFromCampaign.useMutation({
+      onSuccess: () => {
+        toast.success("Kontakt sikeresen eltávolítva a kampányból");
+        onSuccess();
+      },
+      onError: (error) => {
+        toast.error(
+          error.message ||
+          "Hiba történt a kampányból történő eltávolítás során",
+        );
+      },
+    });
+
+  const handleDelete = () => {
+    if (!contactToDelete || !campaignId) return;
+    removeFromCampaign({
+      contactId: contactToDelete.id,
+      campaignId: campaignId,
+    });
+  };
+
+  if (!isOpen || !contactToDelete) return null;
+
+  return (
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-destructive" />
+            Kontakt törlése a kampányból
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            <span className="block mb-2">
+              Biztos, hogy el szeretnéd távolítani ezt a kontaktot a kampányból?
+            </span>
+            <span className="block mb-2">
+              <strong>{contactToDelete.name}</strong> ({contactToDelete.email})
+            </span>
+            <span className="block text-destructive font-medium">
+              Az eltávolítás után a kampányból több email nem kerül kiküldésre
+              ennek a kapcsolatnak, és az összes jövőbeli ütemezett email
+              törlésre kerül.
+            </span>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending}>Mégsem</AlertDialogCancel>
+          <Button onClick={handleDelete} variant="destructive" isLoading={isPending}>
+            {isPending ? "Eltávolítás..." : "Eltávolítás"}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
