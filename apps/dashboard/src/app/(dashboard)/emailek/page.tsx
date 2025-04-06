@@ -15,7 +15,7 @@ import { EmailsTable } from "./data-table";
 import EmailStats from "./email-stats";
 
 export default async function EmailsPage() {
-  const statistics = await api.email.getStatistics();
+  const { statistics, total } = await api.email.getStatistics();
 
   return (
     <HydrateClient>
@@ -31,7 +31,7 @@ export default async function EmailsPage() {
         </BreadcrumbList>
       </DashboardHeader>
 
-      <main className="max-w-screen-md w-full mx-auto h-full py-6 px-4">
+      <main className="max-w-4xl w-full mx-auto h-full py-6 px-4">
         <div className="flex gap-3 items-center">
           <div
             className={cn(
@@ -68,12 +68,16 @@ export default async function EmailsPage() {
 
         <Separator className="my-6" />
 
-        {statistics && (
-          <EmailStats
-            statistics={statistics.statistics}
-            total={statistics.total}
-          />
-        )}
+        <div>
+          <h2 className="title text-lg mb-2">Email statisztikák</h2>
+          {total > 0 ? (
+            <EmailStats statistics={statistics} total={total} />
+          ) : (
+            <p className="text-muted-foreground">
+              Nincs még email.
+            </p>
+          )}
+        </div>
 
         <Separator className="my-6" />
 

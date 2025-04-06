@@ -12,9 +12,12 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import ContactStats from "./contact-stats";
+import { DialogOverlay } from "@radix-ui/react-dialog";
 
 export default async function Contacts() {
   void api.contact.getForTable({ limit: 10, offset: 0 });
+  const { statistics, total } = await api.contact.getStatistics();
 
   return (
     <HydrateClient>
@@ -30,7 +33,7 @@ export default async function Contacts() {
         </BreadcrumbList>
       </DashboardHeader>
 
-      <main className="max-w-screen-md w-full mx-auto h-full py-6 px-4">
+      <main className="max-w-4xl w-full mx-auto h-full py-6 px-4">
         <div className="flex gap-3 items-center">
           <div
             className={cn(
@@ -56,6 +59,19 @@ export default async function Contacts() {
             Új kontakt létrehozása
           </Button>
         </Link>
+
+        <Separator className="my-6" />
+
+        <div>
+          <h2 className="title text-lg mb-2">Kontakt statisztikák</h2>
+          {total > 0 ? (
+            <ContactStats statistics={statistics} total={total} />
+          ) : (
+            <p className="text-muted-foreground">
+              Nincs még kontakt.
+            </p>
+          )}
+        </div>
 
         <Separator className="my-6" />
 

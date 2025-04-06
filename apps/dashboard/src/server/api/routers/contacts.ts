@@ -6,6 +6,7 @@ import {
 
 import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
+import { ContactStatus } from "@prisma/client";
 
 export const contactRouter = createTRPCRouter({
   getAll: authedProcedure.query(async ({ ctx }) => {
@@ -232,10 +233,40 @@ export const contactRouter = createTRPCRouter({
         console.error("Error creating contact:", error);
         return {
           success: false,
-          error: "Hiba történt a kontakt létrehozása során.",
+          error: "Hiba történt a kontakt létrehozása során.",
         };
       }
     }),
+
+  getStatistics: authedProcedure.query(async ({ ctx }) => {
+    // Get count of contacts by status
+    const statusCounts = await ctx.db.contact.groupBy({
+      by: ["status"],
+      where: {
+        projectId: ctx.session.activeProjectId,
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    // Transform the result into an object
+    const statistics = statusCounts.reduce(
+      (acc, curr) => {
+        acc[curr.status] = curr._count.id;
+        return acc;
+      },
+      {} as Record<ContactStatus, number>,
+    );
+
+    // Calculate total contacts
+    const total = Object.values(statistics).reduce((a, b) => a + b, 0);
+
+    return {
+      statistics,
+      total,
+    };
+  }),
 });
 
 type ContactRouter = typeof contactRouter;

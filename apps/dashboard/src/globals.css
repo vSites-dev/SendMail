@@ -52,6 +52,12 @@
     --email-bounced: 31 84% 58%;
     --email-complained: 262 83% 58%;
     --email-failed: 0 84% 60%;
+    
+    /* Contact status colors */
+    --contact-subscribed: 142 76% 36%;
+    --contact-unsubscribed: 0 84% 60%;
+    --contact-bounced: 31 84% 58%;
+    --contact-complained: 262 83% 58%;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -94,6 +100,12 @@
     --email-bounced: 31 84% 65%;
     --email-complained: 262 83% 65%;
     --email-failed: 0 84% 65%;
+    
+    /* Contact status colors */
+    --contact-subscribed: 142 76% 45%;
+    --contact-unsubscribed: 0 84% 65%;
+    --contact-bounced: 31 84% 65%;
+    --contact-complained: 262 83% 65%;
   }
   [data-registry="plate"] {
     --background: 0 0% 100%;

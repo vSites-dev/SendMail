@@ -39,7 +39,7 @@ export default async function EmailPage({
         </BreadcrumbList>
       </DashboardHeader>
 
-      <main className="my-6 h-full max-w-screen-md w-full mx-auto">
+      <main className="my-6 h-full max-w-4xl w-full mx-auto">
         {!email ? (
           <h1 className="text-2xl font-semibold text-neutral-800">
             Nem találtuk a keresett emailt
