@@ -14,6 +14,158 @@ import {
 } from "@prisma/client";
 
 export const campaignRouter = createTRPCRouter({
+  addContactsWithEmails: authedProcedure
+    .input(
+      z.object({
+        campaignId: z.string(),
+        contactIds: z.array(z.string()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // First, get the campaign to verify it exists and to get the email templates
+        const campaign = await ctx.db.campaign.findUnique({
+          where: {
+            id: input.campaignId,
+          },
+          include: {
+            emails: {
+              distinct: ['subject', 'from'],
+              select: {
+                id: true,
+                subject: true,
+                from: true,
+                body: true,
+                status: true,
+              },
+            },
+            contacts: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        });
+
+        if (!campaign) {
+          throw new Error("Kampány nem található");
+        }
+
+        // Find contacts that are not already in the campaign
+        const existingContactIds = campaign.contacts.map(c => c.id);
+        const newContactIds = input.contactIds.filter(id => !existingContactIds.includes(id));
+
+        if (newContactIds.length === 0) {
+          return {
+            success: false,
+            error: "A kiválasztott kontaktok már hozzá vannak adva a kampányhoz",
+          };
+        }
+
+        // Add the contacts to the campaign
+        await ctx.db.campaign.update({
+          where: {
+            id: input.campaignId,
+          },
+          data: {
+            contacts: {
+              connect: newContactIds.map(id => ({ id })),
+            },
+          },
+        });
+
+        // Create emails for each new contact for each distinct email in the campaign
+        const uniqueEmails = campaign.emails.filter(
+          (email, index, self) => 
+            index === self.findIndex(e => e.subject === email.subject && e.from === email.from)
+        );
+
+        if (uniqueEmails.length > 0) {
+          // Create emails for each new contact for each unique email
+          const emailsToCreate = newContactIds.flatMap(contactId => 
+            uniqueEmails.map(email => ({
+              subject: email.subject,
+              from: email.from,
+              body: email.body,
+              status: EmailStatus.QUEUED,
+              campaignId: campaign.id,
+              contactId: contactId,
+            }))
+          );
+
+          await ctx.db.email.createMany({
+            data: emailsToCreate,
+          });
+
+          // Get the last created emails to create tasks for them
+          const createdEmails = await ctx.db.email.findMany({
+            where: {
+              campaignId: campaign.id,
+              contactId: {
+                in: newContactIds,
+              },
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+            take: emailsToCreate.length,
+          });
+
+          // Get tasks related to the original emails to use their scheduledAt times
+          const tasks = await ctx.db.task.findMany({
+            where: {
+              campaignId: campaign.id,
+              emailId: {
+                in: uniqueEmails.map(e => e.id),
+              },
+            },
+            select: {
+              scheduledAt: true,
+              email: {
+                select: {
+                  subject: true,
+                  from: true,
+                },
+              },
+            },
+          });
+
+          // Create tasks for the new emails
+          if (tasks.length > 0) {
+            const tasksToCreate = createdEmails.map(email => {
+              // Find matching task by subject and from
+              const matchingTask = tasks.find(
+                t => t.email?.subject === email.subject && t.email?.from === email.from
+              );
+              
+              return {
+                type: TaskType.SEND_EMAIL,
+                status: TaskStatus.PENDING,
+                scheduledAt: matchingTask?.scheduledAt || new Date(),
+                projectId: ctx.session.activeProjectId,
+                campaignId: campaign.id,
+                emailId: email.id,
+              };
+            });
+
+            await ctx.db.task.createMany({
+              data: tasksToCreate,
+            });
+          }
+        }
+
+        return {
+          success: true,
+        };
+      } catch (error) {
+        console.error("Error adding contacts to campaign:", error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Hiba történt a kontaktok hozzáadása során",
+        };
+      }
+    }),
+
   scheduledCampaignsCount: authedProcedure
     .input(
       z.object({
@@ -109,7 +261,7 @@ export const campaignRouter = createTRPCRouter({
       ]);
 
       // Transform the data to include counts
-      const items = campaigns.map(campaign => ({
+      const items = campaigns.map((campaign) => ({
         ...campaign,
         contactsCount: campaign.contacts.length,
         emailsCount: campaign.emails.length,
@@ -123,7 +275,7 @@ export const campaignRouter = createTRPCRouter({
         totalCount,
       };
     }),
-    
+
   getByName: authedProcedure
     .input(
       z.object({
@@ -167,7 +319,7 @@ export const campaignRouter = createTRPCRouter({
       });
 
       // Transform the data to include counts
-      const items = campaigns.map(campaign => ({
+      const items = campaigns.map((campaign) => ({
         ...campaign,
         contactsCount: campaign.contacts.length,
         emailsCount: campaign.emails.length,
@@ -188,6 +340,10 @@ export const campaignRouter = createTRPCRouter({
       return await ctx.db.campaign.findUnique({
         where: {
           id: input.id,
+        },
+        include: {
+          contacts: true,
+          emails: true,
         },
       });
     }),
@@ -353,3 +509,4 @@ type CampaignRouter = typeof campaignRouter;
 type CampaignRouterOutputs = inferRouterOutputs<CampaignRouter>;
 
 export type Campaign = CampaignRouterOutputs["getAll"][number];
+export type GetByIdCampaignType = CampaignRouterOutputs["getById"];

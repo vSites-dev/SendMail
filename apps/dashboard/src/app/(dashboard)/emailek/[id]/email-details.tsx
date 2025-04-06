@@ -39,7 +39,7 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4 rounded-lg">
           <div
@@ -59,6 +59,7 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
             "px-3 py-1 text-sm font-medium",
             emailStatuses[email.status].textColor,
           )}
+          variant={"outline"}
         >
           {emailStatuses[email.status].label}
         </Badge>
