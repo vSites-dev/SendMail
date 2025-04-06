@@ -13,7 +13,6 @@ import {
   Send,
 } from "lucide-react";
 
-// Define status icons and colors
 const statusConfig: Record<
   EmailStatus,
   {
@@ -84,7 +83,6 @@ export function EmailStatCard({
   const config = statusConfig[status];
   const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {

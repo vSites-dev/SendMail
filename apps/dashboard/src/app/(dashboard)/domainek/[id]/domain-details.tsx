@@ -180,7 +180,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
 
         <Button
           onClick={handleVerifyDomain}
-          disabled={isVerifying}
+          disabled={isVerifying || domain.status === "VERIFIED"}
           className="gap-2"
         >
           {isVerifying ? (
@@ -193,7 +193,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
       </div>
 
       <Card>
-        <div className="overflow-hidden rounded-t-[15.5px] bg-stone-100 dark:bg-neutral-800 p-4">
+        <div className="overflow-hidden rounded-t-[15.5px] dark:bg-neutral-800 p-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs uppercase font-bold text-muted-foreground">
@@ -230,7 +230,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
             <div className="text-xs uppercase font-bold text-muted-foreground mb-2">
               DNS HITELESÍTÉS
             </div>
-            <div className="text-sm bg-white dark:bg-neutral-900 p-3 rounded-md">
+            <div className="text-sm bg-white dark:bg-neutral-900 rounded-md">
               <p className="mb-2">
                 A domain teljes hitelesítéséhez adja hozzá az alábbi DNS rekordokat a domain beállításaiban. A beállítások elvégzése után kattintson az "Ellenőrzés" gombra.
               </p>
@@ -252,12 +252,12 @@ export function DomainDetails({ domain }: { domain: Domain }) {
                 </div>
               ) : (
                 <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-slate-100 dark:bg-neutral-800">
+                  <thead className="bg-neutral-50 border rounded-md">
+                    <tr>
                       <th className="text-left p-2 text-sm font-medium">Típus</th>
                       <th className="text-left p-2 text-sm font-medium">Név (Host)</th>
                       <th className="text-left p-2 text-sm font-medium">Érték</th>
-                      <th className="p-2 w-[70px]">Műveletek</th>
+                      <th className="p-2 w-[70px] text-sm font-medium">Műveletek</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -336,7 +336,7 @@ export function DomainDetails({ domain }: { domain: Domain }) {
             </div>
           </div>
 
-          <div className="bg-neutral-100 dark:bg-neutral-900 rounded-md p-4 mt-4">
+          <div className="bg-neutral-50 border dark:bg-neutral-900 rounded-md p-4 mt-4">
             <h4 className="text-sm font-medium mb-2">Útmutató a DNS beállításhoz</h4>
             <ol className="list-decimal pl-5 text-sm space-y-2">
               <li>
