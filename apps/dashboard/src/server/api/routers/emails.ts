@@ -342,40 +342,37 @@ export const emailRouter = createTRPCRouter({
       });
     }),
 
-  getStatistics: authedProcedure
-    .input(z.object({ id: z.string().optional() }))
-    .query(async ({ ctx, input }) => {
-      // Get count of emails by status
-      const statusCounts = await ctx.db.email.groupBy({
-        by: ["status"],
-        where: {
-          contact: {
-            projectId: ctx.session.activeProjectId,
-          },
-          ...(input.id ? { campaignId: input.id } : {}),
+  getStatistics: authedProcedure.query(async ({ ctx }) => {
+    // Get count of emails by status
+    const statusCounts = await ctx.db.email.groupBy({
+      by: ["status"],
+      where: {
+        contact: {
+          projectId: ctx.session.activeProjectId,
         },
-        _count: {
-          id: true,
-        },
-      });
+      },
+      _count: {
+        id: true,
+      },
+    });
 
-      // Transform the result into an object
-      const statistics = statusCounts.reduce(
-        (acc, curr) => {
-          acc[curr.status] = curr._count.id;
-          return acc;
-        },
-        {} as Record<EmailStatus, number>,
-      );
+    // Transform the result into an object
+    const statistics = statusCounts.reduce(
+      (acc, curr) => {
+        acc[curr.status] = curr._count.id;
+        return acc;
+      },
+      {} as Record<EmailStatus, number>,
+    );
 
-      // Calculate total emails
-      const total = Object.values(statistics).reduce((a, b) => a + b, 0);
+    // Calculate total emails
+    const total = Object.values(statistics).reduce((a, b) => a + b, 0);
 
-      return {
-        statistics,
-        total,
-      };
-    }),
+    return {
+      statistics,
+      total,
+    };
+  }),
 
   delete: authedProcedure
     .input(z.object({ id: z.string() }))
@@ -457,7 +454,6 @@ export const emailRouter = createTRPCRouter({
               subject,
               body,
               status: "QUEUED",
-              messageId: `manual_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
               contactId,
               from,
             },

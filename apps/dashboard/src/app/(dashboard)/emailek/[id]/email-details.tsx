@@ -8,9 +8,7 @@ import {
   Archive,
   ExternalLink,
   Link2,
-  BarChart3,
 } from "lucide-react";
-import { useState } from "react";
 import { Email, EmailStatus } from "@prisma/client";
 import {
   Card,
@@ -20,9 +18,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { api } from "@/trpc/react";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
@@ -31,14 +26,6 @@ import { ExtendedEmail } from "@/server/api/routers/emails";
 
 export function EmailDetails({ email }: { email: ExtendedEmail }) {
   if (!email) return;
-
-  const utils = api.useUtils();
-
-  const { data: statistics } = api.email.getStatistics.useQuery({}, {
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
 
   const formatDate = (date: Date | null) => {
     if (!date) return "N/A";
@@ -64,36 +51,21 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
             <Mail className="size-6" />
           </div>
 
-          <h1 className={cn("text-2xl title")}>
-            {email.subject}
-          </h1>
+          <h1 className={cn("text-2xl title")}>{email.subject}</h1>
         </div>
 
         <Badge
           className={cn(
             "px-3 py-1 text-sm font-medium",
-            emailStatuses[email.status].textColor
+            emailStatuses[email.status].textColor,
           )}
         >
           {emailStatuses[email.status].label}
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Email tartalma</CardTitle>
-            </CardHeader>
-            <CardSeparator />
-            <CardContent className="my-4">
-              <div
-                className="p-4 border rounded-md shadow-sm bg-white"
-                dangerouslySetInnerHTML={{ __html: email.body }}
-              />
-            </CardContent>
-          </Card>
-
+      <div className="flex flex-col gap-6">
+        <div className="space-y-6">
           {email.clicks.length > 0 && (
             <Card>
               <CardHeader>
@@ -110,7 +82,7 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
                           href={click.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline flex items-center gap-1"
+                          className="hover:underline flex items-center gap-1"
                         >
                           {click.link}
                           <ExternalLink className="size-3" />
@@ -148,10 +120,13 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
                   </h3>
                   <Link
                     href={`/kontaktok/${email.contactId}`}
-                    className="flex items-center gap-2 text-blue-600 hover:underline"
+                    className="flex items-center gap-2 hover:underline"
                   >
                     <User className="size-4" />
-                    {email.contact.name ? `${email.contact.name} (${email.contact.email})` : email.contact.email}
+                    {email.contact.name
+                      ? `${email.contact.name} (${email.contact.email})`
+                      : email.contact.email}
+                    <ExternalLink className="size-3" />
                   </Link>
                 </div>
 
@@ -162,10 +137,11 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
                     </h3>
                     <Link
                       href={`/kampanyok/${email.campaignId}`}
-                      className="flex items-center gap-2 text-blue-600 hover:underline"
+                      className="flex items-center gap-2 hover:underline"
                     >
                       <Archive className="size-4" />
                       {email.campaign.name}
+                      <ExternalLink className="size-3" />
                     </Link>
                   </div>
                 )}
@@ -192,18 +168,6 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
                   </div>
                 </div>
 
-                {email.openedAt && (
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      Megnyitva
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="size-4 text-muted-foreground" />
-                      {formatDate(email.openedAt)}
-                    </div>
-                  </div>
-                )}
-
                 <Separator />
 
                 <div>
@@ -220,17 +184,6 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
                     {emailStatuses[email.status].label}
                   </div>
                 </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                    Üzenet azonosító
-                  </h3>
-                  <div className="flex items-center gap-2 text-xs truncate max-w-full">
-                    <code className="bg-stone-100 px-1 py-0.5 rounded-sm font-mono">
-                      {email.messageId}
-                    </code>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -244,14 +197,31 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
               <CardContent className="my-4">
                 <div className="flex items-center justify-center p-4">
                   <div className="text-center">
-                    <div className="text-3xl font-bold">{email.clicks.length}</div>
-                    <p className="text-sm text-muted-foreground">Összes kattintás</p>
+                    <div className="text-3xl font-bold">
+                      {email.clicks.length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Összes kattintás
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           )}
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Email tartalma</CardTitle>
+          </CardHeader>
+          <CardSeparator />
+          <CardContent className="my-4">
+            <div
+              className="prose p-4 border rounded-md shadow-sm bg-white"
+              dangerouslySetInnerHTML={{ __html: email.body }}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

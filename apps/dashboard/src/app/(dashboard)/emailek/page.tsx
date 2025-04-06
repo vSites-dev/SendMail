@@ -12,8 +12,11 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { EmailsTable } from "./data-table";
+import EmailStats from "./email-stats";
 
 export default async function EmailsPage() {
+  const statistics = await api.email.getStatistics();
+
   return (
     <HydrateClient>
       <DashboardHeader>
@@ -62,6 +65,15 @@ export default async function EmailsPage() {
             </Button>
           </Link>
         </div>
+
+        <Separator className="my-6" />
+
+        {statistics && (
+          <EmailStats
+            statistics={statistics.statistics}
+            total={statistics.total}
+          />
+        )}
 
         <Separator className="my-6" />
 
