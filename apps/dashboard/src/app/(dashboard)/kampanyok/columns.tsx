@@ -1,6 +1,10 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Eye, Trash2 } from "lucide-react";
+import {
+  MoreHorizontal,
+  Eye,
+  Trash2,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +14,6 @@ import {
 import Link from "next/link";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -19,93 +22,39 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
-import { Email, EmailStatus } from "@prisma/client";
-import { emailDataTableAtom } from "@/store/global";
-import { cn } from "@/lib/utils";
 import { useAtom } from "jotai";
-import { Badge } from "@/components/ui/badge";
-import { GetForTableEmail } from "@/server/api/routers/emails";
+import { CampaignStatus } from "@prisma/client";
+import { campaignDataTableAtom, CampaignWithCounts } from "@/store/global";
+import { cn } from "@/lib/utils";
 
-export const emailStatuses: Record<
-  EmailStatus,
-  { label: string; bgColor: string; textColor: string }
-> = {
-  QUEUED: {
-    label: "Várakozik",
+// Define campaign status styles
+const campaignStatuses = {
+  [CampaignStatus.SCHEDULED]: {
+    label: "Ütemezve",
     bgColor: "bg-yellow-400",
-    textColor: "text-yellow-500",
   },
-  SENT: {
-    label: "Elküldve",
-    bgColor: "bg-blue-400",
-    textColor: "text-blue-500",
-  },
-  DELIVERED: {
-    label: "Kézbesítve",
-    bgColor: "bg-green-400",
-    textColor: "text-green-500",
-  },
-  COMPLAINED: {
-    label: "Panasz",
-    bgColor: "bg-orange-400",
-    textColor: "text-orange-500",
-  },
-  BOUNCED: {
-    label: "Visszapattant",
-    bgColor: "bg-red-400",
-    textColor: "text-red-500",
-  },
-  FAILED: {
-    label: "Hiba",
-    bgColor: "bg-red-400",
-    textColor: "text-red-500",
+  [CampaignStatus.COMPLETED]: {
+    label: "Befejezve",
+    bgColor: "bg-green-500",
   },
 };
 
-export const columns: ColumnDef<GetForTableEmail>[] = [
+
+export const columns: ColumnDef<CampaignWithCounts>[] = [
   {
-    accessorKey: "campaign",
-    header: "Kampány",
-    enableSorting: true,
-    cell: ({ row }) => {
-      return row.original?.campaign?.name ? (
-        <Link
-          className="hover:underline"
-          href={`/kampanyok/${row.original?.campaign.id}`}
-        >
-          {row.original?.campaign.name || "N/A"}
-        </Link>
-      ) : (
-        <Badge variant="outline">Manuális</Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "subject",
-    header: "Tárgy",
-    enableSorting: true,
-    cell: ({ row }) => {
-      return (
-        <Link className="hover:underline" href={`/emailek/${row.original?.id}`}>
-          {row.original?.subject}
-        </Link>
-      );
-    },
-  },
-  {
-    accessorKey: "contact",
-    header: "Címzett",
+    accessorKey: "name",
+    header: "Név",
     enableSorting: true,
     cell: ({ row }) => {
       return (
         <Link
           className="hover:underline"
-          href={`/kontaktok/${row.original?.contact.id}`}
+          href={`/kampanyok/${row.original?.id}`}
         >
-          {row.original?.contact.email || "N/A"}
+          {row.original?.name}
         </Link>
       );
     },
@@ -120,55 +69,62 @@ export const columns: ColumnDef<GetForTableEmail>[] = [
           <div
             className={cn(
               "w-2 h-2 rounded-full mr-2",
-              emailStatuses[row.original.status].bgColor,
+              campaignStatuses[row.original.status].bgColor,
             )}
           ></div>
-          {emailStatuses[row.original.status].label}
+          {campaignStatuses[row.original.status].label}
         </div>
       );
     },
   },
   {
-    accessorKey: "sentAt",
-    header: "Küldés ideje",
+    accessorKey: "contactsCount",
+    header: "Kontaktok",
     enableSorting: true,
     cell: ({ row }) => {
-      return row.original.sentAt
-        ? new Date(row.original.sentAt).toLocaleDateString("hu-HU", {
-          year: "numeric",
-          month: "numeric",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-        : "N/A";
+      return <p><b>{row.original.contactsCount}</b> <span className="text-muted-foreground">kontakt</span></p>;
+    },
+  },
+  {
+    accessorKey: "emailsCount",
+    header: "Emailek",
+    enableSorting: true,
+    cell: ({ row }) => {
+      return <p><b>{row.original.emailsCount}</b> <span className="text-muted-foreground">email</span></p>;
+    },
+  },
+  {
+    accessorKey: "updatedAt",
+    header: "Frissítve",
+    enableSorting: true,
+    cell: ({ row }) => {
+      return new Date(row.original.updatedAt).toLocaleDateString();
     },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const email = row.original!;
+      const campaign = row.original!;
 
       const utils = api.useUtils();
 
       const [menu, setMenu] = useState(false);
       const [deleteDialog, setDeleteDialog] = useState(false);
-      const [emails, setEmails] = useAtom(emailDataTableAtom);
+      const [campaigns, setCampaigns] = useAtom(campaignDataTableAtom);
 
-      const { mutateAsync, isPending } = api.email.delete.useMutation();
+      const { mutateAsync, isPending } = api.campaign.delete.useMutation();
 
       async function handleDelete() {
-        const res = await mutateAsync({ id: email.id });
+        const res = await mutateAsync({ id: campaign.id });
 
         if (res.success) {
-          utils.email.getForTable.invalidate();
-          utils.email.getAll.invalidate();
-          utils.email.getStatistics.invalidate();
+          utils.campaign.getForTable.invalidate();
+          utils.campaign.getAll.invalidate();
 
-          setEmails((prev) => prev.filter((e) => e.id !== email.id));
+          setCampaigns((prev) => prev.filter((c) => c.id !== campaign.id));
 
-          toast.success("Az email sikeresen törölve!");
-        } else toast.error("Hiba történt az email törlése közben!");
+          toast.success("A kampány sikeresen törölve!");
+        } else toast.error("Hiba történt a kampány törlése közben!");
 
         setDeleteDialog(false);
         setMenu(false);
@@ -184,7 +140,7 @@ export const columns: ColumnDef<GetForTableEmail>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link href={`/emailek/${email.id}`}>
+              <Link href={`/kampanyok/${campaign.id}`}>
                 <Eye className="mr-2 h-4 w-4" />
                 Megtekintés
               </Link>

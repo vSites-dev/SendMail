@@ -137,6 +137,10 @@ export function CampaignContacts({ contacts }: { contacts: Contact[] }) {
                 {table
                   .getAllColumns()
                   .filter((column) => column.getCanHide())
+                  .filter(
+                    (column) =>
+                      column.columnDef.header && column.columnDef.header.length > 2,
+                  )
                   .map((column) => {
                     return (
                       <DropdownMenuCheckboxItem

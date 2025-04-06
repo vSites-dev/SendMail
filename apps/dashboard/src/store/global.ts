@@ -3,7 +3,7 @@
 import type { Organization } from "@/lib/auth/auth";
 import { GetForTableEmail } from "@/server/api/routers/emails";
 import { EmailBlock, MemberInvite } from "@/types";
-import { Contact, Domain, Email, Project } from "@prisma/client";
+import { Campaign, Contact, Domain, Email, Project } from "@prisma/client";
 import { atom, createStore } from "jotai";
 
 export const globalStore = createStore();
@@ -16,6 +16,15 @@ export const selectedIntervalAtom = atom<7 | 30 | 90 | 180 | 365>(30);
 export const contactDataTableAtom = atom<Contact[]>([]);
 export const domainDataTableAtom = atom<Domain[]>([]);
 export const emailDataTableAtom = atom<GetForTableEmail[]>([]);
+// We need to extend the Campaign type to include the counts for the data table
+export type CampaignWithCounts = Campaign & { 
+  contactsCount: number; 
+  emailsCount: number;
+  contacts?: undefined;
+  emails?: undefined;
+};
+
+export const campaignDataTableAtom = atom<CampaignWithCounts[]>([]);
 
 // Campaign creation atoms
 export const selectedCampaignContactsAtom = atom<string[]>([]);

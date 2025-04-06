@@ -147,11 +147,8 @@ export const columns: ColumnDef<Contact>[] = [
 
       const utils = api.useUtils();
 
-      // eslint-disable-next-line
       const [menu, setMenu] = useState(false);
-      // eslint-disable-next-line
       const [deleteDialog, setDeleteDialog] = useState(false);
-      // eslint-disable-next-line
       const [contacts, setContacts] = useAtom(contactDataTableAtom);
 
       const { mutateAsync, isPending } = api.contact.delete.useMutation();
@@ -162,6 +159,7 @@ export const columns: ColumnDef<Contact>[] = [
         if (res.success) {
           utils.contact.getForTable.invalidate();
           utils.contact.getAll.invalidate();
+          utils.contact.getStatistics.invalidate();
 
           setContacts((prev) => prev.filter((d) => d.id !== contact.id));
 

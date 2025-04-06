@@ -16,10 +16,12 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import CreateCampaignButton from "@/components/campaigns/create-campaign";
 import { api, HydrateClient } from "@/trpc/server";
+import { CampaignsTable } from "./data-table";
 
 export default async function CampaignsPage() {
   const contacts = await api.contact.getAllAvailable();
   const templates = await api.template.getAll();
+  void api.campaign.getForTable({ limit: 10, offset: 0 });
 
   return (
     <HydrateClient>
@@ -59,7 +61,7 @@ export default async function CampaignsPage() {
 
         <Separator className="my-6" />
 
-        <div className="h-6"></div>
+        <CampaignsTable />
       </main>
     </HydrateClient>
   );

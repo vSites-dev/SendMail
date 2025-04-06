@@ -78,7 +78,7 @@ export const campaignRouter = createTRPCRouter({
         organizationId: ctx.session.session.activeOrganizationId,
       });
 
-      const [items, totalCount] = await Promise.all([
+      const [campaigns, totalCount] = await Promise.all([
         ctx.db.campaign.findMany({
           where: {
             projectId: ctx.session.activeProjectId,
@@ -88,6 +88,18 @@ export const campaignRouter = createTRPCRouter({
           },
           take: limit,
           skip: offset,
+          include: {
+            contacts: {
+              select: {
+                id: true,
+              },
+            },
+            emails: {
+              select: {
+                id: true,
+              },
+            },
+          },
         }),
         ctx.db.campaign.count({
           where: {
@@ -96,9 +108,77 @@ export const campaignRouter = createTRPCRouter({
         }),
       ]);
 
+      // Transform the data to include counts
+      const items = campaigns.map(campaign => ({
+        ...campaign,
+        contactsCount: campaign.contacts.length,
+        emailsCount: campaign.emails.length,
+        // Remove the arrays to avoid sending too much data
+        contacts: undefined,
+        emails: undefined,
+      }));
+
       return {
         items,
         totalCount,
+      };
+    }),
+    
+  getByName: authedProcedure
+    .input(
+      z.object({
+        searchText: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { searchText } = input;
+
+      await withOrganization({
+        organizationId: ctx.session.session.activeOrganizationId,
+      });
+
+      if (!searchText || searchText.trim() === "") {
+        return {
+          items: [],
+          totalCount: 0,
+        };
+      }
+
+      const campaigns = await ctx.db.campaign.findMany({
+        where: {
+          projectId: ctx.session.activeProjectId,
+          name: {
+            contains: searchText,
+            mode: "insensitive",
+          },
+        },
+        include: {
+          contacts: {
+            select: {
+              id: true,
+            },
+          },
+          emails: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      // Transform the data to include counts
+      const items = campaigns.map(campaign => ({
+        ...campaign,
+        contactsCount: campaign.contacts.length,
+        emailsCount: campaign.emails.length,
+        // Remove the arrays to avoid sending too much data
+        contacts: undefined,
+        emails: undefined,
+      }));
+
+      return {
+        items,
+        totalCount: items.length,
       };
     }),
 
