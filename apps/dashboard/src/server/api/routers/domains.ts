@@ -218,6 +218,20 @@ export const domainRouter = createTRPCRouter({
     .input(z.object({ name: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
+        // mock for now
+        const domain = await ctx.db.domain.create({
+          data: {
+            name: input.name,
+            status: "PENDING",
+            projectId: ctx.session.activeProjectId,
+          },
+        });
+
+        return {
+          success: true,
+          id: domain.id,
+        };
+
         // Call the Express API to verify domain
         const response = await fetch(`${process.env.API_URL}/domains/verify`, {
           method: "POST",
@@ -265,6 +279,16 @@ export const domainRouter = createTRPCRouter({
         if (!domain) {
           throw new Error("Domain not found");
         }
+
+        await ctx.db.domain.update({
+          where: { id: domain.id },
+          data: { status: DomainStatus.VERIFIED },
+        });
+
+        return {
+          success: true,
+          status: domain.status,
+        };
 
         // Call the Express API to check verification status
         const response = await fetch(

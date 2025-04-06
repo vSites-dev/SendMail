@@ -30,7 +30,7 @@ export const campaignRouter = createTRPCRouter({
           },
           include: {
             emails: {
-              distinct: ['subject', 'from'],
+              distinct: ["subject", "from"],
               select: {
                 id: true,
                 subject: true,
@@ -52,13 +52,16 @@ export const campaignRouter = createTRPCRouter({
         }
 
         // Find contacts that are not already in the campaign
-        const existingContactIds = campaign.contacts.map(c => c.id);
-        const newContactIds = input.contactIds.filter(id => !existingContactIds.includes(id));
+        const existingContactIds = campaign.contacts.map((c) => c.id);
+        const newContactIds = input.contactIds.filter(
+          (id) => !existingContactIds.includes(id),
+        );
 
         if (newContactIds.length === 0) {
           return {
             success: false,
-            error: "A kiválasztott kontaktok már hozzá vannak adva a kampányhoz",
+            error:
+              "A kiválasztott kontaktok már hozzá vannak adva a kampányhoz",
           };
         }
 
@@ -69,28 +72,31 @@ export const campaignRouter = createTRPCRouter({
           },
           data: {
             contacts: {
-              connect: newContactIds.map(id => ({ id })),
+              connect: newContactIds.map((id) => ({ id })),
             },
           },
         });
 
         // Create emails for each new contact for each distinct email in the campaign
         const uniqueEmails = campaign.emails.filter(
-          (email, index, self) => 
-            index === self.findIndex(e => e.subject === email.subject && e.from === email.from)
+          (email, index, self) =>
+            index ===
+            self.findIndex(
+              (e) => e.subject === email.subject && e.from === email.from,
+            ),
         );
 
         if (uniqueEmails.length > 0) {
           // Create emails for each new contact for each unique email
-          const emailsToCreate = newContactIds.flatMap(contactId => 
-            uniqueEmails.map(email => ({
+          const emailsToCreate = newContactIds.flatMap((contactId) =>
+            uniqueEmails.map((email) => ({
               subject: email.subject,
               from: email.from,
               body: email.body,
               status: EmailStatus.QUEUED,
               campaignId: campaign.id,
               contactId: contactId,
-            }))
+            })),
           );
 
           await ctx.db.email.createMany({
@@ -106,7 +112,7 @@ export const campaignRouter = createTRPCRouter({
               },
             },
             orderBy: {
-              createdAt: 'desc',
+              createdAt: "desc",
             },
             take: emailsToCreate.length,
           });
@@ -116,7 +122,7 @@ export const campaignRouter = createTRPCRouter({
             where: {
               campaignId: campaign.id,
               emailId: {
-                in: uniqueEmails.map(e => e.id),
+                in: uniqueEmails.map((e) => e.id),
               },
             },
             select: {
@@ -132,12 +138,14 @@ export const campaignRouter = createTRPCRouter({
 
           // Create tasks for the new emails
           if (tasks.length > 0) {
-            const tasksToCreate = createdEmails.map(email => {
+            const tasksToCreate = createdEmails.map((email) => {
               // Find matching task by subject and from
               const matchingTask = tasks.find(
-                t => t.email?.subject === email.subject && t.email?.from === email.from
+                (t) =>
+                  t.email?.subject === email.subject &&
+                  t.email?.from === email.from,
               );
-              
+
               return {
                 type: TaskType.SEND_EMAIL,
                 status: TaskStatus.PENDING,
@@ -161,7 +169,10 @@ export const campaignRouter = createTRPCRouter({
         console.error("Error adding contacts to campaign:", error);
         return {
           success: false,
-          error: error instanceof Error ? error.message : "Hiba történt a kontaktok hozzáadása során",
+          error:
+            error instanceof Error
+              ? error.message
+              : "Hiba történt a kontaktok hozzáadása során",
         };
       }
     }),
@@ -444,48 +455,47 @@ export const campaignRouter = createTRPCRouter({
         });
 
         // For each contact and each email block, create an email
-        const emails = await Promise.all(
-          input.contactIds.flatMap((contactId) =>
-            input.emailBlocks.map(async (block) => {
-              const t = templates.find(
-                (template) => template.id === block.templateId,
-              );
-              if (!t) throw new Error("Template not found");
+        const flattenedEmailPromises = input.contactIds.flatMap((contactId) =>
+          input.emailBlocks.map(async (block) => {
+            const t = templates.find(
+              (template) => template.id === block.templateId,
+            );
+            if (!t) throw new Error("Template not found");
 
-              return ctx.db.email.create({
-                data: {
-                  subject: block.subject,
-                  from: block.from,
-                  body: t.body,
-                  status: EmailStatus.QUEUED,
-                  campaignId: campaign.id,
-                  contactId: contactId,
-                },
-              });
-            }),
-          ),
+            return ctx.db.email.create({
+              data: {
+                subject: block.subject,
+                from: block.from,
+                body: t.body,
+                status: EmailStatus.QUEUED,
+                campaignId: campaign.id,
+                contactId: contactId,
+              },
+            });
+          }),
         );
 
-        // For each email, create a task
+        const createdEmails = await Promise.all(flattenedEmailPromises);
+
         const tasks = await Promise.all(
-          input.contactIds.flatMap((contactId) =>
-            input.emailBlocks.map(async (block) => {
-              return ctx.db.task.create({
-                data: {
-                  type: TaskType.SEND_EMAIL,
-                  status: TaskStatus.PENDING,
-                  scheduledAt: block.date,
-                  projectId: ctx.session.activeProjectId,
-                  campaignId: campaign.id,
-                  emailId: emails.find(
-                    (email) =>
-                      email.from === block.from &&
-                      email.subject === block.subject,
-                  )?.id,
-                },
-              });
-            }),
-          ),
+          createdEmails.map(async (email) => {
+            const block = input.emailBlocks.find(
+              (b) => b.subject === email.subject && b.from === email.from,
+            );
+
+            if (!block) throw new Error("Matching email block not found");
+
+            return ctx.db.task.create({
+              data: {
+                type: TaskType.SEND_EMAIL,
+                status: TaskStatus.PENDING,
+                scheduledAt: block.date,
+                projectId: ctx.session.activeProjectId,
+                campaignId: campaign.id,
+                emailId: email.id,
+              },
+            });
+          }),
         );
 
         return {

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 interface DnsRecord {
   type: string;
@@ -43,6 +44,8 @@ interface DnsRecord {
 }
 
 export function DomainDetails({ domain }: { domain: Domain }) {
+  const router = useRouter();
+
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [dnsRecords, setDnsRecords] = useState<DnsRecord[]>([]);
@@ -133,8 +136,9 @@ export function DomainDetails({ domain }: { domain: Domain }) {
       const result = await checkVerificationStatus({ id: domain.id });
 
       if (result.success) {
-        utils.domain.getById.invalidate({ id: domain.id });
+        utils.domain.invalidate();
         toast.success("Domain státusz frissítve!");
+        router.refresh();
       } else {
         toast.error(
           result.error || "Nem sikerült ellenőrizni a domain státuszát",
