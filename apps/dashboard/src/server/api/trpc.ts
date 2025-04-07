@@ -116,6 +116,10 @@ export const authedProcedure = t.procedure
   .use(timingMiddleware)
   .use(async ({ ctx, next }) => {
     if (!ctx.session?.user) {
+      console.debug(
+        "calling authedProcedure if(!ctx.session?.user):",
+        ctx.session,
+      );
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 
@@ -124,6 +128,10 @@ export const authedProcedure = t.procedure
     });
 
     if (!activeOrganization) {
+      console.debug(
+        "calling authedProcedure if(!activeOrganization):",
+        activeOrganization,
+      );
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "No active organization",
@@ -133,6 +141,10 @@ export const authedProcedure = t.procedure
     const activeProject = await getActiveProject(activeOrganization.id);
 
     if (!activeProject) {
+      console.debug(
+        "calling authedProcedure if(!activeProject):",
+        activeProject,
+      );
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "No active project",

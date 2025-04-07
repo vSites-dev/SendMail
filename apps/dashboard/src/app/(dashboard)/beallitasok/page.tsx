@@ -61,7 +61,7 @@ export default async function SettingsPage() {
           <h1 className="text-2xl title">Beállítások</h1>
         </div>
 
-        <SettingsTabs defaultTab={defaultTab} user={session.user} fullOrganization={fullOrganization} />
+        <SettingsTabs defaultTab={defaultTab} user={session?.user} fullOrganization={fullOrganization} />
       </main>
     </HydrateClient>
   );

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/server/db";
 import { redirect } from "next/navigation";

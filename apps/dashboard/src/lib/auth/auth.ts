@@ -30,6 +30,13 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    },
+  },
   trustedOrigins: ["http://localhost:3000"],
   emailAndPassword: {
     enabled: true,
