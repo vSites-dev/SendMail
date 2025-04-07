@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { AppSidebar } from "@/components/layouts/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import redirectNonAuthenticated from "@/lib/auth/redirect-non-authenticated";

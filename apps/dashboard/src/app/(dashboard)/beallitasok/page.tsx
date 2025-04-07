@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import DashboardHeader from "@/components/layouts/dashboard-header";
 import {
   BreadcrumbItem,
@@ -16,7 +18,7 @@ import SettingsTabs from "./tabs";
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) redirect("/bejelentkezes")
+  if (!session?.session.id) redirect("/bejelentkezes")
 
   const fullOrganization = await api.project.getFullOrganization()
 

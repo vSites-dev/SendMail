@@ -18,7 +18,7 @@ export const contactStatuses = {
     bgColor: "bg-gray-500",
   },
   BOUNCED: {
-    label: "Nem létező",
+    label: "Visszapattant",
     bgColor: "bg-red-500",
   },
   COMPLAINED: {

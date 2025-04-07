@@ -75,11 +75,11 @@ export default function NewContactForm() {
     const res = await createContact(values);
 
     if (res && res.id) {
-      utils.contact.getAll.invalidate();
-      utils.contact.getForTable.invalidate();
-      utils.contact.getById.invalidate({ id: res.id });
+      utils.contact.invalidate()
 
       toast.success("Új kontakt létrehozva!");
+
+      router.refresh();
       router.push(`/kontaktok`);
     } else {
       console.error(res);

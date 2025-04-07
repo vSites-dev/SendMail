@@ -72,7 +72,7 @@ export const columns: ColumnDef<Contact>[] = [
             return { loadingToast };
           },
           onSuccess: () => {
-            utils.contact.getForTable.invalidate();
+            utils.contact.invalidate();
 
             toast.success("Státusz sikeresen frissítve");
           },
