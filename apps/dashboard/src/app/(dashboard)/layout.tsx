@@ -36,9 +36,11 @@ export default async function DashboardLayout({
 
   if (membersForTheUser.length === 0) {
     if (invitations && invitations[0] && invitations[0].id) {
+      console.debug("Redirecting to invitation", invitations[0])
       return redirect(`/projekt-meghivas/${invitations[0].id}`);
     }
 
+    console.debug("Redirecting to new project");
     return redirect("/uj-projekt/1");
   }
 

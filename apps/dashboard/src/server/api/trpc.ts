@@ -13,7 +13,7 @@ import { ZodError } from "zod";
 import { db } from "@/server/db";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
-import getActiveProject from "@/lib/get-active-organization copy";
+import getActiveProject from "@/lib/get-active-project";
 
 /**
  * 1. CONTEXT

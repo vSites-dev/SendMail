@@ -32,10 +32,6 @@ export const auth = betterAuth({
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7,
-    cookieOptions: {
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    },
   },
   trustedOrigins: ["http://localhost:3000"],
   emailAndPassword: {

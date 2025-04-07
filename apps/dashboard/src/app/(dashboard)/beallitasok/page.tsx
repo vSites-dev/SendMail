@@ -12,17 +12,17 @@ import { Cog, Home } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
+import { headers as getHeaders } from "next/headers";
 import { redirect } from "next/navigation";
 import SettingsTabs from "./tabs";
 
 export default async function SettingsPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await auth.api.getSession({ headers: await getHeaders() })
   if (!session?.session.id) redirect("/bejelentkezes")
 
   const fullOrganization = await api.project.getFullOrganization()
 
-  const headersList = await headers();
+  const headersList = await getHeaders();
   const urlStr = headersList.get("x-url");
   let defaultTab = "personal";
   if (urlStr) {
