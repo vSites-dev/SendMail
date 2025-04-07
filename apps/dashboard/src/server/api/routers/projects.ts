@@ -113,6 +113,43 @@ export const projectRouter = createTRPCRouter({
         exists: !!user,
       };
     }),
+
+  checkUsersRole: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.session?.user?.email) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "User not authenticated",
+      });
+    }
+
+    if (!ctx.session.session.activeOrganizationId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Organization ID is required",
+      });
+    }
+
+    const member = await ctx.db.member.findFirst({
+      where: {
+        user: {
+          email: ctx.session.user.email,
+        },
+        organizationId: ctx.session.session.activeOrganizationId!,
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    if (!member) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Member not found for the current user in this project",
+      });
+    }
+
+    return member.role;
+  }),
 });
 
 type ProjectRouter = typeof projectRouter;

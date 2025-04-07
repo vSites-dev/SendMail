@@ -16,6 +16,7 @@ import {
   RefreshCcw,
   SquareMousePointer,
   User2,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -40,6 +41,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn, contactStatuses } from "@/lib/utils";
+import { authClient } from "@/lib/auth/client";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Érvénytelen email cím" }),
@@ -54,6 +56,10 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
   const router = useRouter();
 
   const [isLoading, setLoading] = useState(false);
+
+  const { data: usersRole } = api.project.checkUsersRole.useQuery();
+  const isAdminOrOwner = usersRole === 'ADMIN' || usersRole === 'OWNER';
+  const isMember = usersRole === 'MEMBER';
 
   const { mutateAsync: updateContact } = api.contact.update.useMutation();
 
@@ -92,12 +98,21 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={isAdminOrOwner ? form.handleSubmit(onSubmit) : (e) => e.preventDefault()} className="space-y-4">
         <Card className="w-[500px] mx-auto my-4">
           <CardHeader>
             <CardTitle className="flex gap-3 items-center">
-              <User2 className="size-6" />
-              Kontakt szerkesztése
+              {isAdminOrOwner ? (
+                <>
+                  <User2 className="size-6" />
+                  Kontakt szerkesztése
+                </>
+              ) : (
+                <>
+                  <Eye className="size-6" />
+                  Kontakt megtekintése
+                </>
+              )}
             </CardTitle>
           </CardHeader>
 
@@ -111,7 +126,12 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
                 <FormItem>
                   <FormLabel>Email cím</FormLabel>
                   <FormControl>
-                    <Input placeholder="pelda@email.com" {...field} />
+                    <Input
+                      placeholder="pelda@email.com"
+                      {...field}
+                      disabled={isMember}
+                      readOnly={isMember}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +145,12 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
                 <FormItem>
                   <FormLabel>Név</FormLabel>
                   <FormControl>
-                    <Input placeholder="Példa név" {...field} />
+                    <Input
+                      placeholder="Példa név"
+                      {...field}
+                      disabled={isMember}
+                      readOnly={isMember}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -141,6 +166,7 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={isMember}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -180,10 +206,12 @@ export default function EditContactForm({ contact }: { contact: Contact }) {
               Vissza
             </Button>
 
-            <Button type="submit" isLoading={isLoading}>
-              {!isLoading && <RefreshCcw className="size-4" />}
-              Frissítés
-            </Button>
+            {isAdminOrOwner && (
+              <Button type="submit" isLoading={isLoading}>
+                {!isLoading && <RefreshCcw className="size-4" />}
+                Frissítés
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </form>

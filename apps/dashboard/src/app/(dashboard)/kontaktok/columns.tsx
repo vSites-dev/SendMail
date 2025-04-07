@@ -35,6 +35,7 @@ import { useAtom } from "jotai";
 import { Contact, ContactStatus } from "@prisma/client";
 import { contactDataTableAtom } from "@/store/global";
 import { cn, contactStatuses } from "@/lib/utils";
+import { authClient } from "@/lib/auth/client";
 
 export const columns: ColumnDef<Contact>[] = [
   {
@@ -145,6 +146,9 @@ export const columns: ColumnDef<Contact>[] = [
     cell: ({ row }) => {
       const contact = row.original!;
 
+      const { data: usersRole } = api.project.checkUsersRole.useQuery();
+      const isAdminOrOwner = usersRole === 'ADMIN' || usersRole === 'OWNER';
+
       const utils = api.useUtils();
 
       const [menu, setMenu] = useState(false);
@@ -163,8 +167,8 @@ export const columns: ColumnDef<Contact>[] = [
 
           setContacts((prev) => prev.filter((d) => d.id !== contact.id));
 
-          toast.success("A kontakt sikeresen törölve!");
-        } else toast.error("Hiba történt a kontakt törlése közben!");
+          toast.success("A kontakt sikeresen törölve!");
+        } else toast.error("Hiba történt a kontakt törlése közben!");
 
         setDeleteDialog(false);
         setMenu(false);
@@ -181,42 +185,53 @@ export const columns: ColumnDef<Contact>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link href={`/kontaktok/${contact.id}`}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Szerkesztés
+                {isAdminOrOwner ? (
+                  <>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Szerkesztés
+                  </>
+                ) : (
+                  <>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Megtekintés
+                  </>
+                )}
               </Link>
             </DropdownMenuItem>
-            <AlertDialog open={deleteDialog} onOpenChange={setDeleteDialog}>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="text-red-600"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Törlés
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Biztosan törölni szeretnéd?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Ez a művelet visszavonhatatlan.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Mégsem</AlertDialogCancel>
-                  <Button
-                    variant={"destructive"}
-                    onClick={handleDelete}
-                    isLoading={isPending}
+            {isAdminOrOwner && (
+              <AlertDialog open={deleteDialog} onOpenChange={setDeleteDialog}>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="text-red-600"
                   >
-                    {!isPending && <Trash2 className="size-4" />}
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Törlés
-                  </Button>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Biztosan törölni szeretnéd?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Ez a művelet visszavonhatatlan.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Mégsem</AlertDialogCancel>
+                    <Button
+                      variant={"destructive"}
+                      onClick={handleDelete}
+                      isLoading={isPending}
+                    >
+                      {!isPending && <Trash2 className="size-4" />}
+                      Törlés
+                    </Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );
