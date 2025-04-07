@@ -17,7 +17,7 @@ const port = process.env.PORT || 8080
 app.use(cors())
 app.use(express.json())
 
-// Set up static file serving for uploaded images
+// SERVING UPLOADED IMAGES
 const uploadsPath = path.join(__dirname, '../uploads')
 app.use('/images', express.static(uploadsPath))
 

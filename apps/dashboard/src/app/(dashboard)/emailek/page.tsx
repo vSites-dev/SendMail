@@ -50,13 +50,13 @@ export default async function EmailsPage() {
           követhető információt azzal kapcsolatban.
         </p>
 
-        <div className="flex gap-2 items-center">
-          <Link href="/emailek/uj">
+        <div className="flex gap-2 flex-wrap items-center">
+          {/* <Link href="/emailek/uj">
             <Button>
               <PlusSquare className="size-5" />
               Email(ek) manuális kiküldése
             </Button>
-          </Link>
+          </Link> */}
 
           <Link href="/kampanyok">
             <Button variant={"success"}>

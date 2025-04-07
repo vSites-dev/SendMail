@@ -18,7 +18,6 @@ export class TaskScheduler {
 
   constructor() {
     this.emailService = new EmailService()
-    // Check for new tasks every minute
     this.cronJob = cron.schedule(
       '* * * * *',
       this.processScheduledTasks.bind(this)
@@ -32,8 +31,6 @@ export class TaskScheduler {
       )
 
       const currentDate = new Date()
-
-      // Find all pending and failed tasks that are due
       const tasks = await prisma.task.findMany({
         where: {
           status: {
@@ -64,12 +61,10 @@ export class TaskScheduler {
 
       for (const task of tasks) {
         try {
-          // Mark task as processing
           await prisma.task.update({
             where: { id: task.id },
             data: {
               status: TaskStatus.PROCESSING,
-              // For failed tasks, track the retry attempt
               error:
                 task.status === TaskStatus.FAILED
                   ? `Retrying previously failed task: ${task.error}`
@@ -83,7 +78,6 @@ export class TaskScheduler {
           console.error(`Error processing task ${task.id}:`, error)
           failed++
 
-          // Update task status to FAILED
           await prisma.task.update({
             where: { id: task.id },
             data: {

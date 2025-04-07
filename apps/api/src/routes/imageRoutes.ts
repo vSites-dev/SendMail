@@ -3,7 +3,6 @@ import path from 'path'
 import fs from 'fs'
 import multer from 'multer'
 
-// Type definitions for multer file
 declare global {
   namespace Express {
     interface Request {
@@ -28,13 +27,11 @@ declare global {
 
 const router = express.Router()
 
-// Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, '../../uploads')
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true })
 }
 
-// Configure multer storage
 const storage = multer.diskStorage({
   destination: (
     req: Request,
@@ -48,14 +45,12 @@ const storage = multer.diskStorage({
     file: Express.Multer.File,
     cb: (error: Error | null, filename: string) => void
   ) => {
-    // Create unique filename with original extension
     const uniquePrefix = Date.now() + '-' + Math.round(Math.random() * 1e9)
     const ext = path.extname(file.originalname)
     cb(null, uniquePrefix + ext)
   }
 })
 
-// File filter to allow only images
 const fileFilter = (
   req: Request,
   file: Express.Multer.File,
@@ -75,8 +70,6 @@ const fileFilter = (
     cb(new Error('Only image files are allowed'))
   }
 }
-
-// Set up multer with configured storage
 const upload = multer({
   storage,
   fileFilter,
@@ -84,8 +77,6 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024 // 5MB limit
   }
 })
-
-// Upload image endpoint
 router.post(
   '/upload',
   upload.single('image'),
@@ -95,7 +86,6 @@ router.post(
         return res.status(400).json({ error: 'No image file provided' })
       }
 
-      // Generate URL for accessing the image
       const baseUrl =
         process.env.API_URL || `http://localhost:${process.env.PORT || 8080}`
       const imageUrl = `${baseUrl}/images/${req.file.filename}`
@@ -118,13 +108,11 @@ router.post(
   }
 )
 
-// Define MulterError interface
 interface MulterError extends Error {
   code: string
   field?: string
 }
 
-// Error handling middleware for multer errors
 router.use(
   (
     err: Error | MulterError,
@@ -133,7 +121,6 @@ router.use(
     next: NextFunction
   ) => {
     if (err instanceof Error && 'code' in err) {
-      // Multer-specific errors
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res
           .status(400)
@@ -141,7 +128,6 @@ router.use(
       }
       return res.status(400).json({ error: err.message })
     } else if (err) {
-      // Other errors
       return res.status(400).json({ error: err.message })
     }
     next()

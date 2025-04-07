@@ -467,7 +467,7 @@ export const campaignRouter = createTRPCRouter({
                 subject: block.subject,
                 from: block.from,
                 body: t.body,
-                status: EmailStatus.QUEUED,
+                status: EmailStatus.QUEUED as EmailStatus,
                 campaignId: campaign.id,
                 contactId: contactId,
               },
@@ -501,7 +501,7 @@ export const campaignRouter = createTRPCRouter({
         return {
           success: true,
           campaign,
-          emails,
+          createdEmails,
           tasks,
         };
       } catch (error) {
