@@ -59,7 +59,13 @@ export default async function TemplatesPage() {
 
         <Separator className="my-6" />
 
-        <SablonokTable templates={templates} />
+        {templates.length > 0 ? (
+          <SablonokTable templates={templates} />
+        ) : (
+          <p className="text-muted-foreground mb-6 mt-4 max-w-[600px]">
+            Nincsenek még sablonok.
+          </p>
+        )}
       </main>
     </HydrateClient>
   );
