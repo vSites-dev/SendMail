@@ -60,7 +60,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { campaignDataTableAtom, CampaignWithCounts } from "@/store/global";
+import { campaignDataTableAtom } from "@/store/global";
 import { useAtom } from "jotai";
 import DotPattern from "@/components/ui/dot-pattern";
 import { ColumnFiltersState, PaginationState } from "@tanstack/react-table";
@@ -164,8 +164,8 @@ export const CampaignsTable = () => {
   return (
     <div className="space-y-4 w-full">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full sm:w-fit">
             <Input
               id={`${id}-input`}
               className={cn(
@@ -196,7 +196,7 @@ export const CampaignsTable = () => {
 
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-fit">
                 <FilterIcon
                   className="-ms-1 opacity-60"
                   size={16}
@@ -256,7 +256,7 @@ export const CampaignsTable = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-fit">
                 <Columns3Icon
                   className="-ms-1 opacity-60"
                   size={16}

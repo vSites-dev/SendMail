@@ -115,8 +115,8 @@ export function ContactStatCard({
       animate="visible"
       className={cn("w-full", className)}
     >
-      <Card className="p-4 h-full flex flex-col md:flex-row items-center justify-between">
-        <div className="flex flex-col items-center md:items-start mb-4 md:mb-0">
+      <Card className="p-4 h-full flex flex-row items-center justify-between">
+        <div className="flex flex-col items-start mb-4 md:mb-0">
           <div className="flex items-center gap-2 mb-2">
             <div
               className={cn(
@@ -145,10 +145,8 @@ export function ContactStatCard({
           variants={chartVariants}
           className="relative w-20 h-20 flex items-center justify-center"
         >
-          {/* Background circle */}
           <div className="absolute inset-0 rounded-full bg-gray-50"></div>
 
-          {/* Animated progress circle */}
           <svg width="100%" height="100%" viewBox="0 0 100 100" className="absolute inset-0">
             <circle
               cx="50"
@@ -175,7 +173,6 @@ export function ContactStatCard({
             />
           </svg>
 
-          {/* Percentage text */}
           <div className={cn("relative text-sm font-bold", config.color)}>
             {percentage}%
           </div>

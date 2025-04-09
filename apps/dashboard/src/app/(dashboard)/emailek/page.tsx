@@ -31,7 +31,7 @@ export default async function EmailsPage() {
         </BreadcrumbList>
       </DashboardHeader>
 
-      <main className="max-w-4xl w-full mx-auto h-full py-6 px-4">
+      <main className="max-w-[100vw] md:max-w-4xl w-full mx-auto h-full py-6 px-4">
         <div className="flex gap-3 items-center">
           <div
             className={cn(

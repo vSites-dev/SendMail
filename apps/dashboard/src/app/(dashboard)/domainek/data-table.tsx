@@ -152,8 +152,8 @@ export const DomainsTable = () => {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full sm:w-fit">
             <Input
               id={`${id}-input`}
               className={cn(
@@ -184,7 +184,7 @@ export const DomainsTable = () => {
 
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-fit">
                 <FilterIcon
                   className="-ms-1 opacity-60"
                   size={16}
@@ -244,7 +244,7 @@ export const DomainsTable = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-fit">
                 <Columns3Icon
                   className="-ms-1 opacity-60"
                   size={16}
