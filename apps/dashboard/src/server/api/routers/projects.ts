@@ -148,7 +148,7 @@ export const projectRouter = createTRPCRouter({
       });
     }
 
-    return member.role;
+    return member.role.toUpperCase();
   }),
 });
 

@@ -1,6 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Eye, Trash2 } from "lucide-react";
+import {
+  MoreHorizontal,
+  Eye,
+  Trash2,
+  ChevronsUpDown,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { useAtom } from "jotai";
 import { Badge } from "@/components/ui/badge";
 import { GetForTableEmail } from "@/server/api/routers/emails";
+import { authClient } from "@/lib/auth/client";
 
 export const emailStatuses: Record<
   EmailStatus,
@@ -114,7 +120,10 @@ export const columns: ColumnDef<GetForTableEmail>[] = [
     accessorKey: "status",
     header: "Státusz",
     enableSorting: true,
+    enableColumnFilter: true,
     cell: ({ row }) => {
+      const utils = api.useUtils();
+
       return (
         <div className="flex items-center">
           <div
@@ -148,6 +157,10 @@ export const columns: ColumnDef<GetForTableEmail>[] = [
     id: "actions",
     cell: ({ row }) => {
       const email = row.original!;
+
+      const { data: usersRole } = api.project.checkUsersRole.useQuery();
+      console.debug("usersRole", usersRole);
+      const isAdminOrOwner = usersRole === 'ADMIN' || usersRole === 'OWNER';
 
       const utils = api.useUtils();
 
@@ -189,38 +202,40 @@ export const columns: ColumnDef<GetForTableEmail>[] = [
                 Megtekintés
               </Link>
             </DropdownMenuItem>
-            <AlertDialog open={deleteDialog} onOpenChange={setDeleteDialog}>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="text-red-600"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Törlés
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Biztosan törölni szeretnéd?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Ez a művelet visszavonhatatlan.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Mégsem</AlertDialogCancel>
-                  <Button
-                    variant={"destructive"}
-                    onClick={handleDelete}
-                    isLoading={isPending}
+            {isAdminOrOwner && (
+              <AlertDialog open={deleteDialog} onOpenChange={setDeleteDialog}>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="text-red-600"
                   >
-                    {!isPending && <Trash2 className="size-4" />}
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Törlés
-                  </Button>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Biztosan törölni szeretnéd?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Ez a művelet visszavonhatatlan.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Mégsem</AlertDialogCancel>
+                    <Button
+                      variant={"destructive"}
+                      onClick={handleDelete}
+                      isLoading={isPending}
+                    >
+                      {!isPending && <Trash2 className="size-4" />}
+                      Törlés
+                    </Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

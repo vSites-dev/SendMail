@@ -81,19 +81,6 @@ const multiColumnFilterFn: FilterFn<Contact> = (row, columnId, filterValue) => {
   return searchableRowContent.includes(searchTerm);
 };
 
-const statusFilterFn: FilterFn<Contact> = (
-  row,
-  columnId,
-  filterValue: string[]
-) => {
-  // If no filter is applied, show all rows
-  if (!filterValue?.length) return true;
-  // Get the status value from the row
-  const status = row.getValue(columnId) as string;
-  // Show the row if its status is in the selected statuses array
-  return filterValue.includes(status);
-};
-
 export const ContactsTable = () => {
   const id = useId();
   const [contacts, setContacts] = useAtom(contactDataTableAtom);
@@ -110,6 +97,7 @@ export const ContactsTable = () => {
   ]);
 
   const [inputValue, setInputValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   const { data, isLoading } = api.contact.getForTable.useQuery(
     {
@@ -127,8 +115,16 @@ export const ContactsTable = () => {
     if (data?.items) setContacts(data.items);
   }, [data, setContacts]);
 
+  const filteredContacts = useMemo(() => {
+    if (!statusFilter.length) return contacts;
+
+    return contacts.filter(contact => {
+      return statusFilter.includes(contact.status);
+    });
+  }, [contacts, statusFilter]);
+
   const table = useReactTable({
-    data: contacts,
+    data: filteredContacts,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -149,42 +145,32 @@ export const ContactsTable = () => {
     },
     filterFns: {
       multiColumnFilter: multiColumnFilterFn,
-      statusFilter: statusFilterFn,
     },
+
   });
 
-  // Get unique status values for filtering
-  const uniqueStatusValues = useMemo(() => {
-    // Convert the status object keys to array
-    return Object.keys(contactStatuses) as ContactStatus[];
-  }, []);
-
-  // Get status filter values
-  const selectedStatuses = useMemo(() => {
-    const filterValue = table.getColumn("status")?.getFilterValue() as string[];
-    return filterValue ?? [];
-  }, [table.getColumn("status")?.getFilterValue()]);
-
-  // Handle status filter changes
   const handleStatusChange = (checked: boolean, value: string) => {
-    const filterValue = table.getColumn("status")?.getFilterValue() as string[];
-    const newFilterValue = filterValue ? [...filterValue] : [];
+    console.log("Status change triggered:", { checked, value });
 
-    if (checked) {
-      newFilterValue.push(value);
-    } else {
-      const index = newFilterValue.indexOf(value);
-      if (index > -1) {
-        newFilterValue.splice(index, 1);
+    setStatusFilter(prev => {
+      const newFilterValue = [...prev];
+
+      if (checked) {
+        if (!newFilterValue.includes(value)) {
+          newFilterValue.push(value);
+        }
+      } else {
+        const index = newFilterValue.indexOf(value);
+        if (index > -1) {
+          newFilterValue.splice(index, 1);
+        }
       }
-    }
 
-    table
-      .getColumn("status")
-      ?.setFilterValue(newFilterValue.length ? newFilterValue : undefined);
+      console.log("New status filter values:", newFilterValue);
+      return newFilterValue;
+    });
   };
 
-  // Handle name/email search
   const handleGlobalFilterChange = (value: string) => {
     setInputValue(value);
     table.getColumn("email")?.setFilterValue(value);
@@ -205,9 +191,9 @@ export const ContactsTable = () => {
               )}
               value={inputValue}
               onChange={(e) => handleGlobalFilterChange(e.target.value)}
-              placeholder="Keresés név vagy email alapján..."
+              placeholder="Keresés email alapján..."
               type="text"
-              aria-label="Keresés név vagy email alapján"
+              aria-label="Keresés email alapján"
             />
             <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
               <ListFilterIcon size={16} aria-hidden="true" />
@@ -235,9 +221,9 @@ export const ContactsTable = () => {
                   aria-hidden="true"
                 />
                 Státusz
-                {selectedStatuses.length > 0 && (
+                {statusFilter.length > 0 && (
                   <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
-                    {selectedStatuses.length}
+                    {statusFilter.length}
                   </span>
                 )}
               </Button>
@@ -248,11 +234,11 @@ export const ContactsTable = () => {
                   Szűrők
                 </div>
                 <div className="space-y-3">
-                  {uniqueStatusValues.map((value, i) => (
+                  {Object.keys(contactStatuses).map((value, i) => (
                     <div key={value} className="flex items-center gap-2">
                       <Checkbox
                         id={`${id}-${i}`}
-                        checked={selectedStatuses.includes(value)}
+                        checked={statusFilter.includes(value)}
                         onCheckedChange={(checked: boolean) =>
                           handleStatusChange(checked, value)
                         }
@@ -263,10 +249,9 @@ export const ContactsTable = () => {
                       >
                         {contactStatuses[value].label}{" "}
                         <span className="text-muted-foreground ms-2 text-xs">
-                          {table
-                            .getColumn("status")
-                            ?.getFacetedUniqueValues()
-                            .get(value) || 0}
+                          {contacts.filter(
+                            (contact) => contact.status === value
+                          ).length}
                         </span>
                       </Label>
                     </div>

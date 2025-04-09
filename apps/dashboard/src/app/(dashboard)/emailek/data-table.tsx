@@ -72,16 +72,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-
-// Email statuses for filtering
-const emailStatuses: Record<string, { label: string; color: string }> = {
-  DELIVERED: { label: "Kézbesítve", color: "green" },
-  OPENED: { label: "Megnyitva", color: "blue" },
-  SENT: { label: "Elküldve", color: "yellow" },
-  PENDING: { label: "Függőben", color: "orange" },
-  FAILED: { label: "Sikertelen", color: "red" },
-  SCHEDULED: { label: "Ütemezve", color: "purple" },
-};
+import { emailStatuses } from "./columns";
 
 const multiColumnFilterFn: FilterFn<Email> = (row, columnId, filterValue) => {
   if (!filterValue?.length) return true;
@@ -91,24 +82,12 @@ const multiColumnFilterFn: FilterFn<Email> = (row, columnId, filterValue) => {
   return searchableRowContent.includes(searchTerm);
 };
 
-const statusFilterFn: FilterFn<Email> = (
-  row,
-  columnId,
-  filterValue: string[]
-) => {
-  if (!filterValue?.length) return true;
-  const status = row.getValue(columnId) as string;
-  return filterValue.includes(status);
-};
-
 export const EmailsTable = () => {
   const id = useId();
   const [emails, setEmails] = useAtom(emailDataTableAtom);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState({});
-  const [inputValue, setInputValue] = useState("");
 
-  // Use TanStack table's pagination state
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -118,9 +97,8 @@ export const EmailsTable = () => {
     { id: "sentAt", desc: true },
   ]);
 
-  const uniqueStatusValues = useMemo(() => {
-    return Object.keys(emailStatuses) as EmailStatus[];
-  }, []);
+  const [inputValue, setInputValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   const { data, isLoading } = api.email.getForTable.useQuery(
     {
@@ -134,8 +112,20 @@ export const EmailsTable = () => {
     },
   );
 
+  useEffect(() => {
+    if (data?.items) setEmails(data.items);
+  }, [data, setEmails]);
+
+  const filteredEmails = useMemo(() => {
+    if (!statusFilter.length) return emails;
+
+    return emails.filter(email => {
+      return statusFilter.includes(email.status);
+    });
+  }, [emails, statusFilter]);
+
   const table = useReactTable({
-    data: emails,
+    data: filteredEmails,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -147,52 +137,31 @@ export const EmailsTable = () => {
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     manualPagination: true,
-    pageCount: data?.totalCount
-      ? Math.ceil(data.totalCount / pagination.pageSize)
-      : 0,
+    pageCount: Math.ceil((data?.totalCount || 0) / pagination.pageSize),
     state: {
-      sorting,
-      pagination,
       columnFilters,
       columnVisibility,
+      pagination,
+      sorting,
     },
     filterFns: {
-      multiColumnFilter: multiColumnFilterFn,
-      statusFilter: statusFilterFn,
+      multiColumn: multiColumnFilterFn,
     },
   });
 
-  useEffect(() => {
-    if (data?.items) setEmails(data.items);
-  }, [data, setEmails]);
-
-
-
-  // Handle status filter changes
   const handleStatusChange = (checked: boolean, value: string) => {
-    const filterValue = table.getColumn("status")?.getFilterValue() as string[];
-    const newFilterValue = filterValue ? [...filterValue] : [];
-
-    if (checked) {
-      newFilterValue.push(value);
-    } else {
-      const index = newFilterValue.indexOf(value);
-      if (index !== -1) {
-        newFilterValue.splice(index, 1);
-      }
-    }
-
-    table
-      .getColumn("status")
-      ?.setFilterValue(newFilterValue.length ? newFilterValue : undefined);
+    setStatusFilter(prev => {
+      if (checked) {
+        if (!prev.includes(value)) return [...prev, value];
+      } else return prev.filter(status => status !== value);
+      return prev;
+    });
   };
 
-  // Handle subject/email search
   const handleGlobalFilterChange = (value: string) => {
     setInputValue(value);
-    table.getColumn("subject")?.setFilterValue(value);
+    table.setGlobalFilter(value);
   };
-
 
   return (
     <div className="space-y-4">
@@ -209,9 +178,9 @@ export const EmailsTable = () => {
               )}
               value={inputValue}
               onChange={(e) => handleGlobalFilterChange(e.target.value)}
-              placeholder="Keresés tárgy vagy email alapján..."
+              placeholder="Keresés tárgy alapján..."
               type="text"
-              aria-label="Keresés tárgy vagy email alapján"
+              aria-label="Keresés tárgy alapján"
             />
             <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
               <ListFilterIcon size={16} aria-hidden="true" />
@@ -239,17 +208,11 @@ export const EmailsTable = () => {
                   aria-hidden="true"
                 />
                 Státusz
-                {(() => {
-                  const filterValue = table.getColumn("status")?.getFilterValue();
-                  if (filterValue && Array.isArray(filterValue) && filterValue.length > 0) {
-                    return (
-                      <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
-                        {filterValue.length}
-                      </span>
-                    );
-                  }
-                  return null;
-                })()}
+                {statusFilter.length > 0 && (
+                  <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
+                    {statusFilter.length}
+                  </span>
+                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto min-w-36 p-3" align="start">
@@ -258,39 +221,44 @@ export const EmailsTable = () => {
                   Szűrők
                 </div>
                 <div className="space-y-3">
-                  {uniqueStatusValues.map((value, i) => {
-                    const filterValue = table.getColumn("status")?.getFilterValue() as string[];
-                    const checked = filterValue ? filterValue.includes(value) : false;
-
-                    return (
-                      <div
-                        key={value + i.toString()}
-                        className="flex items-center space-x-2 py-1"
+                  {Object.keys(emailStatuses).map((value, i) => (
+                    <div
+                      key={value + i.toString()}
+                      className="flex items-center gap-3 py-1"
+                    >
+                      <Checkbox
+                        id={id + "-" + value}
+                        checked={statusFilter.includes(value)}
+                        onCheckedChange={(checked: boolean) =>
+                          handleStatusChange(checked, value)
+                        }
+                      />
+                      <Label
+                        htmlFor={id + "-" + value}
+                        className="flex items-center font-normal"
                       >
-                        <Checkbox
-                          id={id + "-" + value}
-                          checked={checked}
-                          onCheckedChange={(checked) => {
-                            handleStatusChange(checked as boolean, value);
-                          }}
+                        <span
+                          className={cn(
+                            "mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                            value === "DELIVERED" && "bg-green-500",
+                            value === "SENT" && "bg-yellow-500",
+                            value === "FAILED" && "bg-red-500",
+                            value === "BOUNCED" && "bg-amber-500",
+                            value === "QUEUED" && "bg-yellow-500",
+                            value === "COMPLAINED" && "bg-orange-500",
+                          )}
                         />
-                        <Label
-                          htmlFor={id + "-" + value}
-                          className="text-sm font-normal flex items-center"
-                        >
-                          <span
-                            className={cn(
-                              "mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                              value === "DELIVERED" && "bg-green-500",
-                              value === "SENT" && "bg-yellow-500",
-                              value === "FAILED" && "bg-red-500",
-                            )}
-                          />
-                          {emailStatuses[value]?.label || value}
-                        </Label>
+                        {emailStatuses[value]?.label || value}
+                      </Label>
+                      <div className="flex-1 text-right ml-2">
+                        <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
+                          {emails.filter(
+                            (email) => email.status === value
+                          ).length}
+                        </span>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               </div>
             </PopoverContent>
@@ -313,6 +281,10 @@ export const EmailsTable = () => {
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
+                .filter(
+                  (column) =>
+                    column.columnDef.header && column.columnDef.header.length > 2,
+                )
                 .map((column) => {
                   return (
                     <DropdownMenuCheckboxItem
@@ -324,12 +296,7 @@ export const EmailsTable = () => {
                       }
                       onSelect={(event) => event.preventDefault()}
                     >
-                      {column.id === "campaign" ? "Kampány" :
-                        column.id === "subject" ? "Tárgy" :
-                          column.id === "contact" ? "Címzett" :
-                            column.id === "status" ? "Státusz" :
-                              column.id === "sentAt" ? "Küldés ideje" :
-                                column.id}
+                      {column.columnDef.header as string}
                     </DropdownMenuCheckboxItem>
                   );
                 })}
@@ -339,8 +306,8 @@ export const EmailsTable = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-background overflow-hidden rounded-md border">
-        <Table className="table-fixed">
+      <div className="bg-white overflow-hidden rounded-md border">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -354,7 +321,7 @@ export const EmailsTable = () => {
                         <div
                           className={cn(
                             header.column.getCanSort() &&
-                            "flex h-full cursor-pointer items-center justify-between gap-2 select-none"
+                            "flex h-full cursor-pointer items-center gap-2 select-none"
                           )}
                           onClick={header.column.getToggleSortingHandler()}
                           onKeyDown={(e) => {

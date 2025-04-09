@@ -62,6 +62,7 @@ export const columns: ColumnDef<Contact>[] = [
     accessorKey: "status",
     header: "Státusz",
     enableSorting: true,
+    enableColumnFilter: true,
     cell: ({ row }) => {
       const utils = api.useUtils();
 
