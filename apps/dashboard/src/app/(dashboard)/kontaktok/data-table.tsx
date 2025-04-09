@@ -178,10 +178,8 @@ export const ContactsTable = () => {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          {/* Filter by name or email */}
           <div className="relative">
             <Input
               id={`${id}-input`}
@@ -211,7 +209,6 @@ export const ContactsTable = () => {
             )}
           </div>
 
-          {/* Filter by status */}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline">
@@ -245,15 +242,23 @@ export const ContactsTable = () => {
                       />
                       <Label
                         htmlFor={`${id}-${i}`}
-                        className="flex grow justify-between gap-2 font-normal"
+                        className="flex grow items-center cursor-pointer font-normal"
                       >
-                        {contactStatuses[value].label}{" "}
-                        <span className="text-muted-foreground ms-2 text-xs">
+                        <span
+                          className={cn(
+                            "mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                            contactStatuses[value]?.bgColor
+                          )}
+                        />
+                        {contactStatuses[value].label}
+                      </Label>
+                      <div className="flex-1 text-right ml-2">
+                        <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
                           {contacts.filter(
                             (contact) => contact.status === value
                           ).length}
                         </span>
-                      </Label>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -261,7 +266,6 @@ export const ContactsTable = () => {
             </PopoverContent>
           </Popover>
 
-          {/* Toggle columns visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
@@ -274,7 +278,9 @@ export const ContactsTable = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Oszlopok megjelenítése</DropdownMenuLabel>
+              <div className="p-2 text-muted-foreground text-xs font-medium">
+                Szűrők
+              </div>
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
@@ -302,7 +308,6 @@ export const ContactsTable = () => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white overflow-hidden rounded-md border">
         <Table className="">
           <TableHeader>
@@ -420,9 +425,7 @@ export const ContactsTable = () => {
         </Table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between gap-8">
-        {/* Results per page */}
         <div className="flex items-center gap-3">
           <Label htmlFor={id} className="max-sm:sr-only">
             Találatok oldalanként
@@ -446,7 +449,6 @@ export const ContactsTable = () => {
           </Select>
         </div>
 
-        {/* Page number information */}
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
           <p
             className="text-muted-foreground text-sm whitespace-nowrap"
@@ -471,11 +473,9 @@ export const ContactsTable = () => {
           </p>
         </div>
 
-        {/* Pagination buttons */}
         <div>
           <Pagination>
             <PaginationContent>
-              {/* First page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -488,7 +488,6 @@ export const ContactsTable = () => {
                   <ChevronFirstIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Previous page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -501,7 +500,6 @@ export const ContactsTable = () => {
                   <ChevronLeftIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Next page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -514,7 +512,6 @@ export const ContactsTable = () => {
                   <ChevronRightIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Last page button */}
               <PaginationItem>
                 <Button
                   size="icon"

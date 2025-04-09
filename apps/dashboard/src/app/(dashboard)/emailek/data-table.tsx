@@ -39,9 +39,7 @@ import {
   ListFilterIcon,
 } from "lucide-react";
 import {
-  ColumnDef,
   ColumnFiltersState,
-  FilterFn,
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
@@ -73,14 +71,6 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { emailStatuses } from "./columns";
-
-const multiColumnFilterFn: FilterFn<Email> = (row, columnId, filterValue) => {
-  if (!filterValue?.length) return true;
-  const searchableRowContent =
-    `${row.original.subject || ''} ${row.original.from || ''}`.toLowerCase();
-  const searchTerm = (filterValue ?? "").toLowerCase();
-  return searchableRowContent.includes(searchTerm);
-};
 
 export const EmailsTable = () => {
   const id = useId();
@@ -144,9 +134,6 @@ export const EmailsTable = () => {
       pagination,
       sorting,
     },
-    filterFns: {
-      multiColumn: multiColumnFilterFn,
-    },
   });
 
   const handleStatusChange = (checked: boolean, value: string) => {
@@ -165,10 +152,8 @@ export const EmailsTable = () => {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          {/* Filter by subject or email */}
           <div className="relative">
             <Input
               id={`${id}-input`}
@@ -198,7 +183,6 @@ export const EmailsTable = () => {
             )}
           </div>
 
-          {/* Filter by status */}
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline">
@@ -235,17 +219,12 @@ export const EmailsTable = () => {
                       />
                       <Label
                         htmlFor={id + "-" + value}
-                        className="flex items-center font-normal"
+                        className="flex cursor-pointer grow items-center font-normal"
                       >
                         <span
                           className={cn(
                             "mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                            value === "DELIVERED" && "bg-green-500",
-                            value === "SENT" && "bg-yellow-500",
-                            value === "FAILED" && "bg-red-500",
-                            value === "BOUNCED" && "bg-amber-500",
-                            value === "QUEUED" && "bg-yellow-500",
-                            value === "COMPLAINED" && "bg-orange-500",
+                            emailStatuses[value]?.bgColor
                           )}
                         />
                         {emailStatuses[value]?.label || value}
@@ -264,7 +243,6 @@ export const EmailsTable = () => {
             </PopoverContent>
           </Popover>
 
-          {/* Toggle columns visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
@@ -305,7 +283,6 @@ export const EmailsTable = () => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -423,9 +400,7 @@ export const EmailsTable = () => {
         </Table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between gap-8">
-        {/* Results per page */}
         <div className="flex items-center gap-3">
           <Label htmlFor={id} className="max-sm:sr-only">
             Találatok oldalanként
@@ -449,7 +424,6 @@ export const EmailsTable = () => {
           </Select>
         </div>
 
-        {/* Page number information */}
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
           <p
             className="text-muted-foreground text-sm whitespace-nowrap"
@@ -474,11 +448,9 @@ export const EmailsTable = () => {
           </p>
         </div>
 
-        {/* Pagination buttons */}
         <div>
           <Pagination>
             <PaginationContent>
-              {/* First page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -491,7 +463,6 @@ export const EmailsTable = () => {
                   <ChevronFirstIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Previous page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -504,7 +475,6 @@ export const EmailsTable = () => {
                   <ChevronLeftIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Next page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -517,7 +487,6 @@ export const EmailsTable = () => {
                   <ChevronRightIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Last page button */}
               <PaginationItem>
                 <Button
                   size="icon"

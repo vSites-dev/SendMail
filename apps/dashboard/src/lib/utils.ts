@@ -65,3 +65,57 @@ export const domainStatuses = {
     borderColor: "border-red-500",
   },
 };
+
+export const emailStatuses = {
+  QUEUED: {
+    label: "Küldés alatt",
+    bgColor: "bg-yellow-500",
+    color: "text-yellow-500",
+    borderColor: "border-yellow-500",
+  },
+  SENT: {
+    label: "Elküldve",
+    bgColor: "bg-blue-500",
+    color: "text-blue-500",
+    borderColor: "border-blue-500",
+  },
+  DELIVERED: {
+    label: "Kézbesítve",
+    bgColor: "bg-green-500",
+    color: "text-green-500",
+    borderColor: "border-green-500",
+  },
+  BOUNCED: {
+    label: "Visszapattant",
+    bgColor: "bg-red-500",
+    color: "text-red-500",
+    borderColor: "border-red-500",
+  },
+  COMPLAINED: {
+    label: "Reklamált",
+    bgColor: "bg-yellow-500",
+    color: "text-yellow-500",
+    borderColor: "border-yellow-500",
+  },
+  FAILED: {
+    label: "Hiba",
+    bgColor: "bg-red-500",
+    color: "text-red-500",
+    borderColor: "border-red-500",
+  },
+};
+
+export const campaignStatuses = {
+  SCHEDULED: {
+    label: "Folyamatban",
+    bgColor: "bg-yellow-500",
+    color: "text-yellow-500",
+    borderColor: "border-yellow-500",
+  },
+  COMPLETED: {
+    label: "Befejezve",
+    bgColor: "bg-green-500",
+    color: "text-green-500",
+    borderColor: "border-green-500",
+  },
+};

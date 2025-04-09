@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -29,6 +29,7 @@ import {
   flexRender,
   getSortedRowModel,
   SortingState,
+  getFacetedUniqueValues,
 } from "@tanstack/react-table";
 import { columns } from "./columns";
 import {
@@ -40,173 +41,311 @@ import {
   ChevronsUpDown,
   ChevronUp,
   ChevronDown,
+  ListFilterIcon,
+  CircleXIcon,
+  FilterIcon,
+  Columns3Icon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ChevronFirstIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronLastIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { campaignDataTableAtom, CampaignWithCounts } from "@/store/global";
 import { useAtom } from "jotai";
 import DotPattern from "@/components/ui/dot-pattern";
+import { ColumnFiltersState, PaginationState } from "@tanstack/react-table";
+import { campaignStatuses, cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export const CampaignsTable = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
-
-  const [globalFilter, setGlobalFilter] = useState("");
+  const id = useId();
+  const [campaigns, setCampaigns] = useAtom(campaignDataTableAtom);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState({});
+
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "updatedAt", desc: true },
+    { id: "name", desc: true },
   ]);
 
-  const [campaigns, setCampaigns] = useAtom<CampaignWithCounts[]>(campaignDataTableAtom);
+  const [inputValue, setInputValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
-  const { data, isLoading } = api.campaign.getForTable.useQuery({
-    limit: pageSize,
-    offset: (currentPage - 1) * pageSize
-  }, {
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
-
-  const { data: searchResults, isFetching: isSearchResultsFetching } = api.campaign.getByName.useQuery({
-    searchText: globalFilter,
-  }, {
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
-
-  useEffect(() => {
-    if (
-      data?.totalCount &&
-      data.totalCount > 0 &&
-      data.totalCount !== totalCount
-    ) {
-      setTotalPages(Math.ceil(data.totalCount / pageSize));
-      setTotalCount(data.totalCount);
-    }
-  }, [data, totalPages, pageSize]);
+  const { data, isLoading } = api.campaign.getForTable.useQuery(
+    {
+      limit: pagination.pageSize,
+      offset: pagination.pageIndex * pagination.pageSize,
+    },
+    {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+    });
 
   useEffect(() => {
     if (data?.items) setCampaigns(data.items);
   }, [data]);
 
+  const filteredCampaigns = useMemo(() => {
+    if (!statusFilter.length) return campaigns;
+
+    return campaigns.filter(campaign => {
+      return statusFilter.includes(campaign.status);
+    });
+  }, [campaigns, statusFilter]);
+
   const table = useReactTable({
-    data: campaigns,
+    data: filteredCampaigns,
     columns,
-    state: {
-      globalFilter,
-      columnVisibility,
-      sorting,
-    },
-    onGlobalFilterChange: setGlobalFilter,
-    onColumnVisibilityChange: setColumnVisibility,
-    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    onSortingChange: setSorting,
+    onPaginationChange: setPagination,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    manualPagination: true,
+    pageCount: Math.ceil((data?.totalCount || 0) / pagination.pageSize),
+    state: {
+      columnFilters,
+      columnVisibility,
+      pagination,
+      sorting,
+    },
   });
 
-  // Check if search is active and we have results
-  const isSearchActive = globalFilter.trim().length > 0;
-  const searchHasResults = searchResults?.items && searchResults.items.length > 0;
+  const handleStatusChange = (checked: boolean, value: string) => {
+    setStatusFilter(prev => {
+      if (checked) {
+        if (!prev.includes(value)) return [...prev, value];
+      } else return prev.filter(status => status !== value);
+      return prev;
+    });
+  };
 
-  // Disable pagination when search is active
-  const shouldDisablePagination = isSearchActive && searchHasResults;
+  const handleGlobalFilterChange = (value: string) => {
+    setInputValue(value);
+    table.setGlobalFilter(value);
+  };
 
   return (
     <div className="space-y-4 w-full">
-      <div className="flex justify-between items-center">
-        <div className="relative w-full">
-          <Input
-            className="bg-white max-w-sm peer ps-9"
-            placeholder="Keresés a kampányok között..."
-            type="text"
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-          />
-          <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-muted-foreground/80 peer-disabled:opacity-50">
-            <Search size={16} strokeWidth={2} aria-hidden="true" />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Input
+              id={`${id}-input`}
+              className={cn(
+                "peer min-w-60 ps-9",
+                Boolean(table.getColumn("name")?.getFilterValue()) && "pe-9"
+              )}
+              value={inputValue}
+              onChange={(e) => handleGlobalFilterChange(e.target.value)}
+              placeholder="Keresés név alapján..."
+              type="text"
+              aria-label="Keresés név alapján"
+            />
+            <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
+              <ListFilterIcon size={16} aria-hidden="true" />
+            </div>
+            {Boolean(table.getColumn("name")?.getFilterValue()) && (
+              <button
+                className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label="Keresés törlése"
+                onClick={() => {
+                  handleGlobalFilterChange("");
+                }}
+              >
+                <CircleXIcon size={16} aria-hidden="true" />
+              </button>
+            )}
           </div>
-        </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="ml-auto bg-white flex gap-1 items-center"
-            >
-              <Settings2 size={16} />
-              Oszlopok
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .filter(
-                (column) =>
-                  column.columnDef.header && column.columnDef.header.length > 2,
-              )
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.columnDef.header as string}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">
+                <FilterIcon
+                  className="-ms-1 opacity-60"
+                  size={16}
+                  aria-hidden="true"
+                />
+                Státusz
+                {statusFilter.length > 0 && (
+                  <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
+                    {statusFilter.length}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto min-w-36 p-3" align="start">
+              <div className="space-y-3">
+                <div className="text-muted-foreground text-xs font-medium">
+                  Szűrők
+                </div>
+                <div className="space-y-3">
+                  {Object.keys(campaignStatuses).map((value, i) => (
+                    <div
+                      key={value + i.toString()}
+                      className="flex items-center gap-3 py-1"
+                    >
+                      <Checkbox
+                        id={id + "-" + value}
+                        checked={statusFilter.includes(value)}
+                        onCheckedChange={(checked: boolean) =>
+                          handleStatusChange(checked, value)
+                        }
+                      />
+                      <Label
+                        htmlFor={id + "-" + value}
+                        className="flex cursor-pointer grow items-center font-normal"
+                      >
+                        <span
+                          className={cn(
+                            "mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                            campaignStatuses[value]?.bgColor
+                          )}
+                        />
+                        {campaignStatuses[value]?.label || value}
+                      </Label>
+                      <div className="flex-1 text-right ml-2">
+                        <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
+                          {campaigns.filter(
+                            (campaign) => campaign.status === value
+                          ).length}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Columns3Icon
+                  className="-ms-1 opacity-60"
+                  size={16}
+                  aria-hidden="true"
+                />
+                Nézet
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Oszlopok megjelenítése</DropdownMenuLabel>
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .filter(
+                  (column) =>
+                    column.columnDef.header && column.columnDef.header.length > 2,
+                )
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      {column.columnDef.header as string}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : header.column.getCanSort() ? (
-                          <div
-                            className={`flex items-center gap-1 cursor-pointer select-none`}
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                            {{
-                              asc: <ChevronUp className="size-4" />,
-                              desc: <ChevronDown className="size-4" />,
-                            }[header.column.getIsSorted() as string] ?? (
-                                <ChevronsUpDown className="size-4 opacity-50" />
-                              )}
-                          </div>
-                        ) : (
-                          flexRender(
+                    <TableHead
+                      key={header.id}
+                      className="h-11"
+                    >
+                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                        <div
+                          className={cn(
+                            header.column.getCanSort() &&
+                            "flex h-full cursor-pointer items-center gap-2 select-none"
+                          )}
+                          onClick={header.column.getToggleSortingHandler()}
+                          onKeyDown={(e) => {
+                            if (
+                              header.column.getCanSort() &&
+                              (e.key === "Enter" || e.key === " ")
+                            ) {
+                              e.preventDefault();
+                              header.column.getToggleSortingHandler()?.(e);
+                            }
+                          }}
+                          tabIndex={header.column.getCanSort() ? 0 : undefined}
+                        >
+                          {flexRender(
                             header.column.columnDef.header,
                             header.getContext()
-                          )
-                        )}
+                          )}
+                          {{
+                            asc: (
+                              <ChevronUpIcon
+                                className="shrink-0 opacity-60"
+                                size={16}
+                                aria-hidden="true"
+                              />
+                            ),
+                            desc: (
+                              <ChevronDownIcon
+                                className="shrink-0 opacity-60"
+                                size={16}
+                                aria-hidden="true"
+                              />
+                            ),
+                          }[header.column.getIsSorted() as string] ?? null}
+                        </div>
+                      ) : (
+                        flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )
+                      )}
                     </TableHead>
                   );
                 })}
@@ -231,7 +370,7 @@ export const CampaignsTable = () => {
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="last:py-0">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -240,15 +379,6 @@ export const CampaignsTable = () => {
                   ))}
                 </TableRow>
               ))
-            ) : isSearchActive && !searchHasResults ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  Nincs találat.
-                </TableCell>
-              </TableRow>
             ) : (
               <TableRow>
                 <TableCell
@@ -279,73 +409,107 @@ export const CampaignsTable = () => {
         </Table>
       </div>
 
-      <div className="flex w-full justify-between items-center">
-        <p className="text-muted-foreground text-sm w-full">
-          {shouldDisablePagination && searchResults?.items
-            ? `${searchResults.items.length} találat`
-            : `${totalCount} kampány`}
-        </p>
+      <div className="flex items-center justify-between gap-8">
+        <div className="flex items-center gap-3">
+          <Label htmlFor={id} className="max-sm:sr-only">
+            Találatok oldalanként
+          </Label>
+          <Select
+            value={table.getState().pagination.pageSize.toString()}
+            onValueChange={(value) => {
+              table.setPageSize(Number(value));
+            }}
+          >
+            <SelectTrigger id={id} className="w-fit whitespace-nowrap">
+              <SelectValue placeholder="Találatok száma" />
+            </SelectTrigger>
+            <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:end-2">
+              {[5, 10, 25, 50].map((pageSize) => (
+                <SelectItem key={pageSize} value={pageSize.toString()}>
+                  {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        {!shouldDisablePagination ? (
-          <Pagination className="w-full">
+        <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
+          <p
+            className="text-muted-foreground text-sm whitespace-nowrap"
+            aria-live="polite"
+          >
+            <span className="text-foreground">
+              {table.getState().pagination.pageIndex *
+                table.getState().pagination.pageSize +
+                (data?.items && data.items.length > 0 ? 1 : 0)}
+              -
+              {Math.min(
+                table.getState().pagination.pageIndex *
+                table.getState().pagination.pageSize +
+                (data?.items?.length || 0),
+                data?.totalCount || 0
+              )}
+            </span>{" "}
+            / {" "}
+            <span className="text-foreground">
+              {data?.totalCount || 0}
+            </span>
+          </p>
+        </div>
+
+        <div>
+          <Pagination>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className={
-                    currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                  }
-                />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="disabled:pointer-events-none disabled:opacity-50"
+                  onClick={() => table.firstPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  aria-label="Első oldalra ugrás"
+                >
+                  <ChevronFirstIcon size={16} aria-hidden="true" />
+                </Button>
               </PaginationItem>
-              {[...Array(totalPages)].map((_, idx) => {
-                const page = idx + 1;
-                if (
-                  page === 1 ||
-                  page === totalPages ||
-                  (page >= currentPage - 1 && page <= currentPage + 1)
-                ) {
-                  return (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        onClick={() => setCurrentPage(page)}
-                        isActive={currentPage === page}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                } else if (page === currentPage - 2 || page === currentPage + 2) {
-                  return (
-                    <PaginationItem key={page}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  );
-                }
-                return null;
-              })}
               <PaginationItem>
-                <PaginationNext
-                  isActive={currentPage === totalPages || totalPages === 0}
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
-                  className={
-                    currentPage === totalPages || totalPages === 0
-                      ? "pointer-events-none opacity-50 !bg-transparent border-none shadow-none"
-                      : ""
-                  }
-                />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="disabled:pointer-events-none disabled:opacity-50"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  aria-label="Előző oldalra ugrás"
+                >
+                  <ChevronLeftIcon size={16} aria-hidden="true" />
+                </Button>
+              </PaginationItem>
+              <PaginationItem>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="disabled:pointer-events-none disabled:opacity-50"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  aria-label="Következő oldalra ugrás"
+                >
+                  <ChevronRightIcon size={16} aria-hidden="true" />
+                </Button>
+              </PaginationItem>
+              <PaginationItem>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="disabled:pointer-events-none disabled:opacity-50"
+                  onClick={() => table.lastPage()}
+                  disabled={!table.getCanNextPage()}
+                  aria-label="Utolsó oldalra ugrás"
+                >
+                  <ChevronLastIcon size={16} aria-hidden="true" />
+                </Button>
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-        ) : (
-          <div className="w-full text-center text-muted-foreground text-sm">
-            Keresési találatok megjelenítése
-          </div>
-        )}
-
-        <div className="w-full text-right text-muted-foreground text-sm">
-          {shouldDisablePagination ? "1 oldal" : `${totalPages} oldal`}
         </div>
       </div>
     </div>
