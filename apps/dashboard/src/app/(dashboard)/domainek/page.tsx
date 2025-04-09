@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 export default async function DomainsPage() {
   void api.domain.getForTable({ limit: 10, offset: 0 });
 
+  const userRole = await api.project.checkUsersRole();
+
   return (
     <HydrateClient>
       <DashboardHeader>
@@ -49,12 +51,14 @@ export default async function DomainsPage() {
           után megerésítés szükséges az Ön részéről.
         </p>
 
-        <Link href="/domainek/uj">
-          <Button>
-            <PlusSquare className="size-5" />
-            Új domain hozzáadása
-          </Button>
-        </Link>
+        {userRole === 'ADMIN' || userRole === 'OWNER' && (
+          <Link href="/domainek/uj">
+            <Button>
+              <PlusSquare className="size-5" />
+              Új domain hozzáadása
+            </Button>
+          </Link>
+        )}
 
         <Separator className="my-6" />
 

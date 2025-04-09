@@ -510,3 +510,5 @@ type CampaignRouterOutputs = inferRouterOutputs<CampaignRouter>;
 
 export type Campaign = CampaignRouterOutputs["getAll"][number];
 export type GetByIdCampaignType = CampaignRouterOutputs["getById"];
+export type GetForTableCampaignType =
+  CampaignRouterOutputs["getForTable"]["items"][number];
