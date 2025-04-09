@@ -16,15 +16,7 @@ export const selectedIntervalAtom = atom<7 | 30 | 90 | 180 | 365>(30);
 export const contactDataTableAtom = atom<Contact[]>([]);
 export const domainDataTableAtom = atom<Domain[]>([]);
 export const emailDataTableAtom = atom<GetForTableEmail[]>([]);
-// We need to extend the Campaign type to include the counts for the data table
-export type CampaignWithCounts = Campaign & { 
-  contactsCount: number; 
-  emailsCount: number;
-  contacts?: undefined;
-  emails?: undefined;
-};
-
-export const campaignDataTableAtom = atom<CampaignWithCounts[]>([]);
+export const campaignDataTableAtom = atom<Campaign[]>([]);
 
 // Campaign creation atoms
 export const selectedCampaignContactsAtom = atom<string[]>([]);

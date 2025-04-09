@@ -271,18 +271,8 @@ export const campaignRouter = createTRPCRouter({
         }),
       ]);
 
-      // Transform the data to include counts
-      const items = campaigns.map((campaign) => ({
-        ...campaign,
-        contactsCount: campaign.contacts.length,
-        emailsCount: campaign.emails.length,
-        // Remove the arrays to avoid sending too much data
-        contacts: undefined,
-        emails: undefined,
-      }));
-
       return {
-        items,
+        items: campaigns,
         totalCount,
       };
     }),

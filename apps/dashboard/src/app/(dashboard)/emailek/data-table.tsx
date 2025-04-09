@@ -37,6 +37,7 @@ import {
   Columns3Icon,
   FilterIcon,
   ListFilterIcon,
+  Search,
 } from "lucide-react";
 import {
   ColumnFiltersState,
@@ -69,8 +70,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { emailStatuses } from "./columns";
+import { cn, emailStatuses } from "@/lib/utils";
 
 export const EmailsTable = () => {
   const id = useId();
@@ -89,6 +89,8 @@ export const EmailsTable = () => {
 
   const [inputValue, setInputValue] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [campaignFilter, setCampaignFilter] = useState<string[]>([]);
+  const [campaignSearchValue, setCampaignSearchValue] = useState("");
 
   const { data, isLoading } = api.email.getForTable.useQuery(
     {
@@ -107,12 +109,20 @@ export const EmailsTable = () => {
   }, [data, setEmails]);
 
   const filteredEmails = useMemo(() => {
-    if (!statusFilter.length) return emails;
+    let filtered = emails;
 
-    return emails.filter(email => {
-      return statusFilter.includes(email.status);
-    });
-  }, [emails, statusFilter]);
+    if (statusFilter.length) {
+      filtered = filtered.filter(email => statusFilter.includes(email.status));
+    }
+
+    if (campaignFilter.length) {
+      filtered = filtered.filter(email =>
+        email.campaignId && campaignFilter.includes(email.campaignId)
+      );
+    }
+
+    return filtered;
+  }, [emails, statusFilter, campaignFilter]);
 
   const table = useReactTable({
     data: filteredEmails,
@@ -149,6 +159,30 @@ export const EmailsTable = () => {
     setInputValue(value);
     table.setGlobalFilter(value);
   };
+
+  const handleCampaignChange = (checked: boolean, campaignId: string) => {
+    setCampaignFilter(prev => {
+      if (checked) {
+        if (!prev.includes(campaignId)) return [...prev, campaignId];
+      } else return prev.filter(id => id !== campaignId);
+      return prev;
+    });
+  };
+
+  const filteredCampaignOptions = useMemo(() => {
+    const uniqueCampaigns = new Map();
+
+    emails.forEach(email => {
+      if (email.campaign) {
+        if (!campaignSearchValue ||
+          email.campaign.name.toLowerCase().includes(campaignSearchValue.toLowerCase())) {
+          uniqueCampaigns.set(email.campaign.id, email.campaign);
+        }
+      }
+    });
+
+    return Array.from(uniqueCampaigns.values());
+  }, [emails, campaignSearchValue]);
 
   return (
     <div className="space-y-4">
@@ -238,6 +272,84 @@ export const EmailsTable = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">
+                <FilterIcon
+                  className="-ms-1 opacity-60"
+                  size={16}
+                  aria-hidden="true"
+                />
+                Kampányok
+                {campaignFilter.length > 0 && (
+                  <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
+                    {campaignFilter.length}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-fit p-3" align="start">
+              <div className="space-y-3">
+                <div className="text-muted-foreground text-xs font-medium">
+                  Kampány szűrő
+                </div>
+                <div className="relative">
+                  <Input
+                    placeholder="Kampány keresése..."
+                    className="w-full ps-9"
+                    value={campaignSearchValue}
+                    onChange={(e) => setCampaignSearchValue(e.target.value)}
+                  />
+                  <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
+                    <Search size={16} aria-hidden="true" />
+                  </div>
+                  {campaignSearchValue && (
+                    <button
+                      className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                      aria-label="Keresés törlése"
+                      onClick={() => setCampaignSearchValue("")}
+                    >
+                      <CircleXIcon size={16} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+                <div className="max-h-60 overflow-y-auto space-y-3">
+                  {filteredCampaignOptions.length > 0 ? (
+                    filteredCampaignOptions?.map((campaign) => campaign && (
+                      <div
+                        key={campaign.id}
+                        className="flex items-center gap-3 py-1"
+                      >
+                        <Checkbox
+                          id={id + "-campaign-" + campaign.id}
+                          checked={campaignFilter.includes(campaign.id || "")}
+                          onCheckedChange={(checked: boolean) =>
+                            handleCampaignChange(checked, campaign.id || "")
+                          }
+                        />
+                        <Label
+                          htmlFor={id + "-campaign-" + campaign.id}
+                          className="flex cursor-pointer text-sm grow items-center font-normal truncate"
+                        >
+                          {campaign.name || ""}
+                        </Label>
+                        <div className="flex-1 text-right ml-2">
+                          <span className="bg-background text-muted-foreground/70 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
+                            {emails.filter((e) => e.campaign?.id === campaign.id).length || 0}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-muted-foreground text-center py-2">
+                      Nincs találat
+                    </div>
+                  )}
                 </div>
               </div>
             </PopoverContent>

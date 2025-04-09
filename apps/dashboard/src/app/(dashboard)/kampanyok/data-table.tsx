@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -97,6 +97,8 @@ export const CampaignsTable = () => {
 
   const [inputValue, setInputValue] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [campaignFilter, setCampaignFilter] = useState<string[]>([]);
+  const [campaignSearchValue, setCampaignSearchValue] = useState("");
 
   const { data, isLoading } = api.campaign.getForTable.useQuery(
     {
@@ -114,12 +116,14 @@ export const CampaignsTable = () => {
   }, [data]);
 
   const filteredCampaigns = useMemo(() => {
-    if (!statusFilter.length) return campaigns;
+    if (!statusFilter.length && !campaignFilter.length) return campaigns;
 
     return campaigns.filter(campaign => {
-      return statusFilter.includes(campaign.status);
+      const matchesStatus = !statusFilter.length || statusFilter.includes(campaign.status);
+      const matchesCampaign = !campaignFilter.length || campaignFilter.includes(campaign.id);
+      return matchesStatus && matchesCampaign;
     });
-  }, [campaigns, statusFilter]);
+  }, [campaigns, statusFilter, campaignFilter]);
 
   const table = useReactTable({
     data: filteredCampaigns,
