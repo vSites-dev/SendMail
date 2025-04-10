@@ -265,9 +265,14 @@ export const EmailsTable = () => {
                       </Label>
                       <div className="flex-1 text-right ml-2">
                         <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
-                          {emails.filter(
-                            (email) => email.status === value
-                          ).length}
+                          {campaignFilter.length > 0
+                            ? emails.filter(email =>
+                              email.status === value &&
+                              email.campaignId &&
+                              campaignFilter.includes(email.campaignId)
+                            ).length
+                            : emails.filter(email => email.status === value).length
+                          }
                         </span>
                       </div>
                     </div>
@@ -340,7 +345,10 @@ export const EmailsTable = () => {
                         </Label>
                         <div className="flex-1 text-right ml-2">
                           <span className="bg-background text-muted-foreground/70 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
-                            {emails.filter((e) => e.campaign?.id === campaign.id).length || 0}
+                            {emails
+                              .filter((e) => e.campaign?.id === campaign.id)
+                              .filter((e) => statusFilter.length === 0 || statusFilter.includes(e.status))
+                              .length || 0}
                           </span>
                         </div>
                       </div>

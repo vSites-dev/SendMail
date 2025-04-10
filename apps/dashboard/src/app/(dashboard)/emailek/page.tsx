@@ -51,15 +51,8 @@ export default async function EmailsPage() {
         </p>
 
         <div className="flex gap-2 flex-wrap items-center">
-          {/* <Link href="/emailek/uj">
-            <Button>
-              <PlusSquare className="size-5" />
-              Email(ek) manuális kiküldése
-            </Button>
-          </Link> */}
-
           <Link href="/kampanyok">
-            <Button variant={"success"}>
+            <Button>
               <PlusSquare className="size-5" />
               Új kampány létrehozása
             </Button>

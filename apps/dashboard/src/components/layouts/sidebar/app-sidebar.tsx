@@ -26,6 +26,7 @@ import { type Organization } from "@/lib/auth/auth";
 import { Invitation, Project } from "@prisma/client";
 import { OrganizationSwitcher } from "./organization-switcher";
 import { authClient } from "@/lib/auth/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const data = {
   navMain: [
@@ -93,6 +94,9 @@ export function AppSidebar({
       </SidebarContent>
       <SidebarFooter>
         {session.data?.user && <NavUser user={session.data.user} />}
+        {!session.data?.user && (
+          <Skeleton className="w-full h-10" />
+        )}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

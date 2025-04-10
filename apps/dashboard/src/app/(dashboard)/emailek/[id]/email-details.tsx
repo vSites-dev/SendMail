@@ -17,11 +17,10 @@ import {
   CardSeparator,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, emailStatuses } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { emailStatuses } from "../columns";
 import { ExtendedEmail } from "@/server/api/routers/emails";
 import MarkdownIt from "markdown-it";
 import remarkGfm from "remark-gfm";
@@ -47,7 +46,7 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
           <div
             className={cn(
               "flex relative p-[5px] items-center justify-center rounded-md bg-neutral-50 text-2xl font-semibold border",
-              emailStatuses[email.status].textColor,
+              emailStatuses[email.status].color,
             )}
           >
             <Mail className="size-6" />
@@ -59,7 +58,7 @@ export function EmailDetails({ email }: { email: ExtendedEmail }) {
         <Badge
           className={cn(
             "px-3 py-1 text-sm font-medium",
-            emailStatuses[email.status].textColor,
+            emailStatuses[email.status].color,
           )}
           variant={"outline"}
         >
