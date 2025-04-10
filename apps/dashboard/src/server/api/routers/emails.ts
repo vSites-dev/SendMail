@@ -337,7 +337,11 @@ export const emailRouter = createTRPCRouter({
         include: {
           contact: true,
           campaign: true,
-          clicks: true,
+          clicks: {
+            where: {
+              status: "CLICKED",
+            },
+          },
         },
       });
     }),
