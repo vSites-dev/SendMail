@@ -13,6 +13,67 @@ import {
   TaskType,
 } from "@prisma/client";
 
+function parseMarkdownLinks(
+  markdown: string,
+): { text: string; href: string }[] {
+  const links: { text: string; href: string }[] = [];
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let match;
+
+  while ((match = linkRegex.exec(markdown)) !== null) {
+    links.push({
+      text: match[1],
+      href: match[2],
+    });
+  }
+
+  return links;
+}
+
+// Helper function to replace links with tracking links
+async function replaceLinksWithTracking(
+  markdown: string,
+  emailId: string,
+  ctx: any,
+): Promise<{
+  processedMarkdown: string;
+  clicks: { id: string; link: string; emailId: string; status: string }[];
+}> {
+  const links = parseMarkdownLinks(markdown);
+  const clicks: {
+    id: string;
+    link: string;
+    emailId: string;
+    status: string;
+  }[] = [];
+  let processedMarkdown = markdown;
+
+  for (const link of links) {
+    const click = await ctx.db.click.create({
+      data: {
+        link: link.href,
+        emailId: emailId,
+      },
+    });
+
+    clicks.push({
+      id: click.id,
+      link: link.href,
+      emailId: emailId,
+      status: "PENDING",
+    });
+
+    // Replace the original link with the tracking link
+    const trackingUrl = `${process.env.NEXT_PUBLIC_API_URL}/track/${click.id}`;
+    processedMarkdown = processedMarkdown.replace(
+      `[${link.text}](${link.href})`,
+      `[${link.text}](${trackingUrl})`,
+    );
+  }
+
+  return { processedMarkdown, clicks };
+}
+
 export const campaignRouter = createTRPCRouter({
   addContactsWithEmails: authedProcedure
     .input(
@@ -452,7 +513,8 @@ export const campaignRouter = createTRPCRouter({
             );
             if (!t) throw new Error("Template not found");
 
-            return ctx.db.email.create({
+            // Create email first
+            const email = await ctx.db.email.create({
               data: {
                 subject: block.subject,
                 from: block.from,
@@ -462,6 +524,18 @@ export const campaignRouter = createTRPCRouter({
                 contactId: contactId,
               },
             });
+
+            // Process links and create tracking objects
+            const { processedMarkdown, clicks } =
+              await replaceLinksWithTracking(t.body, email.id, ctx);
+
+            // Update email with processed markdown
+            await ctx.db.email.update({
+              where: { id: email.id },
+              data: { body: processedMarkdown },
+            });
+
+            return email;
           }),
         );
 

@@ -229,6 +229,7 @@ model Click {
   id String @id @default(uuid())
 
   link String
+  status ClickStatus @default(PENDING)
 
   email   Email  @relation(fields: [emailId], references: [id], onDelete: Cascade)
   emailId String
@@ -270,6 +271,11 @@ model Template {
 
   @@unique([projectId, name])
   @@map("templates")
+}
+
+enum ClickStatus {
+  PENDING
+  CLICKED
 }
 
 enum ContactStatus {
