@@ -74,6 +74,29 @@ async function replaceLinksWithTracking(
   return { processedMarkdown, clicks };
 }
 
+// Helper function to replace contact variables in the email body
+async function replaceContactVariables(
+  markdown: string,
+  contactId: string,
+  ctx: any,
+): Promise<string> {
+  // Get contact details
+  const contact = await ctx.db.contact.findUnique({
+    where: { id: contactId },
+    select: { name: true, email: true },
+  });
+
+  if (!contact) {
+    throw new Error("Contact not found");
+  }
+
+  // Replace {{name}} with contact's name
+  // Replace {{email}} with contact's email
+  return markdown
+    .replace(/{{name}}/g, contact.name || "")
+    .replace(/{{email}}/g, contact.email || "");
+}
+
 export const campaignRouter = createTRPCRouter({
   addContactsWithEmails: authedProcedure
     .input(
@@ -513,12 +536,19 @@ export const campaignRouter = createTRPCRouter({
             );
             if (!t) throw new Error("Template not found");
 
+            // Replace contact variables in the body
+            const bodyWithVariables = await replaceContactVariables(
+              t.body,
+              contactId,
+              ctx,
+            );
+
             // Create email first
             const email = await ctx.db.email.create({
               data: {
                 subject: block.subject,
                 from: block.from,
-                body: t.body,
+                body: bodyWithVariables,
                 status: EmailStatus.QUEUED as EmailStatus,
                 campaignId: campaign.id,
                 contactId: contactId,
@@ -527,7 +557,7 @@ export const campaignRouter = createTRPCRouter({
 
             // Process links and create tracking objects
             const { processedMarkdown, clicks } =
-              await replaceLinksWithTracking(t.body, email.id, ctx);
+              await replaceLinksWithTracking(bodyWithVariables, email.id, ctx);
 
             // Update email with processed markdown
             await ctx.db.email.update({

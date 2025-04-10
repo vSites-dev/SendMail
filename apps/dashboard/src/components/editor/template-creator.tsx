@@ -9,7 +9,7 @@ import { Plate } from "@udecode/plate/react";
 import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { Button } from "../ui/button";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, TypeOutline } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
@@ -28,6 +28,11 @@ export function TemplateCreator() {
   const { mutateAsync: createTemplate } = api.template.create.useMutation();
 
   async function handleSave() {
+    if (!name) {
+      toast.error("A sablon nevének megadása szükséges!");
+      return;
+    }
+
     setLoading(true);
 
     const markdown = editor.api.markdown.serialize();
@@ -61,18 +66,35 @@ export function TemplateCreator() {
 
       <Card>
         <CardContent className="py-4">
-          <p className="text-muted-foreground text-sm">Sablon neve: </p>
-          <Input
-            placeholder="Sablon neve"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+          <p className="text-sm">Sablon neve: </p>
+          <div className="relative">
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="peer ps-9"
+              placeholder="Köszönjük a megkeresését!"
+            />
+            <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
+              <TypeOutline size={16} aria-hidden="true" />
+            </div>
+          </div>
 
-          <p className="text-muted-foreground text-sm mt-4">
-            Sablon tartalma:{" "}
-          </p>
+          <p className="text-sm mt-6">Sablon tartalma: </p>
+          <div className="text-muted-foreground text-sm mb-4">
+            A szövegben a következő <b>változókat</b> használhatod fel:
+            <ul className="list-disc list-inside mt-1">
+              <li>
+                <code className="bg-muted px-1 rounded">{"{{name}}"}: </code>A
+                címzett neve
+              </li>
+              <li>
+                <code className="bg-muted px-1 rounded">{"{{email}}"}: </code>A
+                címzett email címe
+              </li>
+            </ul>
+          </div>
           <div
-            className="min-h-[400px] h-[calc(100vh-380px)] overflow-y-scroll w-full border bg-white rounded-md"
+            className="min-h-[400px] max-h-[calc(100vh-500px)] overflow-y-scroll w-full border bg-white rounded-md"
             data-registry="plate"
           >
             <DndProvider backend={HTML5Backend}>
