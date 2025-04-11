@@ -13,7 +13,6 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { EmailsTable } from "./data-table";
 import EmailStats from "./email-stats";
-import SendEmailButton from "@/components/emails/send-email-button";
 
 export default async function EmailsPage() {
   const { statistics, total } = await api.email.getStatistics();
@@ -54,21 +53,6 @@ export default async function EmailsPage() {
           között az <b>email státuszát, link kattintásokat</b> és minden fontos
           követhető információt azzal kapcsolatban.
         </p>
-
-        <div className="flex gap-2 flex-wrap items-center">
-          <SendEmailButton
-            contacts={contacts}
-            templates={templates}
-            domains={domains.map((domain) => domain.name)}
-          />
-
-          <Button asChild variant={"success"}>
-            <Link className="flex items-center gap-2" href="/kampanyok">
-              <Megaphone className="size-5" />
-              Új kampány létrehozása
-            </Link>
-          </Button>
-        </div>
 
         <Separator className="my-6" />
 
