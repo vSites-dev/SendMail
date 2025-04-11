@@ -76,7 +76,7 @@ import { cn, contactStatuses } from "@/lib/utils";
 const multiColumnFilterFn: FilterFn<Contact> = (row, columnId, filterValue) => {
   if (!filterValue?.length) return true;
   const searchableRowContent =
-    `${row.original.name || ''} ${row.original.email}`.toLowerCase();
+    `${row.original.name || ""} ${row.original.email}`.toLowerCase();
   const searchTerm = (filterValue ?? "").toLowerCase();
   return searchableRowContent.includes(searchTerm);
 };
@@ -118,7 +118,7 @@ export const ContactsTable = () => {
   const filteredContacts = useMemo(() => {
     if (!statusFilter.length) return contacts;
 
-    return contacts.filter(contact => {
+    return contacts.filter((contact) => {
       return statusFilter.includes(contact.status);
     });
   }, [contacts, statusFilter]);
@@ -136,7 +136,9 @@ export const ContactsTable = () => {
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     manualPagination: true,
-    pageCount: data?.totalCount ? Math.ceil(data.totalCount / pagination.pageSize) : 0,
+    pageCount: data?.totalCount
+      ? Math.ceil(data.totalCount / pagination.pageSize)
+      : 0,
     state: {
       sorting,
       pagination,
@@ -146,13 +148,12 @@ export const ContactsTable = () => {
     filterFns: {
       multiColumnFilter: multiColumnFilterFn,
     },
-
   });
 
   const handleStatusChange = (checked: boolean, value: string) => {
     console.log("Status change triggered:", { checked, value });
 
-    setStatusFilter(prev => {
+    setStatusFilter((prev) => {
       const newFilterValue = [...prev];
 
       if (checked) {
@@ -185,7 +186,7 @@ export const ContactsTable = () => {
               id={`${id}-input`}
               className={cn(
                 "peer min-w-60 ps-9",
-                Boolean(table.getColumn("email")?.getFilterValue()) && "pe-9"
+                Boolean(table.getColumn("email")?.getFilterValue()) && "pe-9",
               )}
               value={inputValue}
               onChange={(e) => handleGlobalFilterChange(e.target.value)}
@@ -228,7 +229,7 @@ export const ContactsTable = () => {
             <PopoverContent className="w-auto min-w-36 p-3" align="start">
               <div className="space-y-3">
                 <div className="text-muted-foreground text-xs font-medium">
-                  Szűrők
+                  Státusz szűrők
                 </div>
                 <div className="space-y-3">
                   {Object.keys(contactStatuses).map((value, i) => (
@@ -247,16 +248,18 @@ export const ContactsTable = () => {
                         <span
                           className={cn(
                             "mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                            contactStatuses[value]?.bgColor
+                            contactStatuses[value]?.bgColor,
                           )}
                         />
                         {contactStatuses[value].label}
                       </Label>
                       <div className="flex-1 text-right ml-2">
                         <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
-                          {contacts.filter(
-                            (contact) => contact.status === value
-                          ).length}
+                          {
+                            contacts.filter(
+                              (contact) => contact.status === value,
+                            ).length
+                          }
                         </span>
                       </div>
                     </div>
@@ -279,14 +282,15 @@ export const ContactsTable = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <div className="p-2 text-muted-foreground text-xs font-medium">
-                Szűrők
+                Oszlopok megjelenítése
               </div>
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
                 .filter(
                   (column) =>
-                    column.columnDef.header && column.columnDef.header.length > 2,
+                    column.columnDef.header &&
+                    column.columnDef.header.length > 2,
                 )
                 .map((column) => {
                   return (
@@ -315,15 +319,12 @@ export const ContactsTable = () => {
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead
-                      key={header.id}
-                      className="h-11"
-                    >
+                    <TableHead key={header.id} className="h-11">
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
                         <div
                           className={cn(
                             header.column.getCanSort() &&
-                            "flex h-full cursor-pointer items-center gap-2 select-none"
+                            "flex h-full cursor-pointer items-center gap-2 select-none",
                           )}
                           onClick={header.column.getToggleSortingHandler()}
                           onKeyDown={(e) => {
@@ -339,7 +340,7 @@ export const ContactsTable = () => {
                         >
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                           {{
                             asc: (
@@ -361,7 +362,7 @@ export const ContactsTable = () => {
                       ) : (
                         flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )
                       )}
                     </TableHead>
@@ -389,7 +390,7 @@ export const ContactsTable = () => {
                     <TableCell key={cell.id} className="last:py-0">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -463,13 +464,10 @@ export const ContactsTable = () => {
                 table.getState().pagination.pageIndex *
                 table.getState().pagination.pageSize +
                 (data?.items?.length || 0),
-                data?.totalCount || 0
+                data?.totalCount || 0,
               )}
             </span>{" "}
-            / {" "}
-            <span className="text-foreground">
-              {data?.totalCount || 0}
-            </span>
+            / <span className="text-foreground">{data?.totalCount || 0}</span>
           </p>
         </div>
 

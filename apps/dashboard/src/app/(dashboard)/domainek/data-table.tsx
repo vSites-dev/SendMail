@@ -108,7 +108,7 @@ export const DomainsTable = () => {
   const filteredDomains = useMemo(() => {
     if (!statusFilter.length) return domains;
 
-    return domains.filter(domain => {
+    return domains.filter((domain) => {
       return statusFilter.includes(domain.status);
     });
   }, [domains, statusFilter]);
@@ -136,10 +136,10 @@ export const DomainsTable = () => {
   });
 
   const handleStatusChange = (checked: boolean, value: string) => {
-    setStatusFilter(prev => {
+    setStatusFilter((prev) => {
       if (checked) {
         if (!prev.includes(value)) return [...prev, value];
-      } else return prev.filter(status => status !== value);
+      } else return prev.filter((status) => status !== value);
       return prev;
     });
   };
@@ -158,7 +158,7 @@ export const DomainsTable = () => {
               id={`${id}-input`}
               className={cn(
                 "peer min-w-60 ps-9",
-                Boolean(table.getColumn("name")?.getFilterValue()) && "pe-9"
+                Boolean(table.getColumn("name")?.getFilterValue()) && "pe-9",
               )}
               value={inputValue}
               onChange={(e) => handleGlobalFilterChange(e.target.value)}
@@ -201,7 +201,7 @@ export const DomainsTable = () => {
             <PopoverContent className="w-auto min-w-36 p-3" align="start">
               <div className="space-y-3">
                 <div className="text-muted-foreground text-xs font-medium">
-                  Szűrők
+                  Státusz szűrők
                 </div>
                 <div className="space-y-3">
                   {Object.keys(domainStatuses).map((value, i) => (
@@ -223,16 +223,17 @@ export const DomainsTable = () => {
                         <span
                           className={cn(
                             "mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                            domainStatuses[value]?.bgColor
+                            domainStatuses[value]?.bgColor,
                           )}
                         />
                         {domainStatuses[value]?.label || value}
                       </Label>
                       <div className="flex-1 text-right ml-2">
                         <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
-                          {domains.filter(
-                            (domain) => domain.status === value
-                          ).length}
+                          {
+                            domains.filter((domain) => domain.status === value)
+                              .length
+                          }
                         </span>
                       </div>
                     </div>
@@ -254,13 +255,16 @@ export const DomainsTable = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Oszlopok megjelenítése</DropdownMenuLabel>
+              <div className="p-2 text-muted-foreground text-xs font-medium">
+                Oszlopok megjelenítése
+              </div>
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
                 .filter(
                   (column) =>
-                    column.columnDef.header && column.columnDef.header.length > 2,
+                    column.columnDef.header &&
+                    column.columnDef.header.length > 2,
                 )
                 .map((column) => {
                   return (
@@ -289,15 +293,12 @@ export const DomainsTable = () => {
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead
-                      key={header.id}
-                      className="h-11"
-                    >
+                    <TableHead key={header.id} className="h-11">
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
                         <div
                           className={cn(
                             header.column.getCanSort() &&
-                            "flex h-full cursor-pointer items-center gap-2 select-none"
+                            "flex h-full cursor-pointer items-center gap-2 select-none",
                           )}
                           onClick={header.column.getToggleSortingHandler()}
                           onKeyDown={(e) => {
@@ -313,7 +314,7 @@ export const DomainsTable = () => {
                         >
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                           {{
                             asc: (
@@ -335,7 +336,7 @@ export const DomainsTable = () => {
                       ) : (
                         flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )
                       )}
                     </TableHead>
@@ -363,7 +364,7 @@ export const DomainsTable = () => {
                     <TableCell key={cell.id} className="last:py-0">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -437,13 +438,10 @@ export const DomainsTable = () => {
                 table.getState().pagination.pageIndex *
                 table.getState().pagination.pageSize +
                 (data?.items?.length || 0),
-                data?.totalCount || 0
+                data?.totalCount || 0,
               )}
             </span>{" "}
-            / {" "}
-            <span className="text-foreground">
-              {data?.totalCount || 0}
-            </span>
+            / <span className="text-foreground">{data?.totalCount || 0}</span>
           </p>
         </div>
 

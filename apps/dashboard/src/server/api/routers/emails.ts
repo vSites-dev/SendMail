@@ -65,6 +65,7 @@ export const emailRouter = createTRPCRouter({
                 SELECT id FROM "contacts" WHERE "projectId" = ${ctx.session.activeProjectId}
               )
               AND "clicks"."createdAt" >= NOW() - ${timeInterval} * INTERVAL '1 day'
+              AND "clicks"."status" = 'CLICKED'
             GROUP BY
               DATE("clicks"."createdAt")
           ) AS click_counts
