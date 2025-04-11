@@ -120,6 +120,7 @@ export const authedProcedure = t.procedure
         "calling authedProcedure if(!ctx.session?.user):",
         ctx.session,
       );
+
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
 

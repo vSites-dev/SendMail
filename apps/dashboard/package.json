@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
+    "build": "next build --turbo",
     "check": "next lint && tsc --noEmit",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
@@ -114,7 +114,7 @@
     "lucide-react": "^0.462.0",
     "markdown-it": "^14.1.0",
     "marked": "^15.0.8",
-    "next": "^15.2.4",
+    "next": "^15.3.0",
     "nodemailer": "^6.10.0",
     "oslo": "^1.2.1",
     "pdf-lib": "^1.17.1",

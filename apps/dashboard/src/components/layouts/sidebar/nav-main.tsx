@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, Loader2, type LucideIcon } from "lucide-react";
 
 import {
   Collapsible,
@@ -17,7 +17,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 
 export function NavMain({
@@ -56,6 +56,7 @@ export function NavMain({
                   <Link href={item.url}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
+                    <LinkStatus />
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -98,4 +99,10 @@ export function NavMain({
       </SidebarMenu>
     </SidebarGroup>
   );
+}
+
+function LinkStatus() {
+  const { pending } = useLinkStatus();
+
+  return pending && <Loader2 className="ml-auto h-4 w-4 animate-spin" />;
 }
