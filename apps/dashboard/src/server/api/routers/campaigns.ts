@@ -13,7 +13,7 @@ import {
   TaskType,
 } from "@prisma/client";
 
-function parseMarkdownLinks(
+export function parseMarkdownLinks(
   markdown: string,
 ): { text: string; href: string }[] {
   const links: { text: string; href: string }[] = [];
@@ -31,7 +31,7 @@ function parseMarkdownLinks(
 }
 
 // Helper function to replace links with tracking links
-async function replaceLinksWithTracking(
+export async function replaceLinksWithTracking(
   markdown: string,
   emailId: string,
   ctx: any,
@@ -75,7 +75,7 @@ async function replaceLinksWithTracking(
 }
 
 // Helper function to replace contact variables in the email body
-async function replaceContactVariables(
+export async function replaceContactVariables(
   markdown: string,
   contactId: string,
   ctx: any,

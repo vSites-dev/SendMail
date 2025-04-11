@@ -25,6 +25,14 @@ export const campaignContactsDataTableAtom = atom<Contact[]>([]);
 export const campaignEmailBlocksAtom = atom<EmailBlock[]>([]);
 export const campaignNameAtom = atom<string>("");
 
+// Email sending atoms
+export const selectedEmailContactsAtom = atom<string[]>([]);
+export const emailContactsDataTableAtom = atom<Contact[]>([]);
+export const emailSubjectAtom = atom<string>("");
+export const emailTemplateIdAtom = atom<string>("");
+export const emailFromAtom = atom<string>("");
+export const emailDateAtom = atom<Date>(new Date());
+
 // Onboarding atoms
 export const onboardingMemberInvitesAtom = atom<MemberInvite[] | null>(null);
 export const onboardingProjectNameAtom = atom<string>("");

@@ -1,11 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import {
-  MoreHorizontal,
-  Eye,
-  Trash2,
-  ChevronsUpDown,
-} from "lucide-react";
+import { MoreHorizontal, Eye, Trash2, ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -122,8 +117,7 @@ export const columns: ColumnDef<GetForTableEmail>[] = [
       const email = row.original!;
 
       const { data: usersRole } = api.project.checkUsersRole.useQuery();
-      console.debug("usersRole", usersRole);
-      const isAdminOrOwner = usersRole === 'ADMIN' || usersRole === 'OWNER';
+      const isAdminOrOwner = usersRole === "ADMIN" || usersRole === "OWNER";
 
       const utils = api.useUtils();
 
