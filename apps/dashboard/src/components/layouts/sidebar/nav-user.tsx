@@ -89,14 +89,20 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/beallitasok/sajat">
+                <Link
+                  href="/beallitasok/sajat"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <UserCog />
                   Személyes beállítások
                   <LinkStatus />
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/beallitasok/projekt">
+                <Link
+                  href="/beallitasok/projekt"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Settings2 />
                   Projekt beállítások
                   <LinkStatus />
@@ -105,7 +111,11 @@ export function NavUser({ user }: { user: User }) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/kijelentkezes">
+              <Link
+                prefetch={false}
+                href="/kijelentkezes"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <LogOut />
                 Kijelentkezés
                 <LinkStatus />
