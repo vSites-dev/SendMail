@@ -65,3 +65,18 @@ export const domainStatuses = {
     borderColor: "border-red-500",
   },
 };
+
+export const campaignStatuses = {
+  SCHEDULED: {
+    label: "Küldés alatt",
+    bgColor: "bg-orange-500",
+    color: "text-orange-500",
+    borderColor: "border-orange-500",
+  },
+  COMPLETED: {
+    label: "Befejezve",
+    bgColor: "bg-green-500",
+    color: "text-green-500",
+    borderColor: "border-green-500",
+  },
+};
