@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # db:
+  #   image: postgres:16
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: supersecretdbpwd
+  #     POSTGRES_DB: sendmail
+  #   ports:
+  #     - '5432:5432'
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file:
+      - .env
+      - apps/api/.env
+    volumes:
+      - ./prisma:/app/prisma
+      - ./apps/api:/app/apps/api
+    ports:
+      - '3001:3001'
+    command: sh -c "cd /app/apps/api && pnpm prisma generate && pnpm prisma db push && pnpm run dev"
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+    env_file:
+      - .env
+      - apps/dashboard/.env
+    volumes:
+      - ./prisma:/app/prisma
+      - ./apps/dashboard:/app/apps/dashboard
+    ports:
+      - '3000:3000'
+    command: sh -c "cd /app/apps/dashboard && pnpm prisma generate && pnpm run dev"
