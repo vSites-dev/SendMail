@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import React from "react";
 import { headers as getHeaders } from "next/headers";
 import { auth } from "@/lib/auth/auth";
@@ -34,6 +36,10 @@ export default async function SettingsLayout({
           <BreadcrumbPage>Beállítások</BreadcrumbPage>
         </BreadcrumbList>
       </DashboardHeader>
+
+      <main className="max-w-screen-md w-full mx-auto h-full py-6 px-4">
+        {children}
+      </main>
     </HydrateClient>
   );
 }

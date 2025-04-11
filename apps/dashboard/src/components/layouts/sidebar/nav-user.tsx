@@ -6,9 +6,11 @@ import {
   ChevronsUpDown,
   Cog,
   CreditCard,
+  Loader2,
   LogOut,
   Settings2,
   Sparkles,
+  UserCog,
   User as UserIcon,
 } from "lucide-react";
 
@@ -29,8 +31,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { User } from "better-auth";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import Image from "next/image";
+import LinkStatus from "@/components/ui/link-status";
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
@@ -86,15 +89,17 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/beallitasok?tab=szemelyes">
-                  <UserIcon />
+                <Link href="/beallitasok/sajat">
+                  <UserCog />
                   Személyes beállítások
+                  <LinkStatus />
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/beallitasok?tab=projekt">
+                <Link href="/beallitasok/projekt">
                   <Settings2 />
                   Projekt beállítások
+                  <LinkStatus />
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -103,6 +108,7 @@ export function NavUser({ user }: { user: User }) {
               <Link href="/kijelentkezes">
                 <LogOut />
                 Kijelentkezés
+                <LinkStatus />
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

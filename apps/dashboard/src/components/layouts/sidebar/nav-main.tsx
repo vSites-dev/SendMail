@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
+import LinkStatus from "@/components/ui/link-status";
 
 export function NavMain({
   items,
@@ -99,10 +100,4 @@ export function NavMain({
       </SidebarMenu>
     </SidebarGroup>
   );
-}
-
-function LinkStatus() {
-  const { pending } = useLinkStatus();
-
-  return pending && <Loader2 className="ml-auto h-4 w-4 animate-spin" />;
 }
