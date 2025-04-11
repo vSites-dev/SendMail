@@ -8,7 +8,12 @@ import {
   CardSeparator,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquareMore, BarChartBig, Mails, MousePointerClick } from "lucide-react";
+import {
+  MessageSquareMore,
+  BarChartBig,
+  Mails,
+  MousePointerClick,
+} from "lucide-react";
 import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   ChartConfig,
@@ -49,7 +54,6 @@ const chartConfig = {
 //   return data;
 // };
 
-
 export function EmailsAndClicksChart({
   initialData,
 }: {
@@ -59,7 +63,6 @@ export function EmailsAndClicksChart({
     clicks: number;
   }[];
 }) {
-
   const [selectedInterval] = useAtom(selectedIntervalAtom);
   const { data: chartData, isFetching } =
     api.email.emailsAndClicksChartData.useQuery(
@@ -98,7 +101,8 @@ export function EmailsAndClicksChart({
           <div className="p-6">
             <Skeleton className="h-[250px] w-full" />
           </div>
-        ) : chartData?.length === 0 || chartData?.every((x) => x.emails === 0 && x.clicks === 0) ? (
+        ) : chartData?.length === 0 ||
+          chartData?.every((x) => x.emails === 0 && x.clicks === 0) ? (
           <div className="relative h-[250px] overflow-hidden w-full">
             <DotPattern
               width={6}
@@ -145,9 +149,9 @@ export function EmailsAndClicksChart({
                           <>
                             <div>
                               <span className="text-xs text-muted-foreground">
-                                {new Date(payload.payload.date).toLocaleDateString(
-                                  "hu-HU",
-                                )}
+                                {new Date(
+                                  payload.payload.date,
+                                ).toLocaleDateString("hu-HU")}
                               </span>
                             </div>
                             <div className="border-[#2a9d90] border-l-2 pl-2 rounded-[2px] mt-1">
@@ -224,4 +228,3 @@ export function EmailsAndClicksChart({
     </Card>
   );
 }
-

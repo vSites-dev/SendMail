@@ -96,6 +96,7 @@ export const emailRouter = createTRPCRouter({
         // current period
         ctx.db.click.count({
           where: {
+            status: "CLICKED",
             email: {
               campaign: {
                 projectId: ctx.session.activeProjectId,
@@ -110,6 +111,7 @@ export const emailRouter = createTRPCRouter({
         // for previous period
         ctx.db.click.count({
           where: {
+            status: "CLICKED",
             email: {
               campaign: {
                 projectId: ctx.session.activeProjectId,

@@ -13,14 +13,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
 } from "@/components/ui/pagination";
 import { api } from "@/trpc/react";
 import { Input } from "@/components/ui/input";
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  FilterFn,
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
@@ -32,14 +33,10 @@ import {
 } from "@tanstack/react-table";
 import { columns } from "./columns";
 import {
-  ChevronFirstIcon,
-  ChevronLastIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  FilterIcon,
-  ListFilterIcon,
-  CircleXIcon,
-  Columns3Icon,
+  Search,
+  Settings2,
+  ArrowUp,
+  ArrowDown,
   BarChartBig,
   ChevronsUpDown,
   ChevronUp,
@@ -59,7 +56,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";

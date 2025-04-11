@@ -26,6 +26,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Invitation, Project } from "@prisma/client";
 import Link from "next/link";
+import RoleIndicator from "@/components/ui/role-indicator";
 
 export function OrganizationSwitcher({
   organizations,
@@ -50,13 +51,16 @@ export function OrganizationSwitcher({
   );
   const [activeProject, setActiveProject] = useAtom(activeProjectAtom);
 
-  const { data: newProject } = api.project.getById.useQuery({
-    organizationId: activeOrganization?.id ?? "",
-  }, {
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
+  const { data: newProject } = api.project.getById.useQuery(
+    {
+      organizationId: activeOrganization?.id ?? "",
+    },
+    {
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+    },
+  );
 
   async function switchOrganization(organizationId: string) {
     const newOrg = await authClient.organization.setActive({
@@ -92,13 +96,20 @@ export function OrganizationSwitcher({
                   suppressHydrationWarning
                   className="size-8"
                   src={activeOrganization.logo ?? "/brand/icon.jpg"}
-                  alt={activeOrganization?.name ?? "Porjekt#" + activeOrganization.id}
+                  alt={
+                    activeOrganization?.name ??
+                    "Porjekt#" + activeOrganization.id
+                  }
                 />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold" suppressHydrationWarning>
+              <div className="grid space-y-1 flex-1 text-left text-sm leading-tight">
+                <span
+                  className="truncate font-semibold"
+                  suppressHydrationWarning
+                >
                   {activeOrganization?.name}
                 </span>
+                <RoleIndicator />
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -116,7 +127,7 @@ export function OrganizationSwitcher({
               <DropdownMenuItem
                 key={organization.slug}
                 onClick={() => switchOrganization(organization.id)}
-                className="gap-2 p-2"
+                className="gap-3 p-2 mt-1"
                 suppressHydrationWarning
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border relative">
@@ -127,8 +138,10 @@ export function OrganizationSwitcher({
                     alt={organization.name}
                   />
                 </div>
-                {organization.name}
-                <DropdownMenuShortcut>{index + 1}</DropdownMenuShortcut>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">{organization.name}</p>
+                  <RoleIndicator />
+                </div>
               </DropdownMenuItem>
             ))}
 
@@ -149,30 +162,26 @@ export function OrganizationSwitcher({
                   />
                 </div>
                 <div>
-                  <p className="text-xs text-violet-600 mb-0 flex items-center gap-1" suppressHydrationWarning>
+                  <p
+                    className="text-xs text-violet-600 mb-0 flex items-center gap-1"
+                    suppressHydrationWarning
+                  >
                     <Megaphone className="size-3 text-violet-600" />
 
                     {invitation.organization.name}
                   </p>
-                  <p className="mt-0">
-                    Meghívás elfogadása
-                  </p>
+                  <p className="mt-0">Meghívás elfogadása</p>
                 </div>
               </DropdownMenuItem>
             ))}
 
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="gap-2 p-2"
-              asChild
-            >
+            <DropdownMenuItem className="gap-2 p-2" asChild>
               <Link href="/uj-projekt/1">
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <Rocket className="size-4 text-indigo-600" />
                 </div>
-                <span>
-                  Új SendMail projekt
-                </span>
+                <span>Új SendMail projekt</span>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
