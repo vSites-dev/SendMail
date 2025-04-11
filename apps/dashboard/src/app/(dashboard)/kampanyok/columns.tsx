@@ -33,11 +33,10 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 import { CampaignStatus } from "@prisma/client";
-import { campaignDataTableAtom, CampaignWithCounts } from "@/store/global";
+import { campaignDataTableAtom } from "@/store/global";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth/client";
 
-// Define campaign status styles
 const campaignStatuses = {
   [CampaignStatus.SCHEDULED]: {
     label: "Ütemezve",
@@ -146,7 +145,7 @@ export const columns: ColumnDef<CampaignWithCounts>[] = [
     header: "Kontaktok",
     enableSorting: true,
     cell: ({ row }) => {
-      return <p><b>{row.original.contactsCount}</b> <span className="text-muted-foreground">kontakt</span></p>;
+      return <p><b>{row.original.contacts.length}</b> <span className="text-muted-foreground">kontakt</span></p>;
     },
   },
   {
@@ -154,7 +153,7 @@ export const columns: ColumnDef<CampaignWithCounts>[] = [
     header: "Emailek",
     enableSorting: true,
     cell: ({ row }) => {
-      return <p><b>{row.original.emailsCount}</b> <span className="text-muted-foreground">email</span></p>;
+      return <p><b>{row.original.emails.length}</b> <span className="text-muted-foreground">email</span></p>;
     },
   },
   {
@@ -179,7 +178,7 @@ export const columns: ColumnDef<CampaignWithCounts>[] = [
       const [deleteDialog, setDeleteDialog] = useState(false);
       const [campaigns, setCampaigns] = useAtom(campaignDataTableAtom);
 
-      const { mutateAsync, isPending } = api.campaign.delete.useMutation();      
+      const { mutateAsync, isPending } = api.campaign.delete.useMutation();
 
       async function handleDelete() {
         const res = await mutateAsync({ id: campaign.id });

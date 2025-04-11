@@ -37,11 +37,10 @@ import {
   Columns3Icon,
   FilterIcon,
   ListFilterIcon,
+  Search,
 } from "lucide-react";
 import {
-  ColumnDef,
   ColumnFiltersState,
-  FilterFn,
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
@@ -71,16 +70,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { emailStatuses } from "./columns";
-
-const multiColumnFilterFn: FilterFn<Email> = (row, columnId, filterValue) => {
-  if (!filterValue?.length) return true;
-  const searchableRowContent =
-    `${row.original.subject || ''} ${row.original.from || ''}`.toLowerCase();
-  const searchTerm = (filterValue ?? "").toLowerCase();
-  return searchableRowContent.includes(searchTerm);
-};
+import { cn, emailStatuses } from "@/lib/utils";
 
 export const EmailsTable = () => {
   const id = useId();
@@ -99,6 +89,8 @@ export const EmailsTable = () => {
 
   const [inputValue, setInputValue] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [campaignFilter, setCampaignFilter] = useState<string[]>([]);
+  const [campaignSearchValue, setCampaignSearchValue] = useState("");
 
   const { data, isLoading } = api.email.getForTable.useQuery(
     {
@@ -117,12 +109,23 @@ export const EmailsTable = () => {
   }, [data, setEmails]);
 
   const filteredEmails = useMemo(() => {
-    if (!statusFilter.length) return emails;
+    let filtered = emails;
 
-    return emails.filter(email => {
-      return statusFilter.includes(email.status);
-    });
-  }, [emails, statusFilter]);
+    if (statusFilter.length) {
+      filtered = filtered.filter((email) =>
+        statusFilter.includes(email.status),
+      );
+    }
+
+    if (campaignFilter.length) {
+      filtered = filtered.filter(
+        (email) =>
+          email.campaignId && campaignFilter.includes(email.campaignId),
+      );
+    }
+
+    return filtered;
+  }, [emails, statusFilter, campaignFilter]);
 
   const table = useReactTable({
     data: filteredEmails,
@@ -144,16 +147,13 @@ export const EmailsTable = () => {
       pagination,
       sorting,
     },
-    filterFns: {
-      multiColumn: multiColumnFilterFn,
-    },
   });
 
   const handleStatusChange = (checked: boolean, value: string) => {
-    setStatusFilter(prev => {
+    setStatusFilter((prev) => {
       if (checked) {
         if (!prev.includes(value)) return [...prev, value];
-      } else return prev.filter(status => status !== value);
+      } else return prev.filter((status) => status !== value);
       return prev;
     });
   };
@@ -163,18 +163,44 @@ export const EmailsTable = () => {
     table.setGlobalFilter(value);
   };
 
+  const handleCampaignChange = (checked: boolean, campaignId: string) => {
+    setCampaignFilter((prev) => {
+      if (checked) {
+        if (!prev.includes(campaignId)) return [...prev, campaignId];
+      } else return prev.filter((id) => id !== campaignId);
+      return prev;
+    });
+  };
+
+  const filteredCampaignOptions = useMemo(() => {
+    const uniqueCampaigns = new Map();
+
+    emails.forEach((email) => {
+      if (email.campaign) {
+        if (
+          !campaignSearchValue ||
+          email.campaign.name
+            .toLowerCase()
+            .includes(campaignSearchValue.toLowerCase())
+        ) {
+          uniqueCampaigns.set(email.campaign.id, email.campaign);
+        }
+      }
+    });
+
+    return Array.from(uniqueCampaigns.values());
+  }, [emails, campaignSearchValue]);
+
   return (
     <div className="space-y-4">
-      {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {/* Filter by subject or email */}
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full sm:w-fit">
             <Input
               id={`${id}-input`}
               className={cn(
                 "peer min-w-60 ps-9",
-                Boolean(table.getColumn("subject")?.getFilterValue()) && "pe-9"
+                Boolean(table.getColumn("subject")?.getFilterValue()) && "pe-9",
               )}
               value={inputValue}
               onChange={(e) => handleGlobalFilterChange(e.target.value)}
@@ -198,10 +224,9 @@ export const EmailsTable = () => {
             )}
           </div>
 
-          {/* Filter by status */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-fit">
                 <FilterIcon
                   className="-ms-1 opacity-60"
                   size={16}
@@ -218,7 +243,7 @@ export const EmailsTable = () => {
             <PopoverContent className="w-auto min-w-36 p-3" align="start">
               <div className="space-y-3">
                 <div className="text-muted-foreground text-xs font-medium">
-                  Szűrők
+                  Státusz szűrők
                 </div>
                 <div className="space-y-3">
                   {Object.keys(emailStatuses).map((value, i) => (
@@ -235,26 +260,27 @@ export const EmailsTable = () => {
                       />
                       <Label
                         htmlFor={id + "-" + value}
-                        className="flex items-center font-normal"
+                        className="flex cursor-pointer grow items-center font-normal"
                       >
                         <span
                           className={cn(
                             "mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                            value === "DELIVERED" && "bg-green-500",
-                            value === "SENT" && "bg-yellow-500",
-                            value === "FAILED" && "bg-red-500",
-                            value === "BOUNCED" && "bg-amber-500",
-                            value === "QUEUED" && "bg-yellow-500",
-                            value === "COMPLAINED" && "bg-orange-500",
+                            emailStatuses[value]?.bgColor,
                           )}
                         />
                         {emailStatuses[value]?.label || value}
                       </Label>
                       <div className="flex-1 text-right ml-2">
                         <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
-                          {emails.filter(
-                            (email) => email.status === value
-                          ).length}
+                          {campaignFilter.length > 0
+                            ? emails.filter(
+                              (email) =>
+                                email.status === value &&
+                                email.campaignId &&
+                                campaignFilter.includes(email.campaignId),
+                            ).length
+                            : emails.filter((email) => email.status === value)
+                              .length}
                         </span>
                       </div>
                     </div>
@@ -264,10 +290,98 @@ export const EmailsTable = () => {
             </PopoverContent>
           </Popover>
 
-          {/* Toggle columns visibility */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full sm:w-fit">
+                <FilterIcon
+                  className="-ms-1 opacity-60"
+                  size={16}
+                  aria-hidden="true"
+                />
+                Kampányok
+                {campaignFilter.length > 0 && (
+                  <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
+                    {campaignFilter.length}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-fit p-3" align="start">
+              <div className="space-y-3">
+                <div className="text-muted-foreground text-xs font-medium">
+                  Kampány szűrő
+                </div>
+                <div className="relative">
+                  <Input
+                    placeholder="Kampány keresése..."
+                    className="w-full ps-9"
+                    value={campaignSearchValue}
+                    onChange={(e) => setCampaignSearchValue(e.target.value)}
+                  />
+                  <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
+                    <Search size={16} aria-hidden="true" />
+                  </div>
+                  {campaignSearchValue && (
+                    <button
+                      className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                      aria-label="Keresés törlése"
+                      onClick={() => setCampaignSearchValue("")}
+                    >
+                      <CircleXIcon size={16} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+                <div className="max-h-60 overflow-y-auto space-y-3">
+                  {filteredCampaignOptions.length > 0 ? (
+                    filteredCampaignOptions?.map(
+                      (campaign) =>
+                        campaign && (
+                          <div
+                            key={campaign.id}
+                            className="flex items-center gap-3 py-1"
+                          >
+                            <Checkbox
+                              id={id + "-campaign-" + campaign.id}
+                              checked={campaignFilter.includes(
+                                campaign.id || "",
+                              )}
+                              onCheckedChange={(checked: boolean) =>
+                                handleCampaignChange(checked, campaign.id || "")
+                              }
+                            />
+                            <Label
+                              htmlFor={id + "-campaign-" + campaign.id}
+                              className="flex cursor-pointer text-sm grow items-center font-normal truncate"
+                            >
+                              {campaign.name || ""}
+                            </Label>
+                            <div className="flex-1 text-right ml-2">
+                              <span className="bg-background text-muted-foreground/70 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
+                                {emails
+                                  .filter((e) => e.campaign?.id === campaign.id)
+                                  .filter(
+                                    (e) =>
+                                      statusFilter.length === 0 ||
+                                      statusFilter.includes(e.status),
+                                  ).length || 0}
+                              </span>
+                            </div>
+                          </div>
+                        ),
+                    )
+                  ) : (
+                    <div className="text-muted-foreground text-center py-2">
+                      Nincs találat
+                    </div>
+                  )}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-fit">
                 <Columns3Icon
                   className="-ms-1 opacity-60"
                   size={16}
@@ -277,13 +391,16 @@ export const EmailsTable = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Oszlopok megjelenítése</DropdownMenuLabel>
+              <div className="p-2 text-muted-foreground text-xs font-medium">
+                Oszlopok megjelenítése
+              </div>
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
                 .filter(
                   (column) =>
-                    column.columnDef.header && column.columnDef.header.length > 2,
+                    column.columnDef.header &&
+                    column.columnDef.header.length > 2,
                 )
                 .map((column) => {
                   return (
@@ -305,23 +422,19 @@ export const EmailsTable = () => {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white overflow-hidden rounded-md border">
+      <div className="bg-white overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead
-                      key={header.id}
-                      className="h-11"
-                    >
+                    <TableHead key={header.id} className="h-11">
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
                         <div
                           className={cn(
                             header.column.getCanSort() &&
-                            "flex h-full cursor-pointer items-center gap-2 select-none"
+                            "flex h-full cursor-pointer items-center gap-2 select-none",
                           )}
                           onClick={header.column.getToggleSortingHandler()}
                           onKeyDown={(e) => {
@@ -337,7 +450,7 @@ export const EmailsTable = () => {
                         >
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                           {{
                             asc: (
@@ -359,7 +472,7 @@ export const EmailsTable = () => {
                       ) : (
                         flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )
                       )}
                     </TableHead>
@@ -387,7 +500,7 @@ export const EmailsTable = () => {
                     <TableCell key={cell.id} className="last:py-0">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -423,9 +536,7 @@ export const EmailsTable = () => {
         </Table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between gap-8">
-        {/* Results per page */}
         <div className="flex items-center gap-3">
           <Label htmlFor={id} className="max-sm:sr-only">
             Találatok oldalanként
@@ -449,7 +560,6 @@ export const EmailsTable = () => {
           </Select>
         </div>
 
-        {/* Page number information */}
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
           <p
             className="text-muted-foreground text-sm whitespace-nowrap"
@@ -464,21 +574,16 @@ export const EmailsTable = () => {
                 table.getState().pagination.pageIndex *
                 table.getState().pagination.pageSize +
                 (data?.items?.length || 0),
-                data?.totalCount || 0
+                data?.totalCount || 0,
               )}
             </span>{" "}
-            / {" "}
-            <span className="text-foreground">
-              {data?.totalCount || 0}
-            </span>
+            / <span className="text-foreground">{data?.totalCount || 0}</span>
           </p>
         </div>
 
-        {/* Pagination buttons */}
         <div>
           <Pagination>
             <PaginationContent>
-              {/* First page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -491,7 +596,6 @@ export const EmailsTable = () => {
                   <ChevronFirstIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Previous page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -504,7 +608,6 @@ export const EmailsTable = () => {
                   <ChevronLeftIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Next page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -517,7 +620,6 @@ export const EmailsTable = () => {
                   <ChevronRightIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Last page button */}
               <PaginationItem>
                 <Button
                   size="icon"

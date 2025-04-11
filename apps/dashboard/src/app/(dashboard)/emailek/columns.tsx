@@ -1,11 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import {
-  MoreHorizontal,
-  Eye,
-  Trash2,
-  ChevronsUpDown,
-} from "lucide-react";
+import { MoreHorizontal, Eye, Trash2, ChevronsUpDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,47 +24,10 @@ import { api } from "@/trpc/react";
 import { toast } from "sonner";
 import { Email, EmailStatus } from "@prisma/client";
 import { emailDataTableAtom } from "@/store/global";
-import { cn } from "@/lib/utils";
+import { cn, emailStatuses } from "@/lib/utils";
 import { useAtom } from "jotai";
 import { Badge } from "@/components/ui/badge";
 import { GetForTableEmail } from "@/server/api/routers/emails";
-import { authClient } from "@/lib/auth/client";
-
-export const emailStatuses: Record<
-  EmailStatus,
-  { label: string; bgColor: string; textColor: string }
-> = {
-  QUEUED: {
-    label: "Küldés alatt",
-    bgColor: "bg-yellow-400",
-    textColor: "text-yellow-500",
-  },
-  SENT: {
-    label: "Elküldve",
-    bgColor: "bg-blue-400",
-    textColor: "text-blue-500",
-  },
-  DELIVERED: {
-    label: "Kézbesítve",
-    bgColor: "bg-green-400",
-    textColor: "text-green-500",
-  },
-  COMPLAINED: {
-    label: "Panasz",
-    bgColor: "bg-orange-400",
-    textColor: "text-orange-500",
-  },
-  BOUNCED: {
-    label: "Visszapattant",
-    bgColor: "bg-red-400",
-    textColor: "text-red-500",
-  },
-  FAILED: {
-    label: "Hiba",
-    bgColor: "bg-red-400",
-    textColor: "text-red-500",
-  },
-};
 
 export const columns: ColumnDef<GetForTableEmail>[] = [
   {
@@ -159,8 +117,7 @@ export const columns: ColumnDef<GetForTableEmail>[] = [
       const email = row.original!;
 
       const { data: usersRole } = api.project.checkUsersRole.useQuery();
-      console.debug("usersRole", usersRole);
-      const isAdminOrOwner = usersRole === 'ADMIN' || usersRole === 'OWNER';
+      const isAdminOrOwner = usersRole === "ADMIN" || usersRole === "OWNER";
 
       const utils = api.useUtils();
 

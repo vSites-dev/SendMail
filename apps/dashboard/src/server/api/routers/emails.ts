@@ -4,6 +4,7 @@ import {
   withOrganization,
 } from "@/server/api/trpc";
 import { EmailStatus } from "@prisma/client";
+import { replaceContactVariables, replaceLinksWithTracking } from "./campaigns";
 
 import type { inferRouterOutputs } from "@trpc/server";
 import { z } from "zod";
@@ -64,6 +65,7 @@ export const emailRouter = createTRPCRouter({
                 SELECT id FROM "contacts" WHERE "projectId" = ${ctx.session.activeProjectId}
               )
               AND "clicks"."createdAt" >= NOW() - ${timeInterval} * INTERVAL '1 day'
+              AND "clicks"."status" = 'CLICKED'
             GROUP BY
               DATE("clicks"."createdAt")
           ) AS click_counts
@@ -337,7 +339,11 @@ export const emailRouter = createTRPCRouter({
         include: {
           contact: true,
           campaign: true,
-          clicks: true,
+          clicks: {
+            where: {
+              status: "CLICKED",
+            },
+          },
         },
       });
     }),
@@ -447,23 +453,61 @@ export const emailRouter = createTRPCRouter({
       try {
         const { subject, body, contactIds, from } = input;
 
-        // Create email records for each contact
-        const emailPromises = contactIds.map(async (contactId) => {
-          return ctx.db.email.create({
+        await withOrganization({
+          organizationId: ctx.session.session.activeOrganizationId,
+        });
+
+        const contacts = await ctx.db.contact.findMany({
+          where: {
+            id: {
+              in: contactIds,
+            },
+          },
+        });
+
+        if (contacts.length !== contactIds.length) {
+          return {
+            success: false,
+            error: "Nem sikerült lekérni a kontaktokat.",
+          };
+        }
+
+        const emailPromises = contacts.map(async (contact) => {
+          // Replace contact variables in the body
+          const bodyWithVariables = await replaceContactVariables(
+            body,
+            contact.id,
+            ctx,
+          );
+
+          // Create email first
+          const email = await ctx.db.email.create({
             data: {
               subject,
-              body,
-              status: "QUEUED",
-              contactId,
               from,
+              body: bodyWithVariables,
+              status: EmailStatus.QUEUED,
+              contactId: contact.id,
             },
           });
+
+          // Process links and create tracking objects
+          const { processedMarkdown, clicks } = await replaceLinksWithTracking(
+            bodyWithVariables,
+            email.id,
+            ctx,
+          );
+
+          // Update email with processed markdown
+          await ctx.db.email.update({
+            where: { id: email.id },
+            data: { body: processedMarkdown },
+          });
+
+          return email;
         });
 
         const emails = await Promise.all(emailPromises);
-
-        // TODO: Call email sending service to actually send the emails
-        // This would typically be handled by a background worker or queue
 
         return {
           success: true,

@@ -6,16 +6,21 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { api, HydrateClient } from "@/trpc/server";
-import { Home, Mails, PlusSquare } from "lucide-react";
+import { Home, MailPlus, Mails, Megaphone, PlusSquare } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { EmailsTable } from "./data-table";
 import EmailStats from "./email-stats";
+import SendEmailButton from "@/components/emails/send-email-button";
 
 export default async function EmailsPage() {
   const { statistics, total } = await api.email.getStatistics();
+
+  const domains = await api.domain.getAll();
+  const templates = await api.template.getAll();
+  const contacts = await api.contact.getAll();
 
   return (
     <HydrateClient>
@@ -31,7 +36,7 @@ export default async function EmailsPage() {
         </BreadcrumbList>
       </DashboardHeader>
 
-      <main className="max-w-4xl w-full mx-auto h-full py-6 px-4">
+      <main className="max-w-[100vw] md:max-w-4xl w-full mx-auto h-full py-6 px-4">
         <div className="flex gap-3 items-center">
           <div
             className={cn(
@@ -51,19 +56,18 @@ export default async function EmailsPage() {
         </p>
 
         <div className="flex gap-2 flex-wrap items-center">
-          {/* <Link href="/emailek/uj">
-            <Button>
-              <PlusSquare className="size-5" />
-              Email(ek) manuális kiküldése
-            </Button>
-          </Link> */}
+          <SendEmailButton
+            contacts={contacts}
+            templates={templates}
+            domains={domains.map((domain) => domain.name)}
+          />
 
-          <Link href="/kampanyok">
-            <Button variant={"success"}>
-              <PlusSquare className="size-5" />
+          <Button asChild variant={"success"}>
+            <Link className="flex items-center gap-2" href="/kampanyok">
+              <Megaphone className="size-5" />
               Új kampány létrehozása
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <Separator className="my-6" />
@@ -73,9 +77,7 @@ export default async function EmailsPage() {
           {total > 0 ? (
             <EmailStats statistics={statistics} total={total} />
           ) : (
-            <p className="text-muted-foreground">
-              Nincs még email.
-            </p>
+            <p className="text-muted-foreground">Nincs még email.</p>
           )}
         </div>
 

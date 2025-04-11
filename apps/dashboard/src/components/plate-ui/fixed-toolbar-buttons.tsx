@@ -65,12 +65,7 @@ import { TurnIntoDropdownMenu } from "./turn-into-dropdown-menu";
 import { usePathname } from "next/navigation";
 
 export function FixedToolbarButtons() {
-  const pathname = usePathname();
   const readOnly = useEditorReadOnly();
-
-  const isTudasbazis = useMemo(() => {
-    return pathname.includes("/tudasbazis");
-  }, [pathname]);
 
   return (
     <div className="flex w-full">
@@ -83,59 +78,41 @@ export function FixedToolbarButtons() {
 
           <ToolbarGroup>
             <InsertDropdownMenu />
-            {!isTudasbazis && <TurnIntoDropdownMenu />}
-            {!isTudasbazis && <FontSizeToolbarButton />}
+            <TurnIntoDropdownMenu />
+            <FontSizeToolbarButton />
           </ToolbarGroup>
 
-          {!isTudasbazis && (
-            <ToolbarGroup>
-              <MarkToolbarButton
-                nodeType={BoldPlugin.key}
-                tooltip="Félkövér (Ctrl+B)"
-              >
-                <BoldIcon />
-              </MarkToolbarButton>
+          <ToolbarGroup>
+            <MarkToolbarButton
+              nodeType={BoldPlugin.key}
+              tooltip="Félkövér (Ctrl+B)"
+            >
+              <BoldIcon />
+            </MarkToolbarButton>
 
-              <MarkToolbarButton
-                nodeType={ItalicPlugin.key}
-                tooltip="Dőlt (Ctrl+I)"
-              >
-                <ItalicIcon />
-              </MarkToolbarButton>
+            <MarkToolbarButton
+              nodeType={ItalicPlugin.key}
+              tooltip="Dőlt (Ctrl+I)"
+            >
+              <ItalicIcon />
+            </MarkToolbarButton>
 
-              <MarkToolbarButton
-                nodeType={UnderlinePlugin.key}
-                tooltip="Aláhúzott (Ctrl+U)"
-              >
-                <UnderlineIcon />
-              </MarkToolbarButton>
+            <MarkToolbarButton
+              nodeType={UnderlinePlugin.key}
+              tooltip="Aláhúzott (Ctrl+U)"
+            >
+              <UnderlineIcon />
+            </MarkToolbarButton>
 
-              <MarkToolbarButton
-                nodeType={StrikethroughPlugin.key}
-                tooltip="Áthúzott (Ctrl+⇧+M)"
-              >
-                <StrikethroughIcon />
-              </MarkToolbarButton>
-
-              <ColorDropdownMenu
-                nodeType={FontColorPlugin.key}
-                tooltip="Szöveg színe"
-              >
-                <BaselineIcon />
-              </ColorDropdownMenu>
-
-              <ColorDropdownMenu
-                nodeType={FontBackgroundColorPlugin.key}
-                tooltip="Háttérszín"
-              >
-                <PaintBucketIcon />
-              </ColorDropdownMenu>
-            </ToolbarGroup>
-          )}
+            <MarkToolbarButton
+              nodeType={StrikethroughPlugin.key}
+              tooltip="Áthúzott (Ctrl+⇧+M)"
+            >
+              <StrikethroughIcon />
+            </MarkToolbarButton>
+          </ToolbarGroup>
 
           <ToolbarGroup>
-            <AlignDropdownMenu />
-
             <NumberedIndentListToolbarButton />
             <BulletedIndentListToolbarButton />
           </ToolbarGroup>
@@ -143,27 +120,14 @@ export function FixedToolbarButtons() {
           <ToolbarGroup>
             <LinkToolbarButton />
             <TableDropdownMenu />
-            <EmojiDropdownMenu />
             <MediaToolbarButton nodeType={ImagePlugin.key} />
           </ToolbarGroup>
 
-          {!isTudasbazis && (
-            <ToolbarGroup>
-              <LineHeightDropdownMenu />
-              <OutdentToolbarButton />
-              <IndentToolbarButton />
-            </ToolbarGroup>
-          )}
+          <ToolbarGroup>
+            <LineHeightDropdownMenu />
+          </ToolbarGroup>
         </>
       )}
-
-      <div className="grow" />
-
-      <ToolbarGroup>
-        <MarkToolbarButton nodeType={HighlightPlugin.key} tooltip="Kiemelés">
-          <HighlighterIcon />
-        </MarkToolbarButton>
-      </ToolbarGroup>
     </div>
   );
 }

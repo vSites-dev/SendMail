@@ -17,7 +17,9 @@ export default async function DashboardLayout({
   const headersObject = await headers();
 
   const session = await auth.api.getSession({ headers: headersObject });
-  const activeOrg = await auth.api.getFullOrganization({ headers: headersObject });
+  const activeOrg = await auth.api.getFullOrganization({
+    headers: headersObject,
+  });
 
   const membersForTheUser = await db.member.findMany({
     where: {
@@ -30,17 +32,15 @@ export default async function DashboardLayout({
       email: session?.user.email!,
     },
     include: {
-      organization: true
+      organization: true,
     },
   });
 
   if (membersForTheUser.length === 0) {
     if (invitations && invitations[0] && invitations[0].id) {
-      console.debug("Redirecting to invitation", invitations[0])
       return redirect(`/projekt-meghivas/${invitations[0].id}`);
     }
 
-    console.debug("Redirecting to new project");
     return redirect("/uj-projekt/1");
   }
 
@@ -67,11 +67,12 @@ export default async function DashboardLayout({
   });
   if (!project) throw new Error("Nem talált projekt");
 
-
   return (
     <SidebarProvider>
       <AppSidebar
-        activeOrganizationFromServer={(activeOrg || organizationsThatUserIsPartOf[0]) as any}
+        activeOrganizationFromServer={
+          (activeOrg || organizationsThatUserIsPartOf[0]) as any
+        }
         activeProjectFromServer={project}
         invitations={invitations as any}
         organizations={organizationsThatUserIsPartOf as any}

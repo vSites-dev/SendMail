@@ -1,8 +1,23 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Form, FormField, FormItem, FormLabel, FormDescription, FormMessage, FormControl } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormDescription,
+  FormMessage,
+  FormControl,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
@@ -28,7 +43,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function PersonalSettings({ user }: { user: User }) {
+export default function PersonalSettingsForm({ user }: { user: User }) {
   const [isLoading, setLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -40,7 +55,6 @@ export default function PersonalSettings({ user }: { user: User }) {
     },
   });
 
-
   const { mutateAsync: updateUser } = api.settings.updateUser.useMutation();
 
   async function onSubmit(data: FormValues) {
@@ -49,10 +63,10 @@ export default function PersonalSettings({ user }: { user: User }) {
     const res = await updateUser({
       name: data.name,
       image: data.image,
-    })
+    });
 
-    if (res.success) toast.success("Beállítások frissítve!")
-    else toast.error("Hiba történt a mentés során!")
+    if (res.success) toast.success("Beállítások frissítve!");
+    else toast.error("Hiba történt a mentés során!");
 
     setLoading(false);
 
@@ -150,7 +164,9 @@ export default function PersonalSettings({ user }: { user: User }) {
                 )}
               />
               <div className="space-y-1">
-                <p className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-neutral-800 tracking-wide text-[15px]">Azonosító</p>
+                <p className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-neutral-800 tracking-wide text-[15px]">
+                  Azonosító
+                </p>
                 <Input className="bg-white" value={user.id} readOnly disabled />
               </div>
             </div>
@@ -164,6 +180,6 @@ export default function PersonalSettings({ user }: { user: User }) {
           </CardFooter>
         </form>
       </Form>
-    </Card >
-  )
+    </Card>
+  );
 }

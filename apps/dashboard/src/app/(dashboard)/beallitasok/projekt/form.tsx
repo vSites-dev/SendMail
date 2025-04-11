@@ -75,7 +75,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function ProjectSettings({
+export default function ProjectSettingsForm({
   user,
   fullOrganization,
 }: {

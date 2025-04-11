@@ -13,6 +13,90 @@ import {
   TaskType,
 } from "@prisma/client";
 
+export function parseMarkdownLinks(
+  markdown: string,
+): { text: string; href: string }[] {
+  const links: { text: string; href: string }[] = [];
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let match;
+
+  while ((match = linkRegex.exec(markdown)) !== null) {
+    links.push({
+      text: match[1],
+      href: match[2],
+    });
+  }
+
+  return links;
+}
+
+// Helper function to replace links with tracking links
+export async function replaceLinksWithTracking(
+  markdown: string,
+  emailId: string,
+  ctx: any,
+): Promise<{
+  processedMarkdown: string;
+  clicks: { id: string; link: string; emailId: string; status: string }[];
+}> {
+  const links = parseMarkdownLinks(markdown);
+  const clicks: {
+    id: string;
+    link: string;
+    emailId: string;
+    status: string;
+  }[] = [];
+  let processedMarkdown = markdown;
+
+  for (const link of links) {
+    const click = await ctx.db.click.create({
+      data: {
+        link: link.href,
+        emailId: emailId,
+      },
+    });
+
+    clicks.push({
+      id: click.id,
+      link: link.href,
+      emailId: emailId,
+      status: "PENDING",
+    });
+
+    // Replace the original link with the tracking link
+    const trackingUrl = `${process.env.NEXT_PUBLIC_API_URL}/track/${click.id}`;
+    processedMarkdown = processedMarkdown.replace(
+      `[${link.text}](${link.href})`,
+      `[${link.text}](${trackingUrl})`,
+    );
+  }
+
+  return { processedMarkdown, clicks };
+}
+
+// Helper function to replace contact variables in the email body
+export async function replaceContactVariables(
+  markdown: string,
+  contactId: string,
+  ctx: any,
+): Promise<string> {
+  // Get contact details
+  const contact = await ctx.db.contact.findUnique({
+    where: { id: contactId },
+    select: { name: true, email: true },
+  });
+
+  if (!contact) {
+    throw new Error("Contact not found");
+  }
+
+  // Replace {{name}} with contact's name
+  // Replace {{email}} with contact's email
+  return markdown
+    .replace(/{{name}}/g, contact.name || "")
+    .replace(/{{email}}/g, contact.email || "");
+}
+
 export const campaignRouter = createTRPCRouter({
   addContactsWithEmails: authedProcedure
     .input(
@@ -271,18 +355,8 @@ export const campaignRouter = createTRPCRouter({
         }),
       ]);
 
-      // Transform the data to include counts
-      const items = campaigns.map((campaign) => ({
-        ...campaign,
-        contactsCount: campaign.contacts.length,
-        emailsCount: campaign.emails.length,
-        // Remove the arrays to avoid sending too much data
-        contacts: undefined,
-        emails: undefined,
-      }));
-
       return {
-        items,
+        items: campaigns,
         totalCount,
       };
     }),
@@ -462,16 +536,36 @@ export const campaignRouter = createTRPCRouter({
             );
             if (!t) throw new Error("Template not found");
 
-            return ctx.db.email.create({
+            // Replace contact variables in the body
+            const bodyWithVariables = await replaceContactVariables(
+              t.body,
+              contactId,
+              ctx,
+            );
+
+            // Create email first
+            const email = await ctx.db.email.create({
               data: {
                 subject: block.subject,
                 from: block.from,
-                body: t.body,
+                body: bodyWithVariables,
                 status: EmailStatus.QUEUED as EmailStatus,
                 campaignId: campaign.id,
                 contactId: contactId,
               },
             });
+
+            // Process links and create tracking objects
+            const { processedMarkdown, clicks } =
+              await replaceLinksWithTracking(bodyWithVariables, email.id, ctx);
+
+            // Update email with processed markdown
+            await ctx.db.email.update({
+              where: { id: email.id },
+              data: { body: processedMarkdown },
+            });
+
+            return email;
           }),
         );
 
@@ -520,3 +614,5 @@ type CampaignRouterOutputs = inferRouterOutputs<CampaignRouter>;
 
 export type Campaign = CampaignRouterOutputs["getAll"][number];
 export type GetByIdCampaignType = CampaignRouterOutputs["getById"];
+export type GetForTableCampaignType =
+  CampaignRouterOutputs["getForTable"]["items"][number];

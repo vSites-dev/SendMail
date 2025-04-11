@@ -76,7 +76,7 @@ import { cn, contactStatuses } from "@/lib/utils";
 const multiColumnFilterFn: FilterFn<Contact> = (row, columnId, filterValue) => {
   if (!filterValue?.length) return true;
   const searchableRowContent =
-    `${row.original.name || ''} ${row.original.email}`.toLowerCase();
+    `${row.original.name || ""} ${row.original.email}`.toLowerCase();
   const searchTerm = (filterValue ?? "").toLowerCase();
   return searchableRowContent.includes(searchTerm);
 };
@@ -118,7 +118,7 @@ export const ContactsTable = () => {
   const filteredContacts = useMemo(() => {
     if (!statusFilter.length) return contacts;
 
-    return contacts.filter(contact => {
+    return contacts.filter((contact) => {
       return statusFilter.includes(contact.status);
     });
   }, [contacts, statusFilter]);
@@ -136,7 +136,9 @@ export const ContactsTable = () => {
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     manualPagination: true,
-    pageCount: data?.totalCount ? Math.ceil(data.totalCount / pagination.pageSize) : 0,
+    pageCount: data?.totalCount
+      ? Math.ceil(data.totalCount / pagination.pageSize)
+      : 0,
     state: {
       sorting,
       pagination,
@@ -146,13 +148,12 @@ export const ContactsTable = () => {
     filterFns: {
       multiColumnFilter: multiColumnFilterFn,
     },
-
   });
 
   const handleStatusChange = (checked: boolean, value: string) => {
     console.log("Status change triggered:", { checked, value });
 
-    setStatusFilter(prev => {
+    setStatusFilter((prev) => {
       const newFilterValue = [...prev];
 
       if (checked) {
@@ -178,16 +179,14 @@ export const ContactsTable = () => {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {/* Filter by name or email */}
-          <div className="relative">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full sm:w-fit">
             <Input
               id={`${id}-input`}
               className={cn(
                 "peer min-w-60 ps-9",
-                Boolean(table.getColumn("email")?.getFilterValue()) && "pe-9"
+                Boolean(table.getColumn("email")?.getFilterValue()) && "pe-9",
               )}
               value={inputValue}
               onChange={(e) => handleGlobalFilterChange(e.target.value)}
@@ -211,10 +210,9 @@ export const ContactsTable = () => {
             )}
           </div>
 
-          {/* Filter by status */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-fit">
                 <FilterIcon
                   className="-ms-1 opacity-60"
                   size={16}
@@ -231,7 +229,7 @@ export const ContactsTable = () => {
             <PopoverContent className="w-auto min-w-36 p-3" align="start">
               <div className="space-y-3">
                 <div className="text-muted-foreground text-xs font-medium">
-                  Szűrők
+                  Státusz szűrők
                 </div>
                 <div className="space-y-3">
                   {Object.keys(contactStatuses).map((value, i) => (
@@ -245,15 +243,25 @@ export const ContactsTable = () => {
                       />
                       <Label
                         htmlFor={`${id}-${i}`}
-                        className="flex grow justify-between gap-2 font-normal"
+                        className="flex grow items-center cursor-pointer font-normal"
                       >
-                        {contactStatuses[value].label}{" "}
-                        <span className="text-muted-foreground ms-2 text-xs">
-                          {contacts.filter(
-                            (contact) => contact.status === value
-                          ).length}
-                        </span>
+                        <span
+                          className={cn(
+                            "mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                            contactStatuses[value]?.bgColor,
+                          )}
+                        />
+                        {contactStatuses[value].label}
                       </Label>
+                      <div className="flex-1 text-right ml-2">
+                        <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium text-right">
+                          {
+                            contacts.filter(
+                              (contact) => contact.status === value,
+                            ).length
+                          }
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -261,10 +269,9 @@ export const ContactsTable = () => {
             </PopoverContent>
           </Popover>
 
-          {/* Toggle columns visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-fit">
                 <Columns3Icon
                   className="-ms-1 opacity-60"
                   size={16}
@@ -274,13 +281,16 @@ export const ContactsTable = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Oszlopok megjelenítése</DropdownMenuLabel>
+              <div className="p-2 text-muted-foreground text-xs font-medium">
+                Oszlopok megjelenítése
+              </div>
               {table
                 .getAllColumns()
                 .filter((column) => column.getCanHide())
                 .filter(
                   (column) =>
-                    column.columnDef.header && column.columnDef.header.length > 2,
+                    column.columnDef.header &&
+                    column.columnDef.header.length > 2,
                 )
                 .map((column) => {
                   return (
@@ -302,7 +312,6 @@ export const ContactsTable = () => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white overflow-hidden rounded-md border">
         <Table className="">
           <TableHeader>
@@ -310,15 +319,12 @@ export const ContactsTable = () => {
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead
-                      key={header.id}
-                      className="h-11"
-                    >
+                    <TableHead key={header.id} className="h-11">
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
                         <div
                           className={cn(
                             header.column.getCanSort() &&
-                            "flex h-full cursor-pointer items-center gap-2 select-none"
+                            "flex h-full cursor-pointer items-center gap-2 select-none",
                           )}
                           onClick={header.column.getToggleSortingHandler()}
                           onKeyDown={(e) => {
@@ -334,7 +340,7 @@ export const ContactsTable = () => {
                         >
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                           {{
                             asc: (
@@ -356,7 +362,7 @@ export const ContactsTable = () => {
                       ) : (
                         flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )
                       )}
                     </TableHead>
@@ -384,7 +390,7 @@ export const ContactsTable = () => {
                     <TableCell key={cell.id} className="last:py-0">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -420,9 +426,7 @@ export const ContactsTable = () => {
         </Table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between gap-8">
-        {/* Results per page */}
         <div className="flex items-center gap-3">
           <Label htmlFor={id} className="max-sm:sr-only">
             Találatok oldalanként
@@ -446,7 +450,6 @@ export const ContactsTable = () => {
           </Select>
         </div>
 
-        {/* Page number information */}
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
           <p
             className="text-muted-foreground text-sm whitespace-nowrap"
@@ -461,21 +464,16 @@ export const ContactsTable = () => {
                 table.getState().pagination.pageIndex *
                 table.getState().pagination.pageSize +
                 (data?.items?.length || 0),
-                data?.totalCount || 0
+                data?.totalCount || 0,
               )}
             </span>{" "}
-            / {" "}
-            <span className="text-foreground">
-              {data?.totalCount || 0}
-            </span>
+            / <span className="text-foreground">{data?.totalCount || 0}</span>
           </p>
         </div>
 
-        {/* Pagination buttons */}
         <div>
           <Pagination>
             <PaginationContent>
-              {/* First page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -488,7 +486,6 @@ export const ContactsTable = () => {
                   <ChevronFirstIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Previous page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -501,7 +498,6 @@ export const ContactsTable = () => {
                   <ChevronLeftIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Next page button */}
               <PaginationItem>
                 <Button
                   size="icon"
@@ -514,7 +510,6 @@ export const ContactsTable = () => {
                   <ChevronRightIcon size={16} aria-hidden="true" />
                 </Button>
               </PaginationItem>
-              {/* Last page button */}
               <PaginationItem>
                 <Button
                   size="icon"
