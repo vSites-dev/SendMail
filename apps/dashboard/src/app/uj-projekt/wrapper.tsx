@@ -1,33 +1,33 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Organization } from "@/lib/auth/auth"
-import useScroll from "@/lib/use-scroll"
-import { cn } from "@/lib/utils"
-import Image from "next/image"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import React from "react"
+import { Button } from "@/components/ui/button";
+import { Organization } from "@/lib/auth/auth";
+import useScroll from "@/lib/use-scroll";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
 
 interface Step {
-  name: string
-  href: string
+  name: string;
+  href: string;
 }
 
 const steps: Step[] = [
   { name: "Első lépés", href: "/uj-projekt/1" },
   { name: "Második lépés", href: "/uj-projekt/2" },
-]
+];
 
 interface StepProgressProps {
-  steps: Step[]
+  steps: Step[];
 }
 
 const StepProgress = ({ steps }: StepProgressProps) => {
-  const pathname = usePathname()
+  const pathname = usePathname();
   const currentStepIndex = steps.findIndex((step) =>
     pathname.startsWith(step.href),
-  )
+  );
 
   return (
     <div aria-label="Onboarding folyamat">
@@ -54,23 +54,23 @@ const StepProgress = ({ steps }: StepProgressProps) => {
         ))}
       </ol>
     </div>
-  )
-}
+  );
+};
 
 const Wrapper = ({
   children,
   organizations,
 }: Readonly<{
-  children: React.ReactNode
-  organizations: Organization[]
+  children: React.ReactNode;
+  organizations: Organization[];
 }>) => {
-  const scrolled = useScroll(15)
+  const scrolled = useScroll(15);
 
   return (
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 isolate z-50 flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 transition-all md:grid md:grid-cols-[200px_auto_200px] md:px-6 dark:border-gray-900 dark:bg-gray-925",
+          "fixed inset-x-0 top-0 isolate z-50 flex items-center justify-between border-b bg-white border-gray-200 px-4 transition-all md:grid md:grid-cols-[200px_auto_200px] md:px-6 dark:border-gray-900 dark:bg-gray-925",
           scrolled ? "h-12" : "h-20",
         )}
       >
@@ -83,14 +83,14 @@ const Wrapper = ({
         />
         <StepProgress steps={steps} />
         <Button asChild variant={"link"}>
-          <Link href={"/"} >Vissza vezérlőpultra</Link>
+          <Link href={"/"}>Vissza vezérlőpultra</Link>
         </Button>
       </header>
       <main id="main-content" className="mx-auto mb-20 mt-28 max-w-lg">
         {children}
       </main>
     </>
-  )
-}
+  );
+};
 
-export default Wrapper
+export default Wrapper;

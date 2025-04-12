@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/server/db";
@@ -17,28 +17,28 @@ export default async function ProjectInvitationPage({
   params: Promise<{ invitationId: string }>;
 }) {
   const { invitationId } = await params;
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await auth.api.getSession({ headers: await headers() });
 
   const invitation = await api.project.getInvitationById({
     invitationId: invitationId,
-  })
+  });
 
   if (session) {
     if (session.user.email === invitation.user.email) {
       try {
-        console.log("trying to accept the invitation", invitationId)
+        console.log("trying to accept the invitation", invitationId);
 
         if (invitation.expiresAt < new Date()) {
-          return redirect("/")
+          return redirect("/");
         }
 
         const res = await auth.api.acceptInvitation({
           body: {
             invitationId: invitationId,
-          }
-        })
+          },
+        });
 
-        console.log(res)
+        console.log(res);
 
         // const existingMember = await db.member.findFirst({
         //   where: {
@@ -64,7 +64,7 @@ export default async function ProjectInvitationPage({
         // //   data: { status: "accepted" },
         // // });
 
-        console.log("invitation accepted successfully")
+        console.log("invitation accepted successfully");
 
         return redirect("/");
       } catch (error) {

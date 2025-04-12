@@ -22,14 +22,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  AtSign,
-  Eye,
-  EyeOff,
-  Fingerprint,
-  KeyRound,
-  User,
-} from "lucide-react";
+import { AtSign, Eye, EyeOff, Fingerprint, KeyRound, User } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -67,9 +60,7 @@ export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [view, setView] = useState<"signUp" | "verifyEmail">(
-    "signUp",
-  );
+  const [view, setView] = useState<"signUp" | "verifyEmail">("signUp");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -92,8 +83,12 @@ export function SignUpForm() {
     if (error) {
       console.log("error", error);
 
-      if (error.code === "USER_WITH_THIS_EMAIL_ALREADY_EXISTS") toast.error("Ez az email cím már regisztrálva van!");
-      else toast.error("Hiba történt a regisztráció során, kérjük, próbálja újra később.");
+      if (error.code === "USER_WITH_THIS_EMAIL_ALREADY_EXISTS")
+        toast.error("Ez az email cím már regisztrálva van!");
+      else
+        toast.error(
+          "Hiba történt a regisztráció során, kérjük, próbálja újra később.",
+        );
 
       setIsLoading(false);
 
@@ -104,7 +99,7 @@ export function SignUpForm() {
       "Regisztráció sikeres! Kérjük, erősítsd meg az email címed a belépéshez.",
     );
 
-    setView("verifyEmail")
+    setView("verifyEmail");
     setIsLoading(false);
   }
 
@@ -118,7 +113,6 @@ export function SignUpForm() {
       className="w-full mx-auto max-w-md"
     >
       <CardStyled className="w-full">
-
         <AnimatePresence mode="wait">
           {view === "signUp" ? (
             <motion.div
@@ -128,7 +122,6 @@ export function SignUpForm() {
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.2 }}
             >
-
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                   <CardHeader className="space-y-3 pb-4">
@@ -164,7 +157,8 @@ export function SignUpForm() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              Teljes név <span className="text-destructive">*</span>
+                              Teljes név{" "}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
@@ -195,7 +189,8 @@ export function SignUpForm() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              Email cím <span className="text-destructive">*</span>
+                              Email cím{" "}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
@@ -228,16 +223,9 @@ export function SignUpForm() {
                             <FormLabel>
                               <div className="flex justify-between">
                                 <span>
-                                  Jelszó <span className="text-destructive">*</span>
+                                  Jelszó{" "}
+                                  <span className="text-destructive">*</span>
                                 </span>
-                                <div className="text-center text-sm font-normal text-muted-foreground">
-                                  <Link
-                                    href="/elfelejtett-jelszo"
-                                    className="hover:underline"
-                                  >
-                                    Elfelejtetted a jelszavad?
-                                  </Link>
-                                </div>
                               </div>
                             </FormLabel>
                             <FormControl>
@@ -263,9 +251,15 @@ export function SignUpForm() {
                                   className="inline-flex items-center rounded-e-lg border border-neutral-950/25 bg-background px-3 text-sm font-medium text-foreground outline-offset-2 transition-colors hover:bg-accent hover:text-foreground focus:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   {!showPassword ? (
-                                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                                    <EyeOff
+                                      className="h-4 w-4"
+                                      aria-hidden="true"
+                                    />
                                   ) : (
-                                    <Eye className="h-4 w-4" aria-hidden="true" />
+                                    <Eye
+                                      className="h-4 w-4"
+                                      aria-hidden="true"
+                                    />
                                   )}
                                 </button>
                               </div>
@@ -280,7 +274,11 @@ export function SignUpForm() {
                   <CardSeparator />
 
                   <CardFooter className="flex-col space-y-2 pt-4">
-                    <Button type="submit" className="w-full" isLoading={isLoading}>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      isLoading={isLoading}
+                    >
                       Regisztráció
                       {!isLoading && <Fingerprint className="mr-2 h-4 w-4" />}
                     </Button>
@@ -314,12 +312,9 @@ export function SignUpForm() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <VerifyEmail
-                email={form.getValues("email")}
-              />
+              <VerifyEmail email={form.getValues("email")} />
             </motion.div>
           )}
-
         </AnimatePresence>
       </CardStyled>
     </motion.div>

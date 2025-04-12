@@ -6,7 +6,13 @@ import { useDropzone } from "react-dropzone";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { useControllableState } from "@/lib/hooks/use-controllable-state";
-import { Controller, useController, Control, FieldPath, FieldValues } from "react-hook-form";
+import {
+  Controller,
+  useController,
+  Control,
+  FieldPath,
+  FieldValues,
+} from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -14,7 +20,7 @@ import { Input } from "@/components/ui/input";
 
 interface ImageUploadProps<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > {
   name: TName;
   control: Control<TFieldValues>;
@@ -28,11 +34,11 @@ interface ImageUploadProps<
 
 export function ImageUpload<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   name,
   control,
-  apiEndpoint = "http://localhost:8080/images/upload",
+  apiEndpoint = "http://localhost:3001/images/upload",
   label = "Kép feltöltése",
   maxSize = 5 * 1024 * 1024, // 5MB
   disabled = false,
@@ -97,23 +103,25 @@ export function ImageUpload<
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
         if (file && file.size > maxSize) {
-          toast.error(`A fájl túl nagy. A maximális méret ${Math.round(maxSize / 1024 / 1024)}MB.`);
+          toast.error(
+            `A fájl túl nagy. A maximális méret ${Math.round(maxSize / 1024 / 1024)}MB.`,
+          );
           return;
         }
         if (file) handleImageUpload(file);
       }
     },
-    [maxSize]
+    [maxSize],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      "image/*": []
+      "image/*": [],
     },
     maxFiles: 1,
     maxSize,
-    disabled: isUploading || disabled
+    disabled: isUploading || disabled,
   });
 
   const handleRemoveImage = () => {
@@ -130,7 +138,7 @@ export function ImageUpload<
             "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             isDragActive && "border-muted-foreground/50",
             (isUploading || disabled) && "pointer-events-none opacity-60",
-            className
+            className,
           )}
         >
           <Input
@@ -172,11 +180,10 @@ export function ImageUpload<
                     />
                   </div>
                   <div className="flex flex-col gap-px">
-                    <p className="font-medium text-muted-foreground">
-                      {label}
-                    </p>
+                    <p className="font-medium text-muted-foreground">{label}</p>
                     <p className="text-sm mt-1 text-muted-foreground/70">
-                      Kattints vagy húzd ide a képet a feltöltéshez <br />(Max. {Math.round(maxSize / 1024 / 1024)}MB)
+                      Kattints vagy húzd ide a képet a feltöltéshez <br />
+                      (Max. {Math.round(maxSize / 1024 / 1024)}MB)
                     </p>
                   </div>
                 </div>
@@ -194,7 +201,12 @@ export function ImageUpload<
               className="object-contain bg-gradient-to-br from-neutral-50 to-neutral-100"
             />
           </div>
-          <div className={cn("absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center", disabled && "hidden")}>
+          <div
+            className={cn(
+              "absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center",
+              disabled && "hidden",
+            )}
+          >
             <Button
               type="button"
               variant="secondary"
@@ -215,7 +227,7 @@ export function ImageUpload<
 // Űrlap-specifikus wrapper komponens
 export function FormImageUpload<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   name,
   control,

@@ -95,7 +95,7 @@ export function OrganizationSwitcher({
                 <img
                   suppressHydrationWarning
                   className="size-8"
-                  src={activeOrganization.logo ?? "/brand/icon.jpg"}
+                  src={activeOrganization.logo || "/brand/icon.jpg"}
                   alt={
                     activeOrganization?.name ??
                     "Porjekt#" + activeOrganization.id
@@ -134,7 +134,7 @@ export function OrganizationSwitcher({
                   <img
                     suppressHydrationWarning
                     className="size-6"
-                    src={organization.logo ?? "/brand/icon.jpg"}
+                    src={organization.logo || "/brand/icon.jpg"}
                     alt={organization.name}
                   />
                 </div>

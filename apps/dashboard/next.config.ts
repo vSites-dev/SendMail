@@ -19,7 +19,6 @@ const config: NextConfig = {
       },
       {
         hostname: "localhost",
-        port: "8080",
       },
     ],
   },

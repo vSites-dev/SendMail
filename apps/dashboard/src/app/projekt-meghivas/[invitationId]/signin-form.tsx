@@ -22,14 +22,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  AtSign,
-  Eye,
-  EyeOff,
-  KeyRound,
-  LogIn,
-  User,
-} from "lucide-react";
+import { AtSign, Eye, EyeOff, KeyRound, LogIn, User } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -49,7 +42,11 @@ const formSchema = z.object({
   }),
 });
 
-export function InvitationSignIn({ invitation }: { invitation: GetInvitationById }) {
+export function InvitationSignIn({
+  invitation,
+}: {
+  invitation: GetInvitationById;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -77,7 +74,9 @@ export function InvitationSignIn({ invitation }: { invitation: GetInvitationById
         if (error.code === "INVALID_CREDENTIALS") {
           toast.error("Hibás jelszó vagy email cím!");
         } else {
-          toast.error("Hiba történt a bejelentkezés során, kérjük, próbálja újra később.");
+          toast.error(
+            "Hiba történt a bejelentkezés során, kérjük, próbálja újra később.",
+          );
         }
 
         setIsLoading(false);
@@ -89,11 +88,13 @@ export function InvitationSignIn({ invitation }: { invitation: GetInvitationById
         await authClient.organization.acceptInvitation({
           invitationId: invitation.id,
         });
-        router.push("/")
+        router.push("/");
       }
     } catch (error) {
       console.error("Sign in error:", error);
-      toast.error("Hiba történt a bejelentkezés során, kérjük, próbálja újra később.");
+      toast.error(
+        "Hiba történt a bejelentkezés során, kérjük, próbálja újra később.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +141,8 @@ export function InvitationSignIn({ invitation }: { invitation: GetInvitationById
                           {invitation.organization.name}
                         </h3>
                         <p className="text-xs text-violet-600 dark:text-violet-400">
-                          {invitation.user.name} ({invitation.user.email}) meghívta Önt
+                          {invitation.user.name} ({invitation.user.email})
+                          meghívta Önt
                         </p>
                       </div>
                       {invitation.organization.logo && (
@@ -159,7 +161,8 @@ export function InvitationSignIn({ invitation }: { invitation: GetInvitationById
 
                   <CardDescription className="text-muted-foreground mt-4 block">
                     <span className="block mt-2">
-                      Jelentkezzen be a meghívóhoz kapcsolódó email címmel a csatlakozáshoz.
+                      Jelentkezzen be a meghívóhoz kapcsolódó email címmel a
+                      csatlakozáshoz.
                     </span>
                   </CardDescription>
                 </CardHeader>
@@ -207,7 +210,8 @@ export function InvitationSignIn({ invitation }: { invitation: GetInvitationById
                           <FormLabel>
                             <div className="flex justify-between">
                               <span>
-                                Jelszó <span className="text-destructive">*</span>
+                                Jelszó{" "}
+                                <span className="text-destructive">*</span>
                               </span>
                             </div>
                           </FormLabel>
@@ -234,7 +238,10 @@ export function InvitationSignIn({ invitation }: { invitation: GetInvitationById
                                 className="inline-flex items-center rounded-e-lg border border-neutral-950/25 bg-background px-3 text-sm font-medium text-foreground outline-offset-2 transition-colors hover:bg-accent hover:text-foreground focus:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 {!showPassword ? (
-                                  <EyeOff className="h-4 w-4" aria-hidden="true" />
+                                  <EyeOff
+                                    className="h-4 w-4"
+                                    aria-hidden="true"
+                                  />
                                 ) : (
                                   <Eye className="h-4 w-4" aria-hidden="true" />
                                 )}
@@ -251,7 +258,11 @@ export function InvitationSignIn({ invitation }: { invitation: GetInvitationById
                 <CardSeparator />
 
                 <CardFooter className="flex-col space-y-2 pt-4">
-                  <Button type="submit" className="w-full" isLoading={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    isLoading={isLoading}
+                  >
                     Bejelentkezés és csatlakozás
                     {!isLoading && <LogIn className="ml-2 h-4 w-4" />}
                   </Button>
@@ -265,13 +276,7 @@ export function InvitationSignIn({ invitation }: { invitation: GetInvitationById
               <div className="flex flex-col items-center justify-center">
                 <div className="px-2 py-2">
                   <div className="text-center text-sm text-muted-foreground">
-                    Nincs még fiókja?{" "}
-                    <Link
-                      href="/regisztracio"
-                      className="text-primary hover:underline"
-                    >
-                      Regisztráljon itt
-                    </Link>
+                    Bejelentkezés után egyből csatlakozik a projekthez.
                   </div>
                 </div>
               </div>

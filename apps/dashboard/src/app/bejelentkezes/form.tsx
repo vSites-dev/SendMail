@@ -67,10 +67,10 @@ export function SignInForm() {
 		const { data, error } = await authClient.signIn.email({
 			email: values.email,
 			password: values.password,
-			rememberMe: true
+			rememberMe: true,
 		});
 
-		if (data) router.push("/")
+		if (data) router.push("/");
 
 		if (error) {
 			console.log(error);
@@ -94,9 +94,9 @@ export function SignInForm() {
 	const handleGoogleSignIn = async () => {
 		setIsGoogleLoading(true);
 		await authClient.signIn.social({
-			provider: "google"
-		})
-		setIsGoogleLoading(false)
+			provider: "google",
+		});
+		setIsGoogleLoading(false);
 	};
 
 	return (
@@ -107,7 +107,6 @@ export function SignInForm() {
 			exit={{ opacity: 0, scale: 0.75 }}
 			transition={{ type: "spring", bounce: 0.3, duration: 0.5 }}
 			className="w-full mx-auto max-w-md"
-
 		>
 			<CardStyled className="w-full">
 				<AnimatePresence mode="wait">
@@ -212,14 +211,6 @@ export function SignInForm() {
 														<FormLabel>
 															<div className="flex justify-between">
 																<span>Jelszó </span>
-																<div className="text-center text-sm font-normal text-muted-foreground">
-																	<Link
-																		href="/elfelejtett-jelszo"
-																		className="hover:underline"
-																	>
-																		Elfelejtetted a jelszavad?
-																	</Link>
-																</div>
 															</div>
 														</FormLabel>
 														<FormControl>
@@ -277,7 +268,6 @@ export function SignInForm() {
 											Bejelentkezés
 											{!isLoading && <LogIn className="mr-2 h-4 w-4" />}
 										</Button>
-
 									</CardFooter>
 								</form>
 							</Form>
@@ -308,9 +298,7 @@ export function SignInForm() {
 							exit={{ opacity: 0, x: -20 }}
 							transition={{ duration: 0.3 }}
 						>
-							<VerifyEmail
-								email={form.getValues("email")}
-							/>
+							<VerifyEmail email={form.getValues("email")} />
 						</motion.div>
 					)}
 				</AnimatePresence>
