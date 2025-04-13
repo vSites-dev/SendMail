@@ -8,7 +8,8 @@ import {
   TaskStatus,
   TaskType,
   EmailStatus,
-  Email
+  Email,
+  ContactStatus
 } from '@prisma/client'
 import 'dotenv/config'
 
@@ -136,6 +137,13 @@ export class TaskScheduler {
 
           if (!email.campaign)
             throw new Error(`Campaign not found for email ${email.id}`)
+
+          if (email.contact.status !== ContactStatus.SUBSCRIBED) {
+            return {
+              message: 'Contact is not subscribed',
+              status: 400
+            }
+          }
 
           // Process the email
           if (process.env.NODE_ENV === 'development') {
