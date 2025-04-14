@@ -42,7 +42,9 @@ const ProjectInvitationEmail = ({
             </Text>
 
             <Text className="text-gray-700 mb-4">
-              <span className="font-semibold">{invitedByUsername}</span> ({invitedByEmail}) meghívta Önt, hogy csatlakozzon a következő projekthez:
+              <span className="font-semibold">{invitedByUsername}</span> (
+              {invitedByEmail}) meghívta Önt, hogy csatlakozzon a következő
+              projekthez:
             </Text>
 
             <Section className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
@@ -55,7 +57,8 @@ const ProjectInvitationEmail = ({
             </Section>
 
             <Text className="text-gray-700 mb-6">
-              A meghívás elfogadásához és a projekthez való csatlakozáshoz kattintson az alábbi gombra:
+              A meghívás elfogadásához és a projekthez való csatlakozáshoz
+              kattintson az alábbi gombra:
             </Text>
 
             <Button
@@ -73,7 +76,8 @@ const ProjectInvitationEmail = ({
             </Text>
 
             <Text className="text-center text-sm text-gray-600">
-              Ha nem szeretne csatlakozni ehhez a projekthez, egyszerűen hagyja figyelmen kívül ezt az e-mailt.
+              Ha nem szeretne csatlakozni ehhez a projekthez, egyszerűen hagyja
+              figyelmen kívül ezt az e-mailt.
             </Text>
           </Section>
 
@@ -83,9 +87,6 @@ const ProjectInvitationEmail = ({
             <Text>
               © {new Date().getFullYear()} SendMail. Minden jog fenntartva.
             </Text>
-            <Link href="https://sendmail.dev/" className="text-violet-500 hover:text-violet-600">
-              https://sendmail.dev/
-            </Link>
           </Section>
         </Container>
       </Body>

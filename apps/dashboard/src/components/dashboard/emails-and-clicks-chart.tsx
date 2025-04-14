@@ -118,8 +118,8 @@ export function EmailsAndClicksChart({
                 Nincs megjeleníthető adat
               </p>
               <p className="text-xs max-w-[250px] mt-2 text-center text-muted-foreground opacity-80">
-                Ha úgy gondolod, hogy probléma akadt akkor keress fel minket a
-                support@leoai.hu címen.
+                Ha úgy gondolod, hogy probléma akadt akkor keresd fel a
+                rendszergazdákat.
               </p>
             </div>
           </div>
