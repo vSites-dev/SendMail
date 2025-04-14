@@ -54,7 +54,6 @@ const VerifyEmail = ({ verificationUrl, name }: VerifyEmailProps) => (
             <Text>
               © {new Date().getFullYear()} SendMail. Minden jog fenntartva.
             </Text>
-            <Link href="https://sendmail.dev/">https://sendmail.dev/</Link>
           </Section>
         </Container>
       </Body>
