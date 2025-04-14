@@ -3,7 +3,7 @@ import request from 'supertest'
 import taskRoutes from '../src/routes/taskRoutes'
 
 // Mock the taskScheduler
-jest.mock('../../src/index', () => {
+jest.mock('../src/index', () => {
   return {
     taskScheduler: {
       processScheduledTasks: jest.fn().mockResolvedValue(undefined)
@@ -21,7 +21,7 @@ describe('Task Routes', () => {
 
     // Reset mock implementation
     jest
-      .requireMock('../../src/index')
+      .requireMock('../src/index')
       .taskScheduler.processScheduledTasks.mockResolvedValue(undefined)
   })
 

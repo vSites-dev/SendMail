@@ -3,7 +3,7 @@ import request from 'supertest'
 import trackRoutes from '../src/routes/track'
 
 // Mock prisma
-jest.mock('../../src/lib/prisma', () => {
+jest.mock('../src/lib/prisma', () => {
   return {
     __esModule: true,
     default: {
@@ -15,7 +15,7 @@ jest.mock('../../src/lib/prisma', () => {
   }
 })
 
-const prisma = jest.requireMock('../../src/lib/prisma').default
+const prisma = jest.requireMock('../src/lib/prisma').default
 
 describe('Track Routes', () => {
   let app: express.Application

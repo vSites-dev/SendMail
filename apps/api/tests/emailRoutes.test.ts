@@ -3,7 +3,7 @@ import request from 'supertest'
 import emailRoutes from '../src/routes/emailRoutes'
 
 // Mock the EmailService
-jest.mock('../../src/services/emailService', () => {
+jest.mock('../src/services/emailService', () => {
   return {
     EmailService: jest.fn().mockImplementation(() => {
       return {
