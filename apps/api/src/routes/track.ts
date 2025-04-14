@@ -13,13 +13,21 @@ router.get('/:id', async (req, res) => {
       return res.status(404).send('Click not found')
     }
 
-    // Update click status
-    await prisma.click.update({
-      where: { id: click.id },
-      data: { status: 'CLICKED' }
-    })
+    if (click.status === 'CLICKED') {
+      await prisma.click.create({
+        data: {
+          emailId: click.emailId,
+          link: click.link,
+          status: 'CLICKED'
+        }
+      })
+    } else {
+      await prisma.click.update({
+        where: { id: click.id },
+        data: { status: 'CLICKED' }
+      })
+    }
 
-    // Redirect to the original URL
     res.redirect(click.link)
   } catch (error) {
     console.error('Error tracking click:', error)
