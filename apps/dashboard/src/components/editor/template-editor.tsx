@@ -9,7 +9,7 @@ import { Plate } from "@udecode/plate/react";
 import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { Button } from "../ui/button";
-import { ArrowLeft, Save, TypeOutline } from "lucide-react";
+import { ArrowLeft, Save, Trash, TypeOutline } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
@@ -37,6 +37,31 @@ export function TemplateEditor({ template }: { template?: Template }) {
 
   const { mutateAsync: updateTemplate } = api.template.update.useMutation();
 
+  const { mutateAsync: deleteTemplate } = api.template.delete.useMutation();
+
+  async function handleDelete() {
+    if (!template) {
+      return;
+    }
+
+    setLoading(true);
+
+    const res = await deleteTemplate({
+      id: template.id,
+    });
+
+    if (res.success) {
+      utils.template.invalidate();
+
+      toast.success("A sablon sikeresen törölve!");
+      router.push("/sablonok");
+    } else {
+      toast.error("Hiba történt a törlés során!");
+    }
+
+    setLoading(false);
+  }
+
   async function handleSave() {
     if (!name) {
       toast.error("A sablon nevének megadása szükséges!");
@@ -54,7 +79,7 @@ export function TemplateEditor({ template }: { template?: Template }) {
     });
 
     if (res.success) {
-      utils.template.getAll.invalidate();
+      utils.template.invalidate();
 
       toast.success("A sablon sikeresen frissítve!");
       router.push("/sablonok");
@@ -127,6 +152,15 @@ export function TemplateEditor({ template }: { template?: Template }) {
         >
           <ArrowLeft className="size-4" />
           Vissza
+        </Button>
+
+        <Button
+          variant="destructive"
+          isLoading={isLoading}
+          onClick={handleDelete}
+        >
+          <Trash className="size-4" />
+          Törlés
         </Button>
 
         <Button onClick={handleSave} isLoading={isLoading}>
